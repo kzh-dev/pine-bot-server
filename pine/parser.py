@@ -4,7 +4,7 @@
 import ply.yacc as yacc
 from lexer import tokens
 
-import vm
+import vm.node as vm
 
 ## helper
 def make_list2 (p, cls):
