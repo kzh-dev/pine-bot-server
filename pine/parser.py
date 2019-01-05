@@ -232,7 +232,6 @@ def p_kw_arg_list (p):
 def p_kw_arg (p):
     'kw_arg : ID DEFINE simple_expression'
     p[0] = (p[1], p[3])
-    print(p[0])
 
 def p_literal (p):
     '''literal : INT_LITERAL
@@ -282,6 +281,7 @@ def p_fun_def_stmt_m (p):
 
 ## Error handling
 class PineSyntaxError (PineError):
+    pass
 
 def p_error (p):
     raise PineError("Unexpected token: {}".format(p))
