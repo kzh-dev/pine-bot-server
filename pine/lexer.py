@@ -3,6 +3,7 @@
 
 import ply.lex as lex
 from ply.lex import TOKEN
+from base import PineError
  
 # List of token names.   This is always required
 tokens = (
@@ -195,8 +196,8 @@ def Lexer ():
         r'\n+'
         t.lexer.lineno += len(t.value)
     def t_error (t):
-        print("Illegal character '%s'" % t.value[0])
-        t.lexer.skip(1)
+        raise PineError("invalid character: {}".format(t.value[0]))
+        #t.lexer.skip(1)
 
     ### Make lexer
     lexer = lex.lex()

@@ -3,6 +3,7 @@
 
 import ply.yacc as yacc
 from lexer import tokens
+from base import PineError
 
 import vm.node as vm
 
@@ -279,9 +280,11 @@ def p_fun_def_stmt_m (p):
     'fun_def_stmt_m : ID LPAR id_list RPAR ARROW stmts_block'
     p[0] = vm.FunDefNode(p[1], p[3], p[6])
 
-# Error handling
+## Error handling
+class PineSyntaxError (PineError):
+
 def p_error (p):
-    print(p)
+    raise PineError("Unexpected token: {}".format(p))
 
 
 from lexer import Lexer
