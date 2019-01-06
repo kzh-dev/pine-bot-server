@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import math
 import numpy as np
 import talib as ta
 
@@ -206,7 +207,11 @@ def month (vm, args, kwargs):
     raise NotImplementedError
 
 def na (vm, args, kwargs):
-    raise NotImplementedError
+    x, = _expand_args(args, kwargs, (('x', None, True),))
+    if isinstance(x, list):
+        return [math.isnan(v) for v in x]
+    else:
+        return math.isnan(x)
 
 def nz (vm, args, kwargs):
     raise NotImplementedError
