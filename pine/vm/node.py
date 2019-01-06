@@ -140,7 +140,9 @@ class FunCallNode (Node):
         else:
             _args = None
         if kwargs:
-            _kwargs = kwargs.eval(vm)
+            _kwargs = {}
+            for k, n in kwargs.items():
+                _kwargs[k] = n.eval(vm)
         else:
             _kwargs = None
         return vm.func_call(fname, _args, _kwargs)
