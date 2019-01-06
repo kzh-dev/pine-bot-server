@@ -178,7 +178,6 @@ class IfNode (Node):
             elif len(self.children) > 2:
                 return self.children[2].eval(vm)
         finally:
-            print(self)
             vm.pop_scope()
 
 class ForNode (Node):
