@@ -24,10 +24,14 @@ def _expand_args (args, kwargs, specs):
         a = args_dict.get(name, None)
         if a is None:
             if mand:
-                raise PineErrpr("Missing mandatory arguemnt: {}".fomrat(name))
+                raise PineError("Missing mandatory arguemnt: {}".format(name))
         else:
-            if not isinstance(a, typ):
-                raise PineErrpr("Invalid argument type mandatory arguemnt: {}".fomrat(name))
+            if typ == float and type(a) == int:
+                a = float(a)
+            elif typ == int and type(a) == float and int(a) == a:
+                a = int(a)
+            elif not isinstance(a, typ):
+                raise PineError("Invalid argument type mandatory arguemnt: {}".format(name))
         args_expanded.append(a)
 
     return args_expanded
@@ -278,7 +282,28 @@ def stoch (vm, args, kwargs):
     raise NotImplementedError
 
 def strategy (vm, args, kwargs):
-    raise NotImplementedError
+    _ = _expand_args(args, kwargs,
+        (
+            ('title', str, True),
+            ('shorttitle', str, False),
+            ('overlay', bool, False),
+            ('precision', int, False),
+            ('scale', int, False),
+            ('pyramiding', int, False),
+            ('calc_on_order_fills', bool, False),
+            ('calc_on_every_click', bool, False),
+            ('max_bars_back', int, False),
+            ('backtest_fill_limits_assumption', int, False),
+            ('default_qty_type', str, False),
+            ('default_qty_value', float, False),
+            ('currency', str, False),
+            ('linktoseries', bool, False),
+            ('slippage', int, False),
+            ('commision_type', str, False),
+            ('commision_value', float, False),
+        )
+    )
+    return None
 
 def strategy__cancel (vm, args, kwargs):
     raise NotImplementedError
