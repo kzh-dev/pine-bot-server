@@ -145,7 +145,7 @@ class FunDefNode (Node):
         self.append(body)
 
     def eval (self, vm):
-        vm.register_function(self.args[0], self.args[1], self.children[0])
+        vm.register_function(self.args[0], self.args[1].children, self.children[0])
 
 class VarDefNode (Node):
     def __init__ (self, ident, expr):

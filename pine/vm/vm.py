@@ -48,6 +48,12 @@ class VM (object):
                 return v
         raise PineError("variable not found: {}".format(name))
 
+    def push_scope (self):
+        self.variable_tables.append({})
+        
+    def pop_scope (self):
+        self.variable_tables.pop(-1)
+
     def func_call (self, fname, args, kwargs):
         func = self.function_table.get(fname, None)
         if func is None:
@@ -55,6 +61,28 @@ class VM (object):
         if isfunction(func):
             return func(self, args, kwargs)
         else:
-            print("Trying to call: {}".format(func))
-            raise NotImplementedError
+            arg_ids, node = func
+            try:
+                self.push_scope()
+                self._set_func_arguments(arg_ids, args, kwargs)
+                node.eval(self)
+            finally:
+                self.pop_scope()
+
+    def _set_func_arguments (self, names, args, kwargs):
+        if args:
+            for n, a in zip(names, args):
+                self.define_variable(n, a)
+        if kwargs:
+            for k, a in kwargs.items():
+                self.define_variable(k, a)
+
+        for n in names:
+            if n not in self.variable_tables[-1]:
+                raise PineError("missing argument: {}".format(n))
+
+
+
+
+
         
