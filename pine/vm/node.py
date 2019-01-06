@@ -222,6 +222,7 @@ class VarDefNode (Node):
     def eval (self, vm):
         rhv = self.children[0].eval(vm)
         vm.define_variable(self.args[0], rhv)
+        return rhv
 
 class VarAssignNode (Node):
     def __init__ (self, ident, expr):
