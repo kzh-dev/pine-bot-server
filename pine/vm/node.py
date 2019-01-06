@@ -147,16 +147,6 @@ class FunCallNode (Node):
             _kwargs = None
         return vm.func_call(fname, _args, _kwargs)
 
-class KwArgsNode (Node):
-    def __init__ (self, kwargs):
-        super().__init__()
-        self.args += kwargs.keys()
-        self.children += kwargs.values()
-
-    def eval (self, vm):
-        print(self)
-        raise NotImplementedError
-
 class LiteralNode (Node):
     def __init__ (self, literal):
         super().__init__()

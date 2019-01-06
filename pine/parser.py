@@ -203,7 +203,7 @@ def p_fun_arg_list (p):
                     | simple_expr_list COMMA kw_arg_list
                     | id_list COMMA kw_arg_list'''  # FIXME
     if len(p) == 2:
-        if isinstance(p[1], vm.KwArgsNode):
+        if isinstance(p[1], dict):
             p[0] = (None, p[1])
         else:
             p[0] = (p[1], None)
