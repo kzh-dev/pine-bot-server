@@ -171,18 +171,14 @@ class IfNode (Node):
             self.append(elseclause)
 
     def eval (self, vm):
-        if self.as_bool(self.children[0].eval(vm)):
-            try:
-                vm.push_scope()
+        vm.push_scope()
+        try:
+            if self.as_bool(self.children[0].eval(vm)):
                 return self.children[1].eval(vm)
-            finally:
-                vm.pop_scope()
-        elif len(self.children) > 2:
-            try:
-                vm.push_scope()
+            elif len(self.children) > 2:
                 return self.children[2].eval(vm)
-            finally:
-                vm.pop_scope()
+        finally:
+            vm.pop_scope()
 
 class ForNode (Node):
     def __init__ (self, var_def, to_clause, stmts_block):
