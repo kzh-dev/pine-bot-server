@@ -188,8 +188,38 @@ class ForNode (Node):
         self.append(stmts_block)
 
     def eval (self, vm):
-        print(self)
-        raise NotImplementedError
+        var_def = self.args[0]
+        counter_name = var_def.name()
+        to_node = self.children[0]
+        body = self.children[1]
+        retval = None
+
+        vm.push_scope()
+        try:
+            counter_init = var_def.eval(vm)
+            counter_last = to_node.eval(vm)
+            if counter_init <= counter_last:
+                op = '>'
+            else:
+                op = '<'
+                
+            while True:
+                # TODO continue, break
+                retval = body.eval(vm)
+
+                counter = vm.lookup_variable(counter_name)
+                print(counter)
+                if op == '>':
+                    counter += 1
+                    if counter > counter_last:
+                        break
+                else:
+                    counter -= 1
+                    if counter < counter_last:
+                        break
+                vm.assign_variable(counter_name, counter)
+        finally:
+            vm.pop_scope()
 
 class FunDefNode (Node):
     def __init__ (self, fname, args, body):
@@ -207,6 +237,9 @@ class VarDefNode (Node):
         self.args.append(ident)
         self.append(expr)
 
+    def name (self):
+        return self.args[0]
+
     def eval (self, vm):
         rhv = self.children[0].eval(vm)
         vm.define_variable(self.args[0], rhv)
@@ -219,6 +252,7 @@ class VarAssignNode (Node):
         self.append(expr)
 
     def eval (self, vm):
-        print(self)
-        raise NotImplementedError
+        rhv = self.children[0].eval(vm)
+        vm.assign_variable(self.args[0], rhv)
+        return rhv
 

@@ -39,10 +39,19 @@ class VM (object):
     def define_variable (self, name, value):
         self.variable_tables[-1][name] = value
 
+    def assign_variable (self, name, value):
+        for t in reversed(self.variable_tables):
+            if name in t:
+                if type(t[name]) != type(value):
+                    raise PineError('invalid type to assign: {0}: {1} for {2}'.format(name, value, t[name]))
+                t[name] = value
+                return value
+        raise PineError('variable not found to assign: {}'.format(name))
+
     def lookup_variable (self, name):
         for t in reversed(self.variable_tables):
             v = t.get(name, None)
-            if v:
+            if v is not None:
                 if isfunction(v):
                     return v(self)
                 return v
@@ -80,9 +89,3 @@ class VM (object):
         for n in names:
             if n not in self.variable_tables[-1]:
                 raise PineError("missing argument: {}".format(n))
-
-
-
-
-
-        
