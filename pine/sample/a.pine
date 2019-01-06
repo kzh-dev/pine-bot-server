@@ -15,8 +15,7 @@ fun(x, y) =>
 //
 a = sma(close, 10)
 b = fun(a, 123)
-c = security(tickerid, period, b)
-//c = security(tickerid, k='v')
-plot(c, title='Out', color=c > c[1] ? lime : red, // This statement will be continued on the next line
+//c = security(tickerid, period, b)
+plot(b, title='Out', color=b > b[1] ? lime : red, // This statement will be continued on the next line
      style=linebr, trackprice=true) // It's prefixed with 5 spaces, so it won't be considered as an indent
 //alertcondition(c > 100)
