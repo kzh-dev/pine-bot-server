@@ -54,7 +54,7 @@ def circles (vm):
     return 0
 
 def close (vm):
-    raise NotImplementedError
+    return vm.market.close()
 
 def columns (vm):
     return 0

@@ -8,9 +8,10 @@ from ..base import PineError
 
 class VM (object):
 
-    def __init__ (self):
+    def __init__ (self, market):
         self.prepare_function_table()
         self.prepare_variable_tables()
+        self.market = market
 
     def prepare_function_table (self):
         self.function_table = {}
