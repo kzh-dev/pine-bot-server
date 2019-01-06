@@ -90,7 +90,7 @@ def currency__SGD (vm):
 def currency__TRY (vm):
     return NotImplementedError
 def currency__USD (vm):
-    return NotImplementedError
+    return 'USD'
 def currency__ZAR (vm):
     return NotImplementedError
 
@@ -298,11 +298,11 @@ def strategy__cash (vm):
 def strategy__closedtrades (vm):
     raise NotImplementedError
 def strategy__commission__cash_per_contract (vm):
-    raise NotImplementedError
+    return 'cash_per_contract'
 def strategy__commission__cash_per_order (vm):
-    raise NotImplementedError
+    return 'cash_per_order'
 def strategy__commission__percent (vm):
-    raise NotImplementedError
+    return 'percent'
 def strategy__direction_all (vm):
     raise NotImplementedError
 def strategy__direction_long (vm):
@@ -344,7 +344,7 @@ def strategy__openprofit (vm):
 def strategy__opentrades (vm):
     raise NotImplementedError
 def strategy__percent_of_equity (vm):
-    raise NotImplementedError
+    return 'percent_of_equity'
 def strategy__position_avg_price (vm):
     raise NotImplementedError
 def strategy__position_entry_name (vm):
