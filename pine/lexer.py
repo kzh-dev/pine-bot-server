@@ -3,7 +3,7 @@
 
 import ply.lex as lex
 from ply.lex import TOKEN
-from base import PineError
+from .base import PineError
  
 # List of token names.   This is always required
 tokens = (

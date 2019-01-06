@@ -2,10 +2,10 @@
 # see https://www.tradingview.com/wiki/Appendix_B._Pine_Script_v2_lexer_gramma://www.tradingview.com/wiki/Appendix_C._Pine_Script_v2_parser_grammar 
 
 import ply.yacc as yacc
-from lexer import tokens
-from base import PineError
+from .lexer import tokens
+from .base import PineError
 
-import vm.node as vm
+from .vm import node as vm
 
 ## helper
 def make_list2 (p, cls):
@@ -287,7 +287,7 @@ def p_error (p):
     raise PineError("Unexpected token: {}".format(p))
 
 
-from lexer import Lexer
+from .lexer import Lexer
 def parse (data):
     parser = yacc.yacc()
     import logging
