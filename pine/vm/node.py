@@ -208,7 +208,6 @@ class ForNode (Node):
                 retval = body.eval(vm)
 
                 counter = vm.lookup_variable(counter_name)
-                print(counter)
                 if op == '>':
                     counter += 1
                     if counter > counter_last:
