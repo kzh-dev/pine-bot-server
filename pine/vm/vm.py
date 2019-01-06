@@ -65,7 +65,7 @@ class VM (object):
             try:
                 self.push_scope()
                 self._set_func_arguments(arg_ids, args, kwargs)
-                node.eval(self)
+                return node.eval(self)
             finally:
                 self.pop_scope()
 
