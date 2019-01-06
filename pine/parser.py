@@ -201,11 +201,14 @@ def p_fun_call (p):
     p[0] = vm.FunCallNode(p[1], p[3])
 
 def p_fun_arg_list (p):
-    '''fun_arg_list : simple_expr_list
+    '''fun_arg_list : 
+                    | simple_expr_list
                     | kw_arg_list
                     | simple_expr_list COMMA kw_arg_list
                     | id_list COMMA kw_arg_list'''  # FIXME
-    if len(p) == 2:
+    if len(p) == 1:
+        p[0] = (None, None)
+    elif len(p) == 2:
         if isinstance(p[1], dict):
             p[0] = (None, p[1])
         else:
