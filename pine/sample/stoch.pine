@@ -6,7 +6,8 @@ timescale = (time > timestamp(2017, 1, 1, 00, 00) and time < timestamp(2100, 12,
 //ストキャスティクス
 len_k = input(5,title="%K")
 len_d = input(2,title="%D")
-th1 = input(20) th2 = input(80)
+th1 = input(20)
+th2 = input(80)
 k = stoch(close,high,low,len_k)
 d = sma(k,len_d)
 plot(k,color=blue,title="%K")
@@ -18,7 +19,8 @@ fill(f1,f2,color=purple)
 //Long
 longCondition = crossover(k, d) and k<th1
 
-//Short shortCondition = crossunder(k, d) and k>th2
+//Short
+shortCondition = crossunder(k, d) and k>th2
 
 //Trading
 if (longCondition)
