@@ -66,34 +66,34 @@ def Lexer ():
 
     # reserved keywords (Needs to define as a method before hand ID to prevent from being swallowed.
     def t_IF_COND (t):
-        r'if'
+        r'\bif\b'
         return t
     def t_IF_COND_ELSE (t):
-        r'else'
+        r'\belse\b'
         return t
     def t_OR (t):
-        r'or'
+        r'\bor\b'
         return t
     def t_AND (t):
-        r'and'
+        r'\band\b'
         return t
     def t_NOT (t):
-        r'not'
+        r'\bnot\b'
         return t
     def t_FOR_STMT (t):
-        r'for'
+        r'\bfor\b'
         return t
     def t_FOR_STMT_TO (t):
-        r'to'
+        r'\bto\b'
         return t
     def t_FOR_STMT_BY (t):
-        r'by'
+        r'\bby\b'
         return t
     def t_BREAK (t):
-        r'break'
+        r'\bbreak\b'
         return t
     def t_CONTINUE (t):
-        r'continue'
+        r'\bcontinue\b'
         return t
 
     # Parenthsis
