@@ -27,6 +27,11 @@ class Node (object):
         self.children.append(node)
         return self
 
+    def as_bool (self, val):
+        if isinstance(val, list):
+            return bool(val[-1])
+        else:
+            return bool(val)
 
 class MulOpNode (Node):
 
@@ -41,6 +46,8 @@ class AndNode(MulOpNode):
 class EqNode(MulOpNode):
     pass
 
+def _eq (a, b):
+    return a + b
 class BinOpNode (Node):
     def __init__ (self, op, a, b):
         super().__init__()
@@ -49,8 +56,57 @@ class BinOpNode (Node):
         self.append(b)
 
     def eval (self, vm):
-        print(self)
-        raise NotImplementedError
+        operator = self.args[0]
+        a = self.children[0].eval(vm)
+        b = self.children[1].eval(vm)
+
+        if operator == r'[':
+            return self.eval_index_access(a, b)
+        
+        if operator == r'==':
+            op = lambda a,b: a == b
+        elif operator == r'!=':
+            op = lambda a,b: a != b
+        elif operator == r'>':
+            op = lambda a,b: a > b
+        elif operator == r'>=':
+            op = lambda a,b: a >= b
+        elif operator == r'<':
+            op = lambda a,b: a < b
+        elif operator == r'<=':
+            op = lambda a,b: a <= b
+        elif operator == r'+':
+            op = lambda a,b: a + b
+        elif operator == r'-':
+            op = lambda a,b: a - b
+        elif operator == r'*':
+            op = lambda a,b: a * b
+        elif operator == r'/':
+            op = lambda a,b: a / b
+        elif operator == r'%':
+            op = lambda a,b: a % b
+        else:
+            raise PineError('invalid opertor: {}'.format(opertor))
+
+        # FIXME need type check
+        if isinstance(a, list):
+            if isinstance(b, list):
+                return [op(i, j) for i,j in zip(a, b)]
+            else:
+                return [op(i, b) for i in a]
+        else:
+            if isinstance(b, list):
+                return op(a, b[-1])
+            else:
+                return op(a, b)
+        
+    def eval_index_access (a, b):
+        if not isinstance(a, list):
+            raise PineError('cannot access by index for: {}'.format(a))
+        if not isinstance(b, int):
+            raise PineError('index must be an interger'.format(b))
+        return a[b]
+
 
 class UniOpNode (Node):
     def __init__ (self, op, a):
@@ -123,7 +179,7 @@ class IfNode (Node):
             self.append(elseclause)
 
     def eval (self, vm):
-        if self.children[0].eval(vm):
+        if self.as_bool(self.children[0].eval(vm)):
             try:
                 vm.push_scope()
                 return self.children[1].eval(vm)
