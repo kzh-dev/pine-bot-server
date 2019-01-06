@@ -1,5 +1,8 @@
 # coding=utf-8
 
+import numpy as np
+import talib as ta
+
 from ..base import PineError
 
 def accdist (vm):
@@ -395,7 +398,10 @@ def timenow (vm):
     raise NotImplementedError
 
 def tr (vm):
-    raise NotImplementedError
+    high = np.array(vm.market.high(), dtype='f8')
+    low  = np.array(vm.market.low(),  dtype='f8')
+    close = np.array(vm.market.close(), dtype='f8')
+    return list(ta.TRANGE(high, low, close))
 
 def tuesday (vm):
     raise NotImplementedError
