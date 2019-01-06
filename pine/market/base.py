@@ -11,6 +11,12 @@ class Market (object):
     def open (self):
         return [4000.0] * 200
 
+    def high (self):
+        return [5500.0] * 200
+
+    def low (self):
+        return [4750.0] * 200
+
     def period (self):
         return 'DD'
     def tickerid (self):
