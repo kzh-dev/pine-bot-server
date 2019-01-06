@@ -1,0 +1,33 @@
+//@version=3
+strategy(title = "ストキャスティクス", overlay = false)
+
+timescale = (time > timestamp(2017, 1, 1, 00, 00) and time < timestamp(2100, 12, 31, 00, 00))
+
+//ストキャスティクス
+len_k = input(5,title="%K")
+len_d = input(2,title="%D")
+th1 = input(20) th2 = input(80)
+k = stoch(close,high,low,len_k)
+d = sma(k,len_d)
+plot(k,color=blue,title="%K")
+plot(d,color=orange,title="%D")
+f1 = plot(th1,color=black)
+f2 = plot(th2,color=black)
+fill(f1,f2,color=purple)
+
+//Long
+longCondition = crossover(k, d) and k<th1
+
+//Short shortCondition = crossunder(k, d) and k>th2
+
+//Trading
+if (longCondition)
+    strategy.entry("BUY", strategy.long, na, when=timescale)
+if (shortCondition)
+    strategy.entry("SELL", strategy.short, na, when=timescale)
+
+//Close
+if strategy.position_size>0 and crossover(k, th2)
+    strategy.close_all()
+if strategy.position_size<0 and crossunder(d, th1)
+    strategy.close_all()
