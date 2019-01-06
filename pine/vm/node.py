@@ -115,8 +115,15 @@ class UniOpNode (Node):
         self.append(a)
 
     def eval (self, vm):
-        print(self)
-        raise NotImplementedError
+        op = self.args[0]
+        rhv = self.children[0].eval(vm)
+        if op == 'not':
+            return not bool(rhv)
+        if op == '+':
+            return rhv
+        if op == '-':
+            return -rhv
+        raise PineError('invalid unary op: {}'.format(op))
 
 class VarRefNode (Node):
     def __init__ (self, ident):
