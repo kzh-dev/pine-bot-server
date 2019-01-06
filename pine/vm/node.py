@@ -103,10 +103,16 @@ class KwArgsNode (Node):
 class LiteralNode (Node):
     def __init__ (self, literal):
         super().__init__()
-        self.args.append(literal)
+        if isinstance(literal, vm.Node):
+            self.append(literal)
+        else:
+            self.args.append(literal)
 
     def eval (self, vm):
-        return self.args[0]
+        if self.args:
+            return self.args[0]
+        else:
+            return [e.eval(vm) for e in self.children[0]]
 
 
 class IfNode (Node):

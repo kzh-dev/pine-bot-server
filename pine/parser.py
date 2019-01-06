@@ -238,8 +238,13 @@ def p_literal (p):
                | FLOAT_LITERAL
                | STR_LITERAL
                | BOOL_LITERAL
-               | COLOR_LITERAL'''
+               | COLOR_LITERAL
+               | list_literal'''
     p[0] = vm.LiteralNode(p[1])
+
+def p_list_leteral (p):
+    'list_literal : LSQBR simple_expr_list RSQBR'
+    p[0] = p[2]
 
 # complex expression
 def p_complex_expression (p):
