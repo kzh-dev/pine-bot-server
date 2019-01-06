@@ -105,7 +105,7 @@ class BinOpNode (Node):
             raise PineError('cannot access by index for: {}'.format(a))
         if not isinstance(b, int):
             raise PineError('index must be an interger'.format(b))
-        return a[b]
+        return a[-b]
 
 
 class UniOpNode (Node):
@@ -178,6 +178,7 @@ class IfNode (Node):
             elif len(self.children) > 2:
                 return self.children[2].eval(vm)
         finally:
+            print(self)
             vm.pop_scope()
 
 class ForNode (Node):
