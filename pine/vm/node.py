@@ -100,7 +100,7 @@ class BinOpNode (Node):
             else:
                 return op(a, b)
         
-    def eval_index_access (a, b):
+    def eval_index_access (self, a, b):
         if not isinstance(a, list):
             raise PineError('cannot access by index for: {}'.format(a))
         if not isinstance(b, int):
