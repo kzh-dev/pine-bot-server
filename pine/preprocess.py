@@ -23,7 +23,7 @@ def complement_block_tokens (string):
         if prev < indent:
             lines[-1][1] = '|BGN|' * (indent - prev)
         elif prev > indent:
-            lines[-1][1] = lines[-1][1] + '|END|' * (prev - indent)
+            lines[-1][1] += '|END|' * (prev - indent)
 
         prev = indent
         if line.strip():
@@ -31,6 +31,9 @@ def complement_block_tokens (string):
         else:
             delim = ''
         lines.append([line, delim])
+
+    if prev != 0:
+        lines[-1][1] += '|END|' * prev
 
     return "\n".join([l + d for l,d in lines])
 
