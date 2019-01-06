@@ -401,7 +401,7 @@ def tr (vm):
     high = np.array(vm.market.high(), dtype='f8')
     low  = np.array(vm.market.low(),  dtype='f8')
     close = np.array(vm.market.close(), dtype='f8')
-    return list(ta.TRANGE(high, low, close))
+    return ta.TRANGE(high, low, close).tolist()
 
 def tuesday (vm):
     raise NotImplementedError

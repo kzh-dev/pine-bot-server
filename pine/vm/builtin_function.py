@@ -284,8 +284,7 @@ def sma (vm, args, kwargs):
     source, length = _expand_args(args, kwargs,
         (('source', list, True), ('length', int, True)))
     source = np.array(source, dtype='f8')
-    rslt = ta.SMA(source, length) # numpy.ndarray
-    return list(rslt)
+    return ta.SMA(source, length).tolist()
 
 def sqrt (vm, args, kwargs):
     raise NotImplementedError
