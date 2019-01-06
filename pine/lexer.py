@@ -137,14 +137,12 @@ def Lexer ():
 
     # FLOAT_LITERAL : ( '.' DIGITS ( EXP )? | DIGITS ( '.' ( DIGITS ( EXP )? )? | EXP ) );
     float1 = _surround(r'\.' + digits + exp + r'?')
-    float2 = _surround(digits + _surround(r'\.' + digits + _surround(exp + r'?')) + r'?')
+    float2 = _surround(digits + r'\.' + _surround(digits + _surround(exp + r'?')) + r'?')
     float3 = exp
     float_ = _surround(float1 + '|' + float2 + '|' + float3)
     @TOKEN(float_)
     def t_FLOAT_LITERAL (t):
-        v = float(t.value)
-        vi = int(v)
-        t.value = vi if vi == v else v
+        t.value = float(t.value)
         return t
 
     @TOKEN(digits)
