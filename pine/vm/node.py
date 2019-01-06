@@ -123,8 +123,18 @@ class IfNode (Node):
             self.append(elseclause)
 
     def eval (self, vm):
-        print(self)
-        raise NotImplementedError
+        if self.children[0].eval(vm):
+            try:
+                vm.push_scope()
+                return self.children[1].eval(vm)
+            finally:
+                vm.pop_scope()
+        elif len(self.children) > 2:
+            try:
+                vm.push_scope()
+                return self.children[2].eval(vm)
+            finally:
+                vm.pop_scope()
 
 class ForNode (Node):
     def __init__ (self, var_def, to_clause, stmts_block):
