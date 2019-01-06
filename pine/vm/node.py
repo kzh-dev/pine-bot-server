@@ -140,8 +140,7 @@ class FunDefNode (Node):
         self.append(body)
 
     def eval (self, vm):
-        print(self)
-        raise NotImplementedError
+        vm.register_function(self.args[0], self.args[1], self.children[0])
 
 class VarDefNode (Node):
     def __init__ (self, ident, expr):
@@ -150,8 +149,8 @@ class VarDefNode (Node):
         self.append(expr)
 
     def eval (self, vm):
-        print(self)
-        raise NotImplementedError
+        rhv = self.children[0].eval(vm)
+        vm.define_variable(self.args[0], rhv)
 
 class VarAssignNode (Node):
     def __init__ (self, ident, expr):
