@@ -3,6 +3,7 @@
 from inspect import getmembers, isfunction
 
 from . import builtin_function
+from . import builtin_variable
 from ..base import PineError
 
 class VM (object):
@@ -26,7 +27,15 @@ class VM (object):
     def prepare_variable_tables (self):
         self.variable_tables = []
         # global scope
-        self.variable_tables.append({})
+        tbl = {}
+        self.variable_tables.append(tbl)
+        for name, func in getmembers(builtin_variable, isfunction):
+            if not func.__module__.endswith('.builtin_variable'):
+                continue
+            if name.startswith('_'):
+                continue
+            name = name.replace('__', '.')
+            tbl[name] = func
 
     def define_variable (self, name, value):
         self.variable_tables[-1][name] = value
@@ -35,6 +44,8 @@ class VM (object):
         for t in reversed(self.variable_tables):
             v = t.get(name, None)
             if v:
+                if isfunction(v):
+                    return v(self)
                 return v
         raise PineError("variable not found: {}".format(name))
 
