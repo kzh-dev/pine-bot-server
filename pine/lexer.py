@@ -208,7 +208,7 @@ def Lexer ():
 
 if __name__ == '__main__':
     import sys
-    from preprocess import preprocess
+    from .preprocess import preprocess
     with open(sys.argv[1]) as f:
         data = preprocess(f.read())
         lexer = Lexer()
