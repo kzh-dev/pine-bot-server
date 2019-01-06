@@ -13,14 +13,18 @@ class VM (object):
         self.prepare_variable_tables()
         self.market = market
 
-    def prepare_function_table (self):
-        self.function_table = {}
-        for name, func in getmembers(builtin_function, isfunction):
-            if not func.__module__.endswith('.builtin_function'):
+    def _load_builtins (self, mod, mod_sfx, dest):
+        for name, func in getmembers(mod, isfunction):
+            if not func.__module__.endswith(mod_sfx):
                 continue
             if name.startswith('_'):
                 continue
-            self.function_table[name] = func
+            name = name.replace('__', '.')
+            dest[name] = func
+
+    def prepare_function_table (self):
+        self.function_table = {}
+        self._load_builtins(builtin_function, '.builtin_function', self.function_table)
 
     def register_function (self, name, args, node):
         self.function_table[name] = (args, node)
@@ -30,13 +34,7 @@ class VM (object):
         # global scope
         tbl = {}
         self.variable_tables.append(tbl)
-        for name, func in getmembers(builtin_variable, isfunction):
-            if not func.__module__.endswith('.builtin_variable'):
-                continue
-            if name.startswith('_'):
-                continue
-            name = name.replace('__', '.')
-            tbl[name] = func
+        self._load_builtins(builtin_variable, '.builtin_variable', tbl)
 
     def define_variable (self, name, value):
         self.variable_tables[-1][name] = value
