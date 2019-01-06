@@ -9,7 +9,7 @@ class VM (object):
 
     def __init__ (self):
         self.prepare_function_table()
-        self.prepare_variable_table()
+        self.prepare_variable_tables()
 
     def prepare_function_table (self):
         self.function_table = {}
@@ -23,13 +23,20 @@ class VM (object):
     def register_function (self, name, args, node):
         self.function_table[name] = (args, node)
 
-    def prepare_variable_table (self):
-        self.variable_table = []
+    def prepare_variable_tables (self):
+        self.variable_tables = []
         # global scope
-        self.variable_table.append({})
+        self.variable_tables.append({})
 
     def define_variable (self, name, value):
-        self.variable_table[-1][name] = value
+        self.variable_tables[-1][name] = value
+
+    def lookup_variable (self, name):
+        for t in reversed(self.variable_tables):
+            v = t.get(name, None)
+            if v:
+                return v
+        raise PineError("variable not found: {}".format(name))
 
     def func_call (self, fname, args, kwargs):
         func = self.function_table.get(fname, None)

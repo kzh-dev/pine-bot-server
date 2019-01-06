@@ -68,8 +68,7 @@ class VarRefNode (Node):
         self.args.append(ident)
 
     def eval (self, vm):
-        print(self)
-        raise NotImplementedError
+        return vm.lookup_variable(self.args[0])
 
 class FunCallNode (Node):
     def __init__ (self, fname, args):
