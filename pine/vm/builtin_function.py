@@ -30,7 +30,7 @@ def _expand_args (args, kwargs, specs):
                 a = float(a)
             elif typ == int and type(a) == float and int(a) == a:
                 a = int(a)
-            elif not isinstance(a, typ):
+            elif typ is not None and not isinstance(a, typ):
                 raise PineError("Invalid argument type mandatory arguemnt: {}".format(name))
         args_expanded.append(a)
 
@@ -149,7 +149,22 @@ def iff (vm, args, kwargs):
     raise NotImplementedError
 
 def input (vm, args, kwargs):
-    raise NotImplementedError
+    _args = _expand_args(args, kwargs,
+        (
+            ('defval', None, True),
+            ('title', str, True),
+            ('type', str, True),
+            ('minval', None , False),
+            ('maxval', None, False),
+            ('confirm', bool, False),
+            ('step', None, False),
+            ('options', None, False),
+        )
+    )
+
+    # TODO make dynamic, type check
+    # return defval
+    return _args[0]
 
 def kagi (vm, args, kwargs):
     raise NotImplementedError
