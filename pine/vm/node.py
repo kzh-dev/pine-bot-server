@@ -34,17 +34,19 @@ class Node (object):
             return bool(val)
 
 class MulOpNode (Node):
-
-    def eval (self, vm):
-        print(self)
-        raise NotImplementedError
+    # FIXME: Need to eval one by one.
+    def eval_inner (self, vm, op):
+        return op([e.eval(vm) for e in self.children])
 
 class OrNode(MulOpNode):
-    pass
+
+    def eval (self, vm):
+        self.eval_inner(vm, any)
+
 class AndNode(MulOpNode):
-    pass
-class EqNode(MulOpNode):
-    pass
+    def eval (self, vm):
+        self.eval_inner(vm, all)
+
 
 def _eq (a, b):
     return a + b
