@@ -103,7 +103,7 @@ class KwArgsNode (Node):
 class LiteralNode (Node):
     def __init__ (self, literal):
         super().__init__()
-        if isinstance(literal, vm.Node):
+        if isinstance(literal, Node):
             self.append(literal)
         else:
             self.args.append(literal)
