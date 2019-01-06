@@ -212,7 +212,7 @@ def orange (vm):
     return '#ff7f00'
 
 def period (vm):
-    raise NotImplementedError
+    return vm.market.period()
 
 def purple (vm):
     return '#800080'
@@ -387,7 +387,7 @@ def thursday (vm):
 def ticker (vm):
     raise NotImplementedError
 def tickerid (vm):
-    raise NotImplementedError
+    return vm.market.tickerid()
 
 def time (vm):
     raise NotImplementedError

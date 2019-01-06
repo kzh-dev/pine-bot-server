@@ -10,3 +10,8 @@ class Market (object):
 
     def open (self):
         return [4000.0] * 200
+
+    def period (self):
+        return 'DD'
+    def tickerid (self):
+        return 'MARKET:SYMBOL'
