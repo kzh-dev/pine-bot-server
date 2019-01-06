@@ -187,7 +187,10 @@ def p_atom (p):
             | var_ref
             | literal
             | LPAR simple_expression RPAR'''
-    p[0] = p[1]
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = p[2]
 
 def p_var_ref (p):
     'var_ref : ID'
