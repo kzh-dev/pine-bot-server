@@ -135,19 +135,21 @@ def Lexer ():
     hex_digit = _surround(r'[\dA-Fa-f]')
     exp = _surround(r'[eE][-+]?' + digits)
 
-    @TOKEN(digits)
-    def t_INT_LITERAL (t):
-        t.value = int(t.value, 10)
-        return t
-
     # FLOAT_LITERAL : ( '.' DIGITS ( EXP )? | DIGITS ( '.' ( DIGITS ( EXP )? )? | EXP ) );
     float1 = _surround(r'\.' + digits + exp + r'?')
-    float2 = _surround(digits + _surround(digits + _surround(exp + r'?')) + r'?')
+    float2 = _surround(digits + _surround(r'\.' + digits + _surround(exp + r'?')) + r'?')
     float3 = exp
     float_ = _surround(float1 + '|' + float2 + '|' + float3)
     @TOKEN(float_)
     def t_FLOAT_LITERAL (t):
-        t.value = float(t.value)
+        v = float(t.value)
+        vi = int(v)
+        t.value = vi if vi == v else v
+        return t
+
+    @TOKEN(digits)
+    def t_INT_LITERAL (t):
+        t.value = int(t.value, 10)
         return t
 
     # BOOL_LITERAL : ( 'true' | 'false' );
