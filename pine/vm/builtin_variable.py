@@ -203,8 +203,10 @@ def ohlc4 (vm):
 def olive (vm):
     return '#808000'
 
-def open (vm):
     raise NotImplementedError
+
+def open (vm):
+    return vm.market.open()
 
 def orange (vm):
     return '#ff7f00'
