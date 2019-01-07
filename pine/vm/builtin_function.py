@@ -92,8 +92,11 @@ def correlation (vm, args, kwargs):
 def cos (vm, args, kwargs):
     raise NotImplementedError
 
-def corss (vm, args, kwargs):
-    raise NotImplementedError
+def cross (vm, args, kwargs):
+    x, y = _expand_args(args, kwargs, (('x', list, True), ('y', list, True)))
+    x1, y1 = x[-1], y[-1]
+    x2, y2 = x[-2], y[-2]
+    return (x1 - y1) * (x2 - y2) < 0
 
 def crossover (vm, args, kwargs):
     x, y = _expand_args(args, kwargs, (('x', list, True), ('y', list, True)))
