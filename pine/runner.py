@@ -12,4 +12,4 @@ if __name__ == '__main__':
         node = parse(data)
         market = Market()
         vm = VM(market)
-        node.eval(vm)
+        vm.eval_node(node)

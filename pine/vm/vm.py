@@ -22,6 +22,7 @@ class VM (object):
             name = name.replace('__', '.')
             dest[name] = func
 
+    # TODO separate bultin table from user-defined one.
     def prepare_function_table (self):
         self.function_table = {}
         self._load_builtins(builtin_function, '.builtin_function', self.function_table)
@@ -89,3 +90,10 @@ class VM (object):
         for n in names:
             if n not in self.variable_tables[-1]:
                 raise PineError("missing argument: {}".format(n))
+
+    def eval_node (self, node):
+        self.push_scope()
+        try:
+            node.eval(self)
+        finally:
+            self.pop_scope()
