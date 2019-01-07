@@ -95,11 +95,17 @@ def cos (vm, args, kwargs):
 def corss (vm, args, kwargs):
     raise NotImplementedError
 
-def corssover (vm, args, kwargs):
-    raise NotImplementedError
+def crossover (vm, args, kwargs):
+    x, y = _expand_args(args, kwargs, (('x', list, True), ('y', list, True)))
+    x1, y1 = x[-1], y[-1]
+    x2, y2 = x[-2], y[-2]
+    return x1 > y1 and x2 < y2
 
-def corssunder (vm, args, kwargs):
-    raise NotImplementedError
+def crossunder (vm, args, kwargs):
+    x, y = _expand_args(args, kwargs, (('x', list, True), ('y', list, True)))
+    x1, y1 = x[-1], y[-1]
+    x2, y2 = x[-2], y[-2]
+    return x1 < y1 and x2 > y2
 
 def cum (vm, args, kwargs):
     raise NotImplementedError
