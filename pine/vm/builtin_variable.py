@@ -124,7 +124,7 @@ def green (vm):
     return '#008000'
 
 def high (vm):
-    raise NotImplementedError
+    return vm.market.high()
 
 def histogram (vm):
     return 0
@@ -177,7 +177,7 @@ def location__top (vm):
     return 'top'
 
 def low (vm):
-    raise NotImplementedError
+    return vm.market.low()
 
 def maroon (vm):
     return '#800000'
