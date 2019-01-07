@@ -50,8 +50,8 @@ class VM (object):
 
     def lookup_variable (self, name):
         for t in reversed(self.variable_tables):
-            v = t.get(name, None)
-            if v is not None:
+            if name in t:
+                v = t[name]
                 if isfunction(v):
                     return v(self)
                 return v
