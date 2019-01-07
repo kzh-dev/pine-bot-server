@@ -393,7 +393,28 @@ def time (vm, args, kwargs):
     raise NotImplementedError
 
 def timestamp (vm, args, kwargs):
-    raise NotImplementedError
+    import datetime
+    import pytz
+    spec1 = (
+        ('year', int, True),
+        ('month', int, True),
+        ('day', int, True),
+        ('hour', int, True),
+        ('minute', int, True),
+    )
+    spec2 = (
+        ('timezone', str, False),
+    ) + spec1
+
+    if args and isinstance(args[0], str):
+        tz, year, month, day, hour, minute = _expand_args(args, kwargs, spec2)
+        tzinfo = pytz.timezone(tz)
+    else:
+        year, month, day, hour, minute = _expand_args(args, kwargs, spec1)
+        tzinfo = None
+
+    dt = datetime.datetime(year, month, day, hour, minute, tzinfo=tzinfo)
+    return dt.timestamp() * 1000.0
 
 def tostring (vm, args, kwargs):
     raise NotImplementedError
