@@ -153,8 +153,8 @@ def input (vm, args, kwargs):
     _args = _expand_args(args, kwargs,
         (
             ('defval', None, True),
-            ('title', str, True),
-            ('type', str, True),
+            ('title', str, False),
+            ('type', str, False),
             ('minval', None , False),
             ('maxval', None, False),
             ('confirm', bool, False),
