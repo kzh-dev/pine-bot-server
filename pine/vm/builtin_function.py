@@ -123,7 +123,7 @@ def falling (vm, args, kwargs):
     raise NotImplementedError
 
 def fill (vm, args, kwargs):
-    raise NotImplementedError
+    return None
 
 def fixnan (vm, args, kwargs):
     raise NotImplementedError
