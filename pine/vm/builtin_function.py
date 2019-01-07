@@ -298,7 +298,19 @@ def stdev (vm, args, kwargs):
     raise NotImplementedError
 
 def stoch (vm, args, kwargs):
-    raise NotImplementedError
+    source, high, low, length = _expand_args(args, kwargs,
+        (
+            ('source', list, True),
+            ('high', list, True),
+            ('low', list, True),
+            ('length', int, True),
+        )
+    )
+    source = np.array(source, dtype='f8')
+    high = np.array(high, dtype='f8')
+    low = np.array(low, dtype='f8')
+    fk, _ = ta.STOCHF(high, low, source, length)
+    return fk.tolist()
 
 def strategy (vm, args, kwargs):
     _ = _expand_args(args, kwargs,
