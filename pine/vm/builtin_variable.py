@@ -393,7 +393,7 @@ def tickerid (vm):
     return vm.market.tickerid()
 
 def time (vm):
-    raise NotImplementedError
+    return vm.market.bartimestamp()
 def timenow (vm):
     raise NotImplementedError
 

@@ -21,3 +21,13 @@ class Market (object):
         return 'DD'
     def tickerid (self):
         return 'MARKET:SYMBOL'
+
+    # float(ms)
+    def bartimestamp (self):
+        import datetime
+        import math
+        unixtime = datetime.datetime.utcnow().timestamp()
+        # round by 4h
+        step = 60 * 240
+        ts = math.floor(unixtime / step) * step
+        return ts * 1000.0
