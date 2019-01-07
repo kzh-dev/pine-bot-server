@@ -1,0 +1,43 @@
+//@version=3
+//30m
+strategy(title = "piano_delta", shorttitle = "piano_delta", overlay = true, default_qty_type = strategy.fixed, initial_capital=10000, currency="USD",
+        default_qty_value = 1,slippage=1,commission_type=strategy.commission.percent,commission_value=0.065)
+timescale = (time > timestamp(2017, 01, 01, 00, 00) and time < timestamp(2100, 12, 31, 00, 00))
+
+// MA
+len=input(defval=49,title="len",type=integer)
+param=input(defval=2,title="param",type=integer)
+ma1 = ema(close,len)
+ma2 = sma(close,len+param)
+
+// DELTA MA
+len_s = input(defval=47, minval=1, title="Dma Length")
+lrc = linreg(close, len_s, 0)
+lrc1 = linreg(close, len_s, 1)
+Dma = (lrc-lrc1)
+
+// FAKE CROSS JUDGE
+Dmaecf= input(defval=12,title="Dma_entry_cutoff +/-",type=integer)
+Dmaccf= input(defval=12,title="Dma_close_cutoff +/-",type=integer)
+DmaLC= input(defval=23,title="Dma_losscut +/-",type=integer)
+nFAKEb= Dma > -Dmaecf
+nFAKEs = Dma < Dmaecf
+nFAKEsc= Dma > -Dmaccf
+nFAKEbc = Dma < Dmaccf
+
+// LOGIC
+buy = crossover(ma1,ma2) and nFAKEb
+sel = crossunder(ma1,ma2) and nFAKEs
+exit_buy = crossunder(ma1,ma2) and nFAKEbc
+exit_sel = crossover(ma1,ma2) and nFAKEsc
+LCbuy = crossunder(Dma,-DmaLC)
+LCsel = crossunder(Dma,DmaLC)
+strategy.entry("BUY", strategy.long , when= buy)
+strategy.entry("SELL", strategy.short, when= sel)
+strategy.close("BUY",when= exit_buy)
+strategy.close("SELL",when= exit_sel)
+strategy.close("BUY",when= LCbuy)
+strategy.close("SELL",when= LCsel)
+
+plot(ma1,color=blue,linewidth=1)
+plot(ma2,color=red,linewidth=1)
