@@ -69,7 +69,10 @@ class VM (object):
         if func is None:
             raise PineError('fuction is not found: {}'.format(fname))
         if isfunction(func):
-            return func(self, args, kwargs)
+            try:
+                return func(self, args, kwargs)
+            except NotImplementedError as e:
+                raise PineError('function is not implemented: {}'.format(fname)) from e
         else:
             arg_ids, node = func
             try:
