@@ -54,7 +54,10 @@ class VM (object):
             if name in t:
                 v = t[name]
                 if isfunction(v):
-                    return v(self)
+                    try:
+                        return v(self)
+                    except NotImplementedError as e:
+                        raise PineError('variable is not implemented: {}'.format(name)) from e
                 return v
         raise PineError("variable not found: {}".format(name))
 
