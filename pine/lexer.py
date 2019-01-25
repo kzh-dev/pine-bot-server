@@ -166,6 +166,7 @@ def Lexer ():
     str_ = dqstr + '|' + sqstr
     @TOKEN(str_)
     def t_STR_LITERAL (t):
+        t.value = t.value[1:-1] 
         return t
 
     # COLOR_LITERAL : ( '#' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT | '#' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT );
