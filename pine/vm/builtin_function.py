@@ -100,15 +100,21 @@ def cross (vm, args, kwargs):
 
 def crossover (vm, args, kwargs):
     x, y = _expand_args(args, kwargs, (('x', list, True), ('y', list, True)))
-    x1, y1 = x[-1], y[-1]
-    x2, y2 = x[-2], y[-2]
-    return x1 > y1 and x2 < y2
+    try:
+        x1, y1 = x[-1], y[-1]
+        x2, y2 = x[-2], y[-2]
+        return x1 > y1 and x2 < y2
+    except IndexError:
+        return False
 
 def crossunder (vm, args, kwargs):
     x, y = _expand_args(args, kwargs, (('x', list, True), ('y', list, True)))
-    x1, y1 = x[-1], y[-1]
-    x2, y2 = x[-2], y[-2]
-    return x1 < y1 and x2 > y2
+    try:
+        x1, y1 = x[-1], y[-1]
+        x2, y2 = x[-2], y[-2]
+        return x1 < y1 and x2 > y2
+    except IndexError:
+        return False
 
 def cum (vm, args, kwargs):
     raise NotImplementedError
@@ -297,6 +303,8 @@ def sin (vm, args, kwargs):
 def sma (vm, args, kwargs):
     source, length = _expand_args(args, kwargs,
         (('source', list, True), ('length', int, True)))
+    if math.isnan(source[-1]):
+        return source.copy()
     source = np.array(source, dtype='f8')
     return ta.SMA(source, length).tolist()
 
@@ -315,6 +323,8 @@ def stoch (vm, args, kwargs):
             ('length', int, True),
         )
     )
+    if math.isnan(source[-1]):
+        return source.copy()
     source = np.array(source, dtype='f8')
     high = np.array(high, dtype='f8')
     low = np.array(low, dtype='f8')
