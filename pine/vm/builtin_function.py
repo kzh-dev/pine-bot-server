@@ -164,8 +164,8 @@ def hour (vm, args, kwargs):
 def iff (vm, args, kwargs):
     raise NotImplementedError
 
-def input (vm, args, kwargs):
-    _args = _expand_args(args, kwargs,
+def _parse_input_args (args, kwargs):
+    return _expand_args(args, kwargs,
         (
             ('defval', None, True),
             ('title', str, False),
@@ -178,6 +178,8 @@ def input (vm, args, kwargs):
         )
     )
 
+def input (vm, args, kwargs):
+    _args = _parse_input_args(args, kwargs)
     # TODO make dynamic, type check
     # return defval
     return _args[0]

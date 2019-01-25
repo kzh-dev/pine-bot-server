@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from inspect import getmembers, isfunction
+from inspect import getmembers, isfunction, ismethod
 
 from . import builtin_function
 from . import builtin_variable
@@ -12,6 +12,7 @@ class VM (object):
         self.prepare_function_table()
         self.prepare_variable_tables()
         self.market = market
+        self.title = 'No Title'
 
     def _load_builtins (self, mod, mod_sfx, dest):
         for name, func in getmembers(mod, isfunction):
@@ -71,7 +72,7 @@ class VM (object):
         func = self.function_table.get(fname, None)
         if func is None:
             raise PineError('fuction is not found: {}'.format(fname))
-        if isfunction(func):
+        if isfunction(func) or ismethod(func):
             try:
                 return func(self, args, kwargs)
             except NotImplementedError as e:
@@ -103,3 +104,29 @@ class VM (object):
             node.eval(self)
         finally:
             self.pop_scope()
+
+
+
+class InputScanner (VM):
+
+    def __init__ (self, market):
+        super().__init__(market)
+        self.input_func = self.function_table.get('input', None)
+        self.function_table['input'] = self.input
+        self.inputs = []
+
+    def eval_node (self, node):
+        super().eval_node(node)
+
+    def input (self, vm, args, kwargs):
+        defval, title, typ,\
+        minval, maxval, confirm, step, options = builtin_function._parse_input_args(args, kwargs)
+        self.inputs.append({
+            'defval': defval,
+            'title': title,
+            'type': typ,
+            'minval': minval,
+            'maxval': maxval,
+            'options': options,
+        })
+        return defval
