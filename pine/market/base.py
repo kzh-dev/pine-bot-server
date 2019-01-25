@@ -6,16 +6,16 @@ class Market (object):
         pass
 
     def close (self):
-        return [5000.0] * 200
+        return [0.0]
 
     def open (self):
-        return [4000.0] * 200
+        return [0.0]
 
     def high (self):
-        return [5500.0] * 200
+        return [0.0]
 
     def low (self):
-        return [4750.0] * 200
+        return [0.0]
 
     def period (self):
         return 'DD'
