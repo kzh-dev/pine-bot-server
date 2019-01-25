@@ -107,7 +107,10 @@ class BinOpNode (Node):
             raise PineError('cannot access by index for: {}'.format(a))
         if not isinstance(b, int):
             raise PineError('index must be an interger'.format(b))
-        return a[-b]
+        try:
+            return a[-b]
+        except IndexError:
+            return float('nan')
 
 
 class UniOpNode (Node):
