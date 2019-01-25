@@ -332,7 +332,7 @@ def stoch (vm, args, kwargs):
     return fk.tolist()
 
 def strategy (vm, args, kwargs):
-    _ = _expand_args(args, kwargs,
+    title, *_ = _expand_args(args, kwargs,
         (
             ('title', str, True),
             ('shorttitle', str, False),
@@ -353,6 +353,8 @@ def strategy (vm, args, kwargs):
             ('commision_value', float, False),
         )
     )
+    if title:
+        vm.title = title
     return None
 
 def strategy__cancel (vm, args, kwargs):
