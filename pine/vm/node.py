@@ -163,7 +163,7 @@ class LiteralNode (Node):
     def __init__ (self, literal):
         super().__init__()
         if isinstance(literal, Node):
-            self.append(literal)
+            self.children = literal.children.copy()
         else:
             self.args.append(literal)
 
