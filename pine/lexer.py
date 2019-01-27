@@ -41,88 +41,138 @@ def _surround (r):
     return r'(?:' + r + r')'
 
 def Lexer ():
+
+    def r (t):
+        t.lexer.last_token = t
+        t.lexer.line_breakable = False
+        return t
+    def b (t):
+        t.lexer.last_token = t
+        t.lexer.line_breakable = True
+        return t
+
     ### Grammer definitiion
 
     # Simple tokens
-    t_COND = r'\?'
-    t_COND_ELSE = r':'
-    t_EQ = r'=='
-    t_NEQ = r'!='
-    t_GT = r'>'
-    t_GE = r'>='
-    t_LT = r'<'
-    t_LE = r'<='
-    t_PLUS = r'\+'
-    t_MINUS = r'-'
-    t_MUL = r'\*'
-    t_DIV = r'/'
-    t_MOD = r'%'
-    t_COMMA = r','
-    t_ARROW = r'=>'
-    t_LSQBR = r'\['
-    t_RSQBR = r'\]'
-    t_DEFINE = r'='
-    t_ASSIGN = r':='
+    def t_COND (t):
+        r'\?'
+        return b(t)
+    def t_COND_ELSE (t):
+        r':'
+        return b(t)
+    def t_EQ (t):
+        r'=='
+        return b(t)
+    def t_NEQ (t):
+        r'!='
+        return b(t)
+    def t_GT (t):
+        r'>'
+        return b(t)
+    def t_GE (t):
+        r'>='
+        return b(t)
+    def t_LT (t):
+        r'<'
+        return b(t)
+    def t_LE (t):
+        r'<='
+        return b(t)
+    def t_PLUS (t):
+        r'\+'
+        return b(t)
+    def t_MINUS (t):
+        r'-'
+        return b(t)
+    def t_MUL (t):
+        r'\*'
+        return b(t)
+    def t_DIV (t):
+        r'/'
+        return b(t)
+    def t_MOD (t):
+        r'%'
+        return b(t)
+    def t_COMMA (t):
+        r','
+        return b(t)
+    def t_ARROW (t):
+        r'=>'
+        return r(t)
+    def t_LSQBR (t):
+        r'\['
+        t.lexer.in_braket += 1
+        return r(t)
+    def t_RSQBR (t):
+        r'\]'
+        t.lexer.in_braket -= 1
+        return r(t)
+    def t_DEFINE (t):
+        r'='
+        return b(t)
+    def t_ASSIGN (t):
+        r':='
+        return b(t)
 
     # reserved keywords (Needs to define as a method before hand ID to prevent from being swallowed.
     def t_IF_COND (t):
         r'\bif\b'
-        return t
+        return r(t)
     def t_IF_COND_ELSE (t):
         r'\belse\b'
-        return t
+        return r(t)
     def t_OR (t):
         r'\bor\b'
-        return t
+        return b(t)
     def t_AND (t):
         r'\band\b'
-        return t
+        return b(t)
     def t_NOT (t):
         r'\bnot\b'
-        return t
+        return r(t)
     def t_FOR_STMT (t):
         r'\bfor\b'
-        return t
+        return r(t)
     def t_FOR_STMT_TO (t):
         r'\bto\b'
-        return t
+        return r(t)
     def t_FOR_STMT_BY (t):
         r'\bby\b'
-        return t
+        return r(t)
     def t_BREAK (t):
         r'\bbreak\b'
-        return t
+        return r(t)
     def t_CONTINUE (t):
         r'\bcontinue\b'
-        return t
+        return r(t)
 
     # Parenthsis
     def t_LPAR (t):
         r'\('
         t.lexer.in_paren += 1
-        return t
+        return r(t)
     def t_RPAR (t):
         r'\)'
         t.lexer.in_paren -= 1
-        return t
+        return r(t)
 
     # Pseudo tokens
     def t_BEGIN (t):
         r'\|BGN\|'
-        if not t.lexer.in_paren:
-            return t
+        if not t.lexer.in_paren and not t.lexer.in_braket and not t.lexer.line_breakable:
+            return r(t)
         else:
             t.lexer.dummy_indent += 1
     def t_END (t):
         r'\|END\|'
-        if not t.lexer.in_paren:
+        if not t.lexer.in_paren and not t.lexer.in_braket:
             if not t.lexer.dummy_indent:
-                return t
+                return r(t)
             t.lexer.dummy_indent -= 1
     def t_DELIM (t):
         r'\|DLM\|'
-        if not t.lexer.in_paren:
-            return t
+        if not t.lexer.in_paren and not t.lexer.in_braket and not t.lexer.line_breakable:
+            return r(t)
 
     ## Literals
 
@@ -143,18 +193,18 @@ def Lexer ():
     @TOKEN(float_)
     def t_FLOAT_LITERAL (t):
         t.value = float(t.value)
-        return t
+        return r(t)
 
     @TOKEN(digits)
     def t_INT_LITERAL (t):
         t.value = int(t.value, 10)
-        return t
+        return r(t)
 
     # BOOL_LITERAL : ( 'true' | 'false' );
     def t_BOOL_LITERAL (t):
         r'true|false'
         t.value = (t.value == 'true')
-        return t
+        return r(t)
 
     # fragment ESC : '\\' . ;
     # STR_LITERAL : ( '"' ( ESC | ~ ( '\\' | '\n' | '"' ) )* '"' | '\'' ( ESC | ~ ( '\\' | '\n' | '\'' ) )* '\'' );
@@ -167,7 +217,7 @@ def Lexer ():
     @TOKEN(str_)
     def t_STR_LITERAL (t):
         t.value = t.value[1:-1] 
-        return t
+        return r(t)
 
     # COLOR_LITERAL : ( '#' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT | '#' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT );
     t_COLOR_LITERAL = '\#' + hex_digit + '{6}' + _surround(hex_digit + '{2}') + '?'
@@ -186,10 +236,10 @@ def Lexer ():
     #id_ex_ = id_letter_ex + _surround(_surround(r'\.?' + id_body_ex + r'\.') + '*' + id_body_ex) + '?'
     @TOKEN(id_)
     def t_ID (t):
-        return t
+        return r(t)
     #@TOKEN(id_ex_)
     #def t_ID_EX (t):
-    #    return t
+    #    return r(t)
 
     ### Utilities
     t_ignore = ' \t'
@@ -203,7 +253,10 @@ def Lexer ():
     ### Make lexer
     lexer = lex.lex()
     lexer.in_paren = 0
+    lexer.in_braket = 0
     lexer.dummy_indent = 0
+    lexer.last_token = None
+    lexer.line_breakable = False
     return lexer
 
 
