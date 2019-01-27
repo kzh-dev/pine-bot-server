@@ -129,7 +129,12 @@ def dev (vm, args, kwargs):
     raise NotImplementedError
 
 def ema (vm, args, kwargs):
-    raise NotImplementedError
+    source, length = _expand_args(args, kwargs,
+        (('source', list, True), ('length', int, True)))
+    if math.isnan(source[-1]):
+        return source.copy()
+    source = np.array(source, dtype='f8')
+    return ta.EMA(source, length).tolist()
 
 def exp (vm, args, kwargs):
     raise NotImplementedError
