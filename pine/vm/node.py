@@ -171,7 +171,7 @@ class LiteralNode (Node):
         if self.args:
             return self.args[0]
         else:
-            return [e.eval(vm) for e in self.children[0]]
+            return [e.eval(vm) for e in self.children]
 
 
 class IfNode (Node):
