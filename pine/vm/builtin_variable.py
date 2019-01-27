@@ -5,6 +5,11 @@ import talib as ta
 
 from ..base import PineError
 
+class BuiltinSeries (list):
+    def __init__ (self, orig, name):
+        super().__init__(orig)
+        self.varname = name
+
 def accdist (vm):
     raise NotImplementedError
 
@@ -57,7 +62,7 @@ def circles (vm):
     return 0
 
 def close (vm):
-    return vm.market.close()
+    return BuiltinSeries(vm.market.close(), 'close')
 
 def columns (vm):
     return 0
@@ -124,7 +129,7 @@ def green (vm):
     return '#008000'
 
 def high (vm):
-    return vm.market.high()
+    return BuiltinSeries(vm.market.high(), 'high')
 
 def histogram (vm):
     return 0
@@ -177,7 +182,7 @@ def location__top (vm):
     return 'top'
 
 def low (vm):
-    return vm.market.low()
+    return BuiltinSeries(vm.market.low(), 'low')
 
 def maroon (vm):
     return '#800000'
@@ -209,7 +214,7 @@ def olive (vm):
     raise NotImplementedError
 
 def open (vm):
-    return vm.market.open()
+    return BuiltinSeries(vm.market.open(), 'open')
 
 def orange (vm):
     return '#ff7f00'
