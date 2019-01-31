@@ -137,6 +137,9 @@ class InputScanner (VM):
                 typ = 'string'
                 # symbol, resolution, session
 
+        if not title:
+            title = "input{}".format(len(self.inputs) + 1)
+
         self.inputs.append({
             'defval': defval_,
             'title': title,
@@ -156,10 +159,15 @@ class RenderVM (VM):
         self.function_table['input'] = self.input
         self.function_table['plot'] = self.plot
         self.plots = []
+        self.input_idx = 0
 
     def input (self, vm, args, kwargs):
         defval, title, typ,\
         minval, maxval, confirm, step, options = builtin_function._parse_input_args(args, kwargs)
+
+        self.input_idx += 1
+        if not title:
+            title = "input{}".format(self.input_idx)
 
         val = self.inputs[title]
         # bool, integer, float, string, symbol, resolution, session, source
