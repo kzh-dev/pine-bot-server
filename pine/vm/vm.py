@@ -226,6 +226,10 @@ class RenderVM (VM):
 
         if color:
             plot['color'] = color
+        if linewidth:
+            plot['width'] = linewidth
+        if transp:
+            plot['alpha'] = transp
 
         self.plots.append(plot)
         return plot
