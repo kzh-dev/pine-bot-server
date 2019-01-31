@@ -3,6 +3,14 @@
 import numpy as np
 import talib as ta
 
+STYLE_LINE = 0
+STYLE_STEPLINE = 1
+STYLE_HISTOGRAM = 2
+STYLE_CROSS = 3
+STYLE_AREA = 4
+STYLE_COLUMNS = 5
+STYLE_CIRCLES = 6
+
 from ..base import PineError
 
 class BuiltinSeries (list):
@@ -24,7 +32,7 @@ def aqua (vm):
     return '#00FFFF'
 
 def area (vm):
-    return 0
+    return STYLE_AREA
 def areabr (vm):
     return 0
 
@@ -59,15 +67,15 @@ def bool (vm):
     return 'bool'
 
 def circles (vm):
-    return 0
+    return STYLE_CIRCLES
 
 def close (vm):
     return BuiltinSeries(vm.market.close(), 'close')
 
 def columns (vm):
-    return 0
+    return STYLE_COLUMNS
 def cross (vm):
-    return 0
+    return STYLE_CROSS
 
 def currency__AUD (vm):
     return NotImplementedError
@@ -132,7 +140,7 @@ def high (vm):
     return BuiltinSeries(vm.market.high(), 'high')
 
 def histogram (vm):
-    return 0
+    return STYLE_HISTOGRAM
 
 def hl2 (vm):
     raise NotImplementedError
@@ -165,7 +173,7 @@ def lime (vm):
     return '#00ff00'
 
 def line (vm):
-    return 0
+    return STYLE_LINE
 
 def linebr (vm):
     return 0
@@ -299,7 +307,7 @@ def source (vm):
     raise NotImplementedError
 
 def stepline (vm):
-    return 0
+    return STYLE_STEPLINE
 
 def strategy__cash (vm):
     raise NotImplementedError

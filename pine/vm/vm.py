@@ -224,5 +224,8 @@ class RenderVM (VM):
                 typ = 'line'
             plot['type'] = typ
 
+        if color:
+            plot['color'] = color
+
         self.plots.append(plot)
         return plot
