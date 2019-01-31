@@ -66,17 +66,17 @@ def Lexer ():
     def t_NEQ (t):
         r'!='
         return b(t)
-    def t_GT (t):
-        r'>'
-        return b(t)
     def t_GE (t):
         r'>='
         return b(t)
-    def t_LT (t):
-        r'<'
+    def t_GT (t):
+        r'>'
         return b(t)
     def t_LE (t):
         r'<='
+        return b(t)
+    def t_LT (t):
+        r'<'
         return b(t)
     def t_PLUS (t):
         r'\+'
