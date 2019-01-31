@@ -242,7 +242,7 @@ def red (vm):
     return '#ff0000'
 
 def resolution (vm):
-    raise NotImplementedError
+    return 'resolution'
 
 def saturday (vm):
     raise NotImplementedError
@@ -309,7 +309,7 @@ def solid (vm):
     return 0
 
 def source (vm):
-    raise NotImplementedError
+    return 'source'
 
 def stepline (vm):
     return STYLE_STEPLINE
