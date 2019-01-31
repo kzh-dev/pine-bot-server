@@ -295,7 +295,12 @@ def round (vm, args, kwargs):
     raise NotImplementedError
 
 def rsi (vm, args, kwargs):
-    raise NotImplementedError
+    x, y = _expand_args(args, kwargs,
+        (('x', list, True), ('y', int, True)))
+    if math.isnan(x[-1]):
+        return x.copy()
+    x = np.array(x, dtype='f8')
+    return ta.RSI(x, y).tolist()
 
 def sar (vm, args, kwargs):
     raise NotImplementedError
