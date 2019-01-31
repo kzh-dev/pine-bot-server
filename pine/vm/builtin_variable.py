@@ -214,7 +214,12 @@ def navy (vm):
     return '#000080'
 
 def ohlc4 (vm):
-    raise NotImplementedError
+    o = vm.market.open()
+    h = vm.market.high()
+    l = vm.market.low()
+    c = vm.market.close()
+    series = [sum(v4) / 4.0 for v4 in zip(o, h, l, c)]
+    return BuiltinSeries(series, 'ohlc4')
 
 def olive (vm):
     return '#808000'
