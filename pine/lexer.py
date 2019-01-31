@@ -220,7 +220,10 @@ def Lexer ():
         return r(t)
 
     # COLOR_LITERAL : ( '#' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT | '#' HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT );
-    t_COLOR_LITERAL = '\#' + hex_digit + '{6}' + _surround(hex_digit + '{2}') + '?'
+    color_literal_ = '\#' + hex_digit + '{6}' + _surround(hex_digit + '{2}') + '?'
+    @TOKEN(color_literal_)
+    def t_COLOR_LITERAL (t):
+        return r(t)
 
     # fragment ID_BODY : ( ID_LETTER | DIGIT )+ ;
     # fragment ID_BODY_EX : ( ID_LETTER_EX | DIGIT )+ ;
