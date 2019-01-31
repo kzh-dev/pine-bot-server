@@ -195,8 +195,13 @@ def kagi (vm, args, kwargs):
 def linebreak (vm, args, kwargs):
     raise NotImplementedError
 
-def linereg (vm, args, kwargs):
-    raise NotImplementedError
+def linreg (vm, args, kwargs):
+    source, length, _offset = _expand_args(args, kwargs,
+        (('source', list, True), ('length', int, True), ('offset', int, True)))
+    if math.isnan(source[-1]):
+        return source.copy()
+    source = np.array(source, dtype='f8')
+    return ta.LINEARREG(source, length).tolist()
 
 def log (vm, args, kwargs):
     raise NotImplementedError
