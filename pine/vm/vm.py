@@ -158,6 +158,7 @@ class RenderVM (VM):
         self.inputs = inputs
         self.function_table['input'] = self.input
         self.function_table['plot'] = self.plot
+        self.function_table['hline'] = self.hline
         self.plots = []
         self.input_idx = 0
 
@@ -239,5 +240,25 @@ class RenderVM (VM):
         if transp:
             plot['alpha'] = transp
 
+        self.plots.append(plot)
+        return plot
+
+    def hline (self, vm, args, kwargs):
+        price, title,\
+         color, linestyle, linewidth, editable = builtin_function._expand_args(args, kwargs, (
+            ('price', float, True),
+            ('title', str, False),
+            ('color', str, False),
+            ('linestyle', int, False),
+            ('linewidth', int, False),
+            ('editable', bool, False),
+        ))
+
+        plot = {'title': title, 'series': price, 'type': 'hline'}
+        if color:
+            plot['color'] = color
+        if linewidth:
+            plot['width'] = linewidth
+            
         self.plots.append(plot)
         return plot
