@@ -204,5 +204,25 @@ class RenderVM (VM):
         ))
 
         plot = {'title': title, 'series': series}
+
+        if style:
+            if style == builtin_variable.STYLE_LINE:
+                typ = 'line'
+            elif style == builtin_variable.STYLE_STEPLINE:
+                typ = 'line' 
+            elif style == builtin_variable.STYLE_HISTOGRAM:
+                typ = 'bar' 
+            elif style == builtin_variable.STYLE_CROSS:
+                typ = 'line'
+            elif style == builtin_variable.STYLE_AREA:
+                typ = 'band'
+            elif style == builtin_variable.STYLE_COLUMNS:
+                typ = 'bar'
+            elif style == builtin_variable.STYLE_CIRCLES:
+                typ = 'line'
+            else:
+                typ = 'line'
+            plot['type'] = typ
+
         self.plots.append(plot)
         return plot
