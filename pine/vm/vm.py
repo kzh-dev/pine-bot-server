@@ -111,7 +111,6 @@ class InputScanner (VM):
 
     def __init__ (self, market):
         super().__init__(market)
-        self.input_func = self.function_table.get('input', None)
         self.function_table['input'] = self.input
         self.inputs = []
 
@@ -121,8 +120,25 @@ class InputScanner (VM):
     def input (self, vm, args, kwargs):
         defval, title, typ,\
         minval, maxval, confirm, step, options = builtin_function._parse_input_args(args, kwargs)
+    
+        defval_ = defval
+        if typ is None:
+            t = type(defval)
+            if t == bool:
+                typ = 'bool'
+            elif t == int:
+                typ = 'integer'
+            elif t == float:
+                typ = 'float'
+            elif isinstance(defval, list):
+                typ = 'source'
+                defval_ = defval.varname
+            else:
+                typ = 'string'
+                # symbol, resolution, session
+
         self.inputs.append({
-            'defval': defval,
+            'defval': defval_,
             'title': title,
             'type': typ,
             'minval': minval,
@@ -130,3 +146,63 @@ class InputScanner (VM):
             'options': options,
         })
         return defval
+
+
+class RenderVM (VM):
+
+    def __init__ (self, market, inputs):
+        super().__init__(market)
+        self.inputs = inputs
+        self.function_table['input'] = self.input
+        self.function_table['plot'] = self.plot
+        self.plots = []
+
+    def input (self, vm, args, kwargs):
+        defval, title, typ,\
+        minval, maxval, confirm, step, options = builtin_function._parse_input_args(args, kwargs)
+
+        val = self.inputs[title]
+        # bool, integer, float, string, symbol, resolution, session, source
+        if not typ:
+            t = type(defval)
+            if t == bool:
+                typ = 'bool'
+            elif t == int:
+                typ = 'integer'
+            elif t == float:
+                typ = 'float'
+            elif isinstance(defval, list):
+                typ = 'source'
+
+        if typ == 'bool':
+            val = bool(val)
+        elif typ == 'integer':
+            val = int(val)
+        elif typ == 'float':
+            val = float(val)
+        elif typ == 'source':
+            val = self.lookup_variable(val)
+
+        return val
+
+    def plot (self, vm, args, kwargs):
+        series, title, color, linewidth, style,\
+         trackprice, transp, histbase,\
+         offset, join, editable, show_last = builtin_function._expand_args(args, kwargs, (
+            ('series', list, True),
+            ('title', str, True),
+            ('color', str, False),
+            ('linewidth', int, False),
+            ('style', int, False),
+            ('trackprice', bool, False),
+            ('transp', int, False),
+            ('histbase', float, False),
+            ('offset', int, False),
+            ('join', bool, False),
+            ('editable', bool, False),
+            ('show_last', int, False),
+        ))
+
+        plot = {'title': title, 'series': series}
+        self.plots.append(plot)
+        return plot
