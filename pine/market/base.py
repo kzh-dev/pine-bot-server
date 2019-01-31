@@ -2,8 +2,10 @@
 
 class Market (object):
 
-    def __init__ (self):
-        pass
+    def __init__ (self, market='MARKET', symbol='SYMBOL', resolution=240):
+        self.market = market
+        self.symbol = symbol
+        self.resolution = resolution
 
     def close (self):
         return [0.0]
@@ -20,7 +22,7 @@ class Market (object):
     def period (self):
         return 'DD'
     def tickerid (self):
-        return 'MARKET:SYMBOL'
+        return ':'.join((self.market, self.symbol))
 
     # float(ms)
     def bartimestamp (self):
@@ -28,6 +30,6 @@ class Market (object):
         import math
         unixtime = datetime.datetime.utcnow().timestamp()
         # round by 4h
-        step = 60 * 240
+        step = 60 * self.resolution
         ts = math.floor(unixtime / step) * step
         return ts * 1000.0
