@@ -308,7 +308,19 @@ def sar (vm, args, kwargs):
 def second (vm, args, kwargs):
     raise NotImplementedError
 
+def _parse_security_args (args, kwargs):
+    return _expand_args(args, kwargs,
+        (
+            ('symbol', str, True),
+            ('resolution', str, True),
+            ('security', list, True),
+            ('gaps', bool , False),
+            ('lookahead', bool, False),
+        )
+    )
+
 def security (vm, args, kwargs):
+    _parse_security_args(args, kwargs)
     raise NotImplementedError
 
 def sign (vm, args, kwargs):
