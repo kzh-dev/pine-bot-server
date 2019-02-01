@@ -12,3 +12,6 @@ def bseries (vals, name):
     s = BuitinSeries(vals)
     s.varname = name
     return s
+
+def series_np (np_array):
+    return Series(np_array.tolist())

@@ -5,7 +5,7 @@ import numpy as np
 import talib as ta
 
 from ..base import PineError
-from .helper import Series
+from .helper import Series, series_np
 
 class PineArgumentError (PineError):
     def __init__ (self, msg):
@@ -100,9 +100,8 @@ def cos (vm, args, kwargs):
 
 def cross (vm, args, kwargs):
     x, y = _expand_args(args, kwargs, (('x', Series, True), ('y', Series, True)))
-    s = Series()
-    s.append(False)
-    for i in xrange(1, len(x)):
+    s = Series([False])
+    for i in range(1, len(x)):
         x1, y1 = x[i], y[i]
         x2, y2 = x[i-1], y[i-1]
         s.append((x1 - y1) * (x2 - y2) < 0)
@@ -110,9 +109,8 @@ def cross (vm, args, kwargs):
 
 def crossover (vm, args, kwargs):
     x, y = _expand_args(args, kwargs, (('x', Series, True), ('y', Series, True)))
-    s = Series()
-    s.append(False)
-    for i in xrange(1, len(x)):
+    s = Series([False])
+    for i in range(1, len(x)):
         x1, y1 = x[i], y[i]
         x2, y2 = x[i-1], y[i-1]
         s.append(x1 > y1 and x2 < y2)
@@ -120,9 +118,8 @@ def crossover (vm, args, kwargs):
 
 def crossunder (vm, args, kwargs):
     x, y = _expand_args(args, kwargs, (('x', Series, True), ('y', Series, True)))
-    s = Series()
-    s.append(False)
-    for i in xrange(1, len(x)):
+    s = Series([False])
+    for i in range(1, len(x)):
         x1, y1 = x[i], y[i]
         x2, y2 = x[i-1], y[i-1]
         s.append(x1 < y1 and x2 > y2)
@@ -142,11 +139,11 @@ def dev (vm, args, kwargs):
 
 def ema (vm, args, kwargs):
     source, length = _expand_args(args, kwargs,
-        (('source', list, True), ('length', int, True)))
+        (('source', Series, True), ('length', int, True)))
     if math.isnan(source[-1]):
         return source.copy()
     source = np.array(source, dtype='f8')
-    return ta.EMA(source, length).tolist()
+    return series_np(ta.EMA(source, length))
 
 def exp (vm, args, kwargs):
     raise NotImplementedError
@@ -209,11 +206,11 @@ def linebreak (vm, args, kwargs):
 
 def linreg (vm, args, kwargs):
     source, length, _offset = _expand_args(args, kwargs,
-        (('source', list, True), ('length', int, True), ('offset', int, True)))
+        (('source', Series, True), ('length', int, True), ('offset', int, True)))
     if math.isnan(source[-1]):
         return source.copy()
     source = np.array(source, dtype='f8')
-    return ta.LINEARREG(source, length).tolist()
+    return series_np(ta.LINEARREG(source, length))
 
 def log (vm, args, kwargs):
     raise NotImplementedError
@@ -247,7 +244,7 @@ def month (vm, args, kwargs):
 
 def na (vm, args, kwargs):
     x, = _expand_args(args, kwargs, (('x', None, True),))
-    if isinstance(x, list):
+    if isinstance(x, Series):
         return [math.isnan(v) for v in x]
     else:
         return math.isnan(x)
@@ -308,11 +305,11 @@ def round (vm, args, kwargs):
 
 def rsi (vm, args, kwargs):
     x, y = _expand_args(args, kwargs,
-        (('x', list, True), ('y', int, True)))
+        (('x', Series, True), ('y', int, True)))
     if math.isnan(x[-1]):
         return x.copy()
     x = np.array(x, dtype='f8')
-    return ta.RSI(x, y).tolist()
+    return series_np(ta.RSI(x, y))
 
 def sar (vm, args, kwargs):
     raise NotImplementedError
@@ -325,7 +322,7 @@ def _parse_security_args (args, kwargs):
         (
             ('symbol', str, True),
             ('resolution', str, True),
-            ('security', list, True),
+            ('security', Series, True),
             ('gaps', bool , False),
             ('lookahead', bool, False),
         )
@@ -343,11 +340,11 @@ def sin (vm, args, kwargs):
 
 def sma (vm, args, kwargs):
     source, length = _expand_args(args, kwargs,
-        (('source', list, True), ('length', int, True)))
+        (('source', Series, True), ('length', int, True)))
     if math.isnan(source[-1]):
         return source.copy()
     source = np.array(source, dtype='f8')
-    return ta.SMA(source, length).tolist()
+    return series_np(ta.SMA(source, length))
 
 def sqrt (vm, args, kwargs):
     raise NotImplementedError
@@ -358,9 +355,9 @@ def stdev (vm, args, kwargs):
 def stoch (vm, args, kwargs):
     source, high, low, length = _expand_args(args, kwargs,
         (
-            ('source', list, True),
-            ('high', list, True),
-            ('low', list, True),
+            ('source', Series, True),
+            ('high', Series, True),
+            ('low', Series, True),
             ('length', int, True),
         )
     )
@@ -370,7 +367,7 @@ def stoch (vm, args, kwargs):
     high = np.array(high, dtype='f8')
     low = np.array(low, dtype='f8')
     fk, _ = ta.STOCHF(high, low, source, length)
-    return fk.tolist()
+    return series_np(fk)
 
 def strategy (vm, args, kwargs):
     title, *_ = _expand_args(args, kwargs,
