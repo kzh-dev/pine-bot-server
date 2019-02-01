@@ -2,7 +2,7 @@
 
 class Series (list):
 
-    def __init__ (self, orig, name):
+    def __init__ (self, orig):
         super().__init__(orig)
 
 class BuitinSeries (Series):
