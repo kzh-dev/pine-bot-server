@@ -142,10 +142,9 @@ def ema (vm, args, kwargs):
         (('source', Series, True), ('length', int, True)))
     if math.isnan(source[-1]):
         return source.copy()
-    source = np.array(source, dtype='f8')
     return series_np(ta.EMA(source, length))
 
-def exp (vm, args, kwargs):
+def exp (vm, args, kwt args):
     raise NotImplementedError
 
 def falling (vm, args, kwargs):
@@ -209,7 +208,6 @@ def linreg (vm, args, kwargs):
         (('source', Series, True), ('length', int, True), ('offset', int, True)))
     if math.isnan(source[-1]):
         return source.copy()
-    source = np.array(source, dtype='f8')
     return series_np(ta.LINEARREG(source, length))
 
 def log (vm, args, kwargs):
@@ -308,7 +306,6 @@ def rsi (vm, args, kwargs):
         (('x', Series, True), ('y', int, True)))
     if math.isnan(x[-1]):
         return x.copy()
-    x = np.array(x, dtype='f8')
     return series_np(ta.RSI(x, y))
 
 def sar (vm, args, kwargs):
@@ -343,7 +340,6 @@ def sma (vm, args, kwargs):
         (('source', Series, True), ('length', int, True)))
     if math.isnan(source[-1]):
         return source.copy()
-    source = np.array(source, dtype='f8')
     return series_np(ta.SMA(source, length))
 
 def sqrt (vm, args, kwargs):
@@ -363,9 +359,6 @@ def stoch (vm, args, kwargs):
     )
     if math.isnan(source[-1]):
         return source.copy()
-    source = np.array(source, dtype='f8')
-    high = np.array(high, dtype='f8')
-    low = np.array(low, dtype='f8')
     fk, _ = ta.STOCHF(high, low, source, length)
     return series_np(fk)
 

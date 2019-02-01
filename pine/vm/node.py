@@ -91,16 +91,7 @@ class BinOpNode (Node):
             raise PineError('invalid opertor: {}'.format(opertor))
 
         # FIXME need type check
-        if isinstance(a, list):
-            if isinstance(b, list):
-                return [op(i, j) for i,j in zip(a, b)]
-            else:
-                return [op(i, b) for i in a]
-        else:
-            if isinstance(b, list):
-                return op(a, b[-1])
-            else:
-                return op(a, b)
+        return op(a, b)
         
     def eval_index_access (self, a, b):
         if not isinstance(a, list):

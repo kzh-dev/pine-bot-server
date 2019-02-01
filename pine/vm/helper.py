@@ -1,17 +1,19 @@
 # coding=utf-8
 
-class Series (list):
+import numpy as np
 
-    def __init__ (self, orig):
-        super().__init__(orig)
+class Series (np.ndarray):
 
-class BuitinSeries (Series):
+    def __new__ (cls, vals):
+        return np.asarray(vals).view(cls)
+
+class BuiltinSeries (Series):
     pass
 
 def bseries (vals, name):
-    s = BuitinSeries(vals)
+    s = BuiltinSeries(vals)
     s.varname = name
     return s
 
 def series_np (np_array):
-    return Series(np_array.tolist())
+    return Series(np_array)
