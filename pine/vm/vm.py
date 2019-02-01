@@ -6,6 +6,8 @@ from . import builtin_function
 from . import builtin_variable
 from ..base import PineError
 
+from .helper import BuiltinSeries
+
 class VM (object):
 
     def __init__ (self, market):
@@ -132,7 +134,7 @@ class InputScanner (VM):
                 typ = 'integer'
             elif t == float:
                 typ = 'float'
-            elif isinstance(defval, list):
+            elif isinstance(defval, BuiltinSeries):
                 typ = 'source'
                 defval_ = defval.varname
             else:
