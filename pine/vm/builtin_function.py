@@ -5,6 +5,7 @@ import numpy as np
 import talib as ta
 
 from ..base import PineError
+from .helper import Series
 
 def _expand_args (args, kwargs, specs):
     args_dict = {}
@@ -93,31 +94,34 @@ def cos (vm, args, kwargs):
     raise NotImplementedError
 
 def cross (vm, args, kwargs):
-    x, y = _expand_args(args, kwargs, (('x', list, True), ('y', list, True)))
-    try:
-        x1, y1 = x[-1], y[-1]
-        x2, y2 = x[-2], y[-2]
-        return (x1 - y1) * (x2 - y2) < 0
-    except IndexError:
-        return False
+    x, y = _expand_args(args, kwargs, (('x', Series, True), ('y', Series, True)))
+    s = Series()
+    s.append(False)
+    for i in xrange(1, len(x)):
+        x1, y1 = x[i], y[i]
+        x2, y2 = x[i-1], y[i-1]
+        s.append((x1 - y1) * (x2 - y2) < 0)
+    return s
 
 def crossover (vm, args, kwargs):
-    x, y = _expand_args(args, kwargs, (('x', list, True), ('y', list, True)))
-    try:
-        x1, y1 = x[-1], y[-1]
-        x2, y2 = x[-2], y[-2]
-        return x1 > y1 and x2 < y2
-    except IndexError:
-        return False
+    x, y = _expand_args(args, kwargs, (('x', Series, True), ('y', Series, True)))
+    s = Series()
+    s.append(False)
+    for i in xrange(1, len(x)):
+        x1, y1 = x[i], y[i]
+        x2, y2 = x[i-1], y[i-1]
+        s.append(x1 > y1 and x2 < y2)
+    return s
 
 def crossunder (vm, args, kwargs):
-    x, y = _expand_args(args, kwargs, (('x', list, True), ('y', list, True)))
-    try:
-        x1, y1 = x[-1], y[-1]
-        x2, y2 = x[-2], y[-2]
-        return x1 < y1 and x2 > y2
-    except IndexError:
-        return False
+    x, y = _expand_args(args, kwargs, (('x', Series, True), ('y', Series, True)))
+    s = Series()
+    s.append(False)
+    for i in xrange(1, len(x)):
+        x1, y1 = x[i], y[i]
+        x2, y2 = x[i-1], y[i-1]
+        s.append(x1 < y1 and x2 > y2)
+    return s
 
 def cum (vm, args, kwargs):
     raise NotImplementedError
