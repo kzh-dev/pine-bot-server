@@ -1,5 +1,8 @@
 # coding=utf-8
 
+from ..base import PineError
+from .helper import Series
+
 # AST Node
 class Node (object):
 
@@ -94,7 +97,7 @@ class BinOpNode (Node):
         return op(a, b)
         
     def eval_index_access (self, a, b):
-        if not isinstance(a, list):
+        if not isinstance(a, Series):
             raise PineError('cannot access by index for: {}'.format(a))
         if not isinstance(b, int):
             raise PineError('index must be an interger'.format(b))
