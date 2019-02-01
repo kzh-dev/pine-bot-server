@@ -75,6 +75,8 @@ class VM (object):
         if isfunction(func) or ismethod(func):
             try:
                 return func(self, args, kwargs)
+            except builtin_function.PineArgumentError as e:
+                raise PineError('{0}: {1}'.format(e, fname)) from e
             except NotImplementedError as e:
                 raise PineError('function is not implemented: {}'.format(fname)) from e
         else:

@@ -7,13 +7,17 @@ import talib as ta
 from ..base import PineError
 from .helper import Series
 
+class PineArgumentError (PineError):
+    def __init__ (self, msg):
+        super().__init__(msg)
+
 def _expand_args (args, kwargs, specs):
     args_dict = {}
     if args:
         la = len(args)
         ls = len(specs)
         if la > ls:
-            raise PineError("Too many arguments: {0} for {1}".format(la , ls))
+            raise PineArgumentError("Too many arguments: {0} for {1}".format(la , ls))
         for a, spec in zip(args, specs):
             n, _, _ = spec
             args_dict[n] = a
@@ -26,14 +30,15 @@ def _expand_args (args, kwargs, specs):
         a = args_dict.get(name, None)
         if a is None:
             if mand:
-                raise PineError("Missing mandatory arguemnt: {}".format(name))
+                raise PineArgumentError("Missing mandatory arguemnt: {}".format(name))
         else:
             if typ == float and type(a) == int:
                 a = float(a)
             elif typ == int and type(a) == float and int(a) == a:
                 a = int(a)
             elif typ is not None and not isinstance(a, typ):
-                raise PineError("Invalid argument type mandatory arguemnt: {}".format(name))
+                raise PineArgumentError("Invalid argument type: {0}: {1} for {2}".format(
+                    name, type(a).__name__, typ.__name__))
         args_expanded.append(a)
 
     return args_expanded
