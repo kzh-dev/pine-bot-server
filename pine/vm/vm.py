@@ -184,7 +184,7 @@ class RenderVM (VM):
                 typ = 'integer'
             elif t == float:
                 typ = 'float'
-            elif isinstance(defval, list):
+            elif isinstance(defval, BuiltinSeries):
                 typ = 'source'
 
         if typ == 'bool':
