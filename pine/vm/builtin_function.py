@@ -144,7 +144,7 @@ def ema (vm, args, kwargs):
         return source.copy()
     return series_np(ta.EMA(source, length))
 
-def exp (vm, args, kwt args):
+def exp (vm, args, kwargs):
     raise NotImplementedError
 
 def falling (vm, args, kwargs):
