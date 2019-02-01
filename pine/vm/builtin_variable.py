@@ -12,11 +12,8 @@ STYLE_COLUMNS = 5
 STYLE_CIRCLES = 6
 
 from ..base import PineError
+from .helper import bseries
 
-class BuiltinSeries (list):
-    def __init__ (self, orig, name):
-        super().__init__(orig)
-        self.varname = name
 
 def accdist (vm):
     raise NotImplementedError
@@ -70,7 +67,7 @@ def circles (vm):
     return STYLE_CIRCLES
 
 def close (vm):
-    return BuiltinSeries(vm.market.close(), 'close')
+    return bseries(vm.market.close(), 'close')
 
 def columns (vm):
     return STYLE_COLUMNS
@@ -137,7 +134,7 @@ def green (vm):
     return '#008000'
 
 def high (vm):
-    return BuiltinSeries(vm.market.high(), 'high')
+    return bseries(vm.market.high(), 'high')
 
 def histogram (vm):
     return STYLE_HISTOGRAM
@@ -190,7 +187,7 @@ def location__top (vm):
     return 'top'
 
 def low (vm):
-    return BuiltinSeries(vm.market.low(), 'low')
+    return bseries(vm.market.low(), 'low')
 
 def maroon (vm):
     return '#800000'
@@ -219,7 +216,7 @@ def ohlc4 (vm):
     l = vm.market.low()
     c = vm.market.close()
     series = [sum(v4) / 4.0 for v4 in zip(o, h, l, c)]
-    return BuiltinSeries(series, 'ohlc4')
+    return bseries(series, 'ohlc4')
 
 def olive (vm):
     return '#808000'
@@ -227,7 +224,7 @@ def olive (vm):
     raise NotImplementedError
 
 def open (vm):
-    return BuiltinSeries(vm.market.open(), 'open')
+    return bseries(vm.market.open(), 'open')
 
 def orange (vm):
     return '#ff7f00'
