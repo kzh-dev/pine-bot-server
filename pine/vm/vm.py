@@ -71,7 +71,7 @@ class VM (object):
     def func_call (self, fname, args, kwargs):
         func = self.function_table.get(fname, None)
         if func is None:
-            raise PineError('fuction is not found: {}'.format(fname))
+            raise PineError('function is not found: {}'.format(fname))
         if isfunction(func) or ismethod(func):
             try:
                 return func(self, args, kwargs)
