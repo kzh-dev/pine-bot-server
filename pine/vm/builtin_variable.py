@@ -312,7 +312,7 @@ def stepline (vm):
     return STYLE_STEPLINE
 
 def strategy__cash (vm):
-    raise NotImplementedError
+    return 'cash'
 def strategy__closedtrades (vm):
     raise NotImplementedError
 def strategy__commission__cash_per_contract (vm):
@@ -332,7 +332,7 @@ def strategy__equity (vm):
 def strategy__eventrades (vm):
     raise NotImplementedError
 def strategy__fixed (vm):
-    raise NotImplementedError
+    return 'fixed'
 def strategy__grossloss (vm):
     raise NotImplementedError
 def strategy__grossprofit (vm):
