@@ -1,0 +1,30 @@
+//@version=3
+study(title="MACD(オフセット戦略_改)", overlay=false)
+
+// Getting inputs
+len = input(38)
+ss = input(ohlc4)
+delay = input(21)
+signal_length = input(title="Signal Smoothing", type=integer, minval = 1, maxval = 50, defval = 28)
+hist_vol = input(45)
+
+// Plot colors
+col_grow_above = "aa"
+col_grow_below = #FFCDD2
+col_fall_above = #B2DFDB
+col_fall_below = #EF5350
+col_macd = #0094ff
+col_signal = #ff6a00
+
+// Calculating
+ema = ema(ss,len)
+ema_delay = ema[delay]
+macd = ema - ema_delay
+signal = sma(macd, signal_length)
+hist = macd - signal
+
+plot(hist, title="Histogram", style=columns, color=(hist>=0 ? (hist[1] < hist ? col_grow_above : col_fall_above) : (hist[1] < hist ? col_grow_below : col_fall_below) ), transp=0 )
+plot(macd, title="MACD", color=col_macd, transp=0)
+plot(signal, title="Signal", color=col_signal, transp=0)
+hline(hist_vol, color=red, linestyle=dashed)
+hline(hist_vol*-1, color=red, linestyle=dashed)
