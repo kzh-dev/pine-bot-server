@@ -226,13 +226,15 @@ class RenderVM (VM):
             elif style == builtin_variable.STYLE_HISTOGRAM:
                 typ = 'bar' 
             elif style == builtin_variable.STYLE_CROSS:
-                typ = 'line'
+                typ = 'marker'
+                plot['mark'] = '+'
             elif style == builtin_variable.STYLE_AREA:
                 typ = 'band'
             elif style == builtin_variable.STYLE_COLUMNS:
                 typ = 'bar'
             elif style == builtin_variable.STYLE_CIRCLES:
-                typ = 'line'
+                typ = 'marker'
+                plot['mark'] = 'o'
             else:
                 typ = 'line'
             plot['type'] = typ
