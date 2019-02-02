@@ -33,19 +33,35 @@ class Node (object):
         return self
 
 
-class MulOpNode (Node):
-    # FIXME: Need to eval one by one.
-    def eval_inner (self, vm, op):
-        return op([e.eval(vm) for e in self.children])
-
-class OrNode(MulOpNode):
+class OrNode (Node):
 
     def eval (self, vm):
-        self.eval_inner(vm, any)
+        r = False
+        for n in self.children:
+            v = n.eval(vm)
+            if not isinstance(v, Series):
+                if bool(v):
+                    return v
+            elif r is False:
+                r = v
+            else:
+                r = numpy.logical_or(r, v)
+        return r
 
-class AndNode(MulOpNode):
+class AndNode (Node):
+
     def eval (self, vm):
-        self.eval_inner(vm, all)
+        r = True
+        for n in self.children:
+            v = n.eval(vm)
+            if not isinstance(v, Series):
+                if not bool(v):
+                    return v
+            elif r is True:
+                r = v
+            else:
+                r = numpy.logical_and(r, v)
+        return r
 
 
 def _eq (a, b):
