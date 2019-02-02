@@ -43,7 +43,7 @@ def _expand_args (args, kwargs, specs):
 
     return args_expanded
     
-def _ma (args, kwargs, func):
+def _ta_ma (args, kwargs, func):
     source, length = _expand_args(args, kwargs,
         (('source', Series, True), ('length', int, True)))
     if math.isnan(source[-1]):
@@ -106,30 +106,30 @@ def cos (vm, args, kwargs):
 
 def cross (vm, args, kwargs):
     x, y = _expand_args(args, kwargs, (('x', Series, True), ('y', Series, True)))
-    s = Series([False])
+    s = [False]
     for i in range(1, len(x)):
         x1, y1 = x[i], y[i]
         x2, y2 = x[i-1], y[i-1]
         s.append((x1 - y1) * (x2 - y2) < 0)
-    return s
+    return Series(s)
 
 def crossover (vm, args, kwargs):
     x, y = _expand_args(args, kwargs, (('x', Series, True), ('y', Series, True)))
-    s = Series([False])
+    s = [False]
     for i in range(1, len(x)):
         x1, y1 = x[i], y[i]
         x2, y2 = x[i-1], y[i-1]
         s.append(x1 > y1 and x2 < y2)
-    return s
+    return Series(s)
 
 def crossunder (vm, args, kwargs):
     x, y = _expand_args(args, kwargs, (('x', Series, True), ('y', Series, True)))
-    s = Series([False])
+    s = [False]
     for i in range(1, len(x)):
         x1, y1 = x[i], y[i]
         x2, y2 = x[i-1], y[i-1]
         s.append(x1 < y1 and x2 > y2)
-    return s
+    return Series(s)
 
 def cum (vm, args, kwargs):
     raise NotImplementedError
@@ -144,7 +144,7 @@ def dev (vm, args, kwargs):
     raise NotImplementedError
 
 def ema (vm, args, kwargs):
-    return _ma(args, kwargs, ta.EMA)
+    return _ta_ma(args, kwargs, ta.EMA)
 
 def exp (vm, args, kwargs):
     raise NotImplementedError
@@ -360,7 +360,7 @@ def sin (vm, args, kwargs):
     raise NotImplementedError
 
 def sma (vm, args, kwargs):
-    return _ma(args, kwargs, ta.SMA)
+    return _ta_ma(args, kwargs, ta.SMA)
 
 def sqrt (vm, args, kwargs):
     raise NotImplementedError
@@ -522,7 +522,7 @@ def weekofyear (vm, args, kwargs):
     raise NotImplementedError
 
 def wma (vm, args, kwargs):
-    raise NotImplementedError
+    return _ta_ma(args, kwargs, ta.WMA)
 
 def year (vm, args, kwargs):
     raise NotImplementedError
