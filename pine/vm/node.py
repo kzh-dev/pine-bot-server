@@ -186,10 +186,32 @@ class IfNode (Node):
     def eval (self, vm):
         vm.push_scope()
         try:
-            if self.as_bool(self.children[0].eval(vm)):
-                return self.children[1].eval(vm)
-            elif len(self.children) > 2:
-                return self.children[2].eval(vm)
+            c =  self.children[0].eval(vm)
+            s1 = self.children[1].eval(vm)
+            if len(self.children) > 2:
+                s2 = self.children[2].eval(vm)
+            else:
+                s2 = None
+
+            # FIXME
+            if isinstance(c, Series):
+                if not isinstance(s1, Series):
+                    s1 = Series([s1] * len(c))
+                if s2 is not None:
+                    if not isinstance(s2, Series):
+                        s2 = Series([s2] * len(c))
+                else:
+                    s2 = Series([float('nan')] * len(c))
+
+                for i in range(0, len(c)):
+                    if not bool(c[i]):
+                        s1[i] = s2[i]
+                return s1
+            else:
+                if bool(c):
+                    return s1
+                elif s2:
+                    return s2
         finally:
             vm.pop_scope()
 
