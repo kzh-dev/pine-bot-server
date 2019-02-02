@@ -1,5 +1,7 @@
 # coding=utf-8
 
+import numpy
+
 from ..base import PineError
 from .helper import Series
 
@@ -101,10 +103,15 @@ class BinOpNode (Node):
             raise PineError('cannot access by index for: {}'.format(a))
         if not isinstance(b, int):
             raise PineError('index must be an interger'.format(b))
-        try:
-            return a[-b]
-        except IndexError:
-            return float('nan')
+
+        if len(a) <= b:
+            r = Series([float('nan')] * len(a))
+        else:
+            r = numpy.roll(a, b)
+            for i in range(0, b):
+                r[i] = r[b]
+
+        return r
 
 
 class UniOpNode (Node):
