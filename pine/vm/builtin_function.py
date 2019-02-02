@@ -457,6 +457,7 @@ def study (vm, args, kwargs):
             ('linktoseries', bool, False),
         )
     )
+    vm.title = title
     return None
 
 def sum (vm, args, kwargs):
