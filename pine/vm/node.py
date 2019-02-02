@@ -206,7 +206,9 @@ class IfNode (Node):
 
             # FIXME
             if isinstance(c, Series):
-                if not isinstance(s1, Series):
+                if isinstance(s1, Series):
+                    s1 = s1.copy()
+                else:
                     s1 = Series([s1] * len(c))
                 if s2 is not None:
                     s2 = s2.eval(vm)
