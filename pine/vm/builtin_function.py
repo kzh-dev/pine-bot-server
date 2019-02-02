@@ -43,6 +43,12 @@ def _expand_args (args, kwargs, specs):
 
     return args_expanded
     
+def _ma (args, kwargs, func):
+    source, length = _expand_args(args, kwargs,
+        (('source', Series, True), ('length', int, True)))
+    if math.isnan(source[-1]):
+        return source.copy()
+    return series_np(func(source, length))
 
 def abs (vm, args, kwargs):
     raise NotImplementedError
@@ -138,11 +144,7 @@ def dev (vm, args, kwargs):
     raise NotImplementedError
 
 def ema (vm, args, kwargs):
-    source, length = _expand_args(args, kwargs,
-        (('source', Series, True), ('length', int, True)))
-    if math.isnan(source[-1]):
-        return source.copy()
-    return series_np(ta.EMA(source, length))
+    return _ma(args, kwargs, ta.EMA)
 
 def exp (vm, args, kwargs):
     raise NotImplementedError
@@ -293,7 +295,29 @@ def rising (vm, args, kwargs):
     raise NotImplementedError
 
 def rma (vm, args, kwargs):
-    raise NotImplementedError
+    source, length = _expand_args(args, kwargs,
+        (('source', Series, True), ('length', int, True)))
+    if math.isnan(source[-1]):
+        return source.copy()
+
+    nan = float('nan')
+
+    slen = len(source)
+    if slen <= length:
+        return Series([nan] * slen)
+
+    r = [nan] * (length - 1)
+    a = float(length - 1)
+    for i in range(length - 1, slen):
+        v = source[i]
+        p = r[i-1]
+        if math.isnan(v):
+            r.append(nan)
+        else:
+            if math.isnan(p):
+                p = 0.0
+            r.append((p * a + v) / length)
+    return Series(r)
 
 def roc (vm, args, kwargs):
     raise NotImplementedError
@@ -336,11 +360,7 @@ def sin (vm, args, kwargs):
     raise NotImplementedError
 
 def sma (vm, args, kwargs):
-    source, length = _expand_args(args, kwargs,
-        (('source', Series, True), ('length', int, True)))
-    if math.isnan(source[-1]):
-        return source.copy()
-    return series_np(ta.SMA(source, length))
+    return _ma(args, kwargs, ta.SMA)
 
 def sqrt (vm, args, kwargs):
     raise NotImplementedError
