@@ -32,11 +32,6 @@ class Node (object):
         self.children.append(node)
         return self
 
-    def as_bool (self, val):
-        if isinstance(val, list):
-            return bool(val[-1])
-        else:
-            return bool(val)
 
 class MulOpNode (Node):
     # FIXME: Need to eval one by one.
@@ -189,7 +184,7 @@ class IfNode (Node):
             c =  self.children[0].eval(vm)
             s1 = self.children[1].eval(vm)
             if len(self.children) > 2:
-                s2 = self.children[2].eval(vm)
+                s2 = self.children[2]
             else:
                 s2 = None
 
@@ -198,6 +193,7 @@ class IfNode (Node):
                 if not isinstance(s1, Series):
                     s1 = Series([s1] * len(c))
                 if s2 is not None:
+                    s2 = s2.eval(vm)
                     if not isinstance(s2, Series):
                         s2 = Series([s2] * len(c))
                 else:
@@ -211,7 +207,7 @@ class IfNode (Node):
                 if bool(c):
                     return s1
                 elif s2:
-                    return s2
+                    return s2.eval(vm)
         finally:
             vm.pop_scope()
 
