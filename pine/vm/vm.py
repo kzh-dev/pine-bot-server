@@ -163,6 +163,7 @@ class RenderVM (VM):
         self.function_table['input'] = self.input
         self.function_table['plot'] = self.plot
         self.function_table['hline'] = self.hline
+        self.function_table['fill'] = self.fill
         self.plots = []
         self.input_idx = 0
 
@@ -246,7 +247,7 @@ class RenderVM (VM):
         if linewidth:
             plot['width'] = linewidth
         if transp:
-            plot['alpha'] = transp
+            plot['alpha'] = transp * 0.01
 
         self.plots.append(plot)
         return plot
@@ -268,5 +269,29 @@ class RenderVM (VM):
         if linewidth:
             plot['width'] = linewidth
             
+        self.plots.append(plot)
+        return plot
+
+    def fill (self, vm, args, kwargs):
+        s1, s2,\
+         color, transp, title, editable, _ = builtin_function._expand_args(args, kwargs, (
+            ('series1', dict, True),
+            ('series2', dict, True),
+            ('color', str, False),
+            ('transp', int, False),
+            ('title', str, False),
+            ('editable', bool, False),
+            ('show_last', bool, False),
+        ))
+
+        plot = {'title': title, 'series': s1['series'], 'series2': s2['series'], 'type': 'fill'}
+        
+        if color is not None:
+            if isinstance(color, Series):
+                color = color[-1]
+            plot['color'] = color
+        if transp:
+            plot['alpha'] = transp * 0.01
+
         self.plots.append(plot)
         return plot
