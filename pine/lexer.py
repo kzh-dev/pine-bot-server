@@ -54,6 +54,9 @@ def Lexer ():
     ### Grammer definitiion
 
     # Simple tokens
+    def t_ASSIGN (t):
+        r':='
+        return b(t)
     def t_COND (t):
         r'\?'
         return b(t)
@@ -69,6 +72,9 @@ def Lexer ():
     def t_GE (t):
         r'>='
         return b(t)
+    def t_ARROW (t):
+        r'=>'
+        return r(t)
     def t_GT (t):
         r'>'
         return b(t)
@@ -96,9 +102,6 @@ def Lexer ():
     def t_COMMA (t):
         r','
         return b(t)
-    def t_ARROW (t):
-        r'=>'
-        return r(t)
     def t_LSQBR (t):
         r'\['
         t.lexer.in_braket += 1
@@ -109,9 +112,6 @@ def Lexer ():
         return r(t)
     def t_DEFINE (t):
         r'='
-        return b(t)
-    def t_ASSIGN (t):
-        r':='
         return b(t)
 
     # reserved keywords (Needs to define as a method before hand ID to prevent from being swallowed.
