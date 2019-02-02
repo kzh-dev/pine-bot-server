@@ -6,7 +6,7 @@ from . import builtin_function
 from . import builtin_variable
 from ..base import PineError
 
-from .helper import BuiltinSeries
+from .helper import Series, BuiltinSeries
 
 class VM (object):
 
@@ -202,9 +202,9 @@ class RenderVM (VM):
         series, title, color, linewidth, style,\
          trackprice, transp, histbase,\
          offset, join, editable, show_last = builtin_function._expand_args(args, kwargs, (
-            ('series', list, True),
+            ('series', Series, True),
             ('title', str, True),
-            ('color', str, False),
+            ('color', None, False),
             ('linewidth', int, False),
             ('style', int, False),
             ('trackprice', bool, False),
@@ -237,7 +237,9 @@ class RenderVM (VM):
                 typ = 'line'
             plot['type'] = typ
 
-        if color:
+        if color is not None:
+            if isinstance(color, Series):
+                color = color[-1]
             plot['color'] = color
         if linewidth:
             plot['width'] = linewidth
