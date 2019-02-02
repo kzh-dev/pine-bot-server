@@ -2,6 +2,8 @@
 
 import numpy as np
 
+NaN = float('nan')
+
 class Series (np.ndarray):
 
     def __new__ (cls, vals):

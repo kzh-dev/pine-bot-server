@@ -3,7 +3,7 @@
 import numpy
 
 from ..base import PineError
-from .helper import Series
+from .helper import Series, NaN
 
 # AST Node
 class Node (object):
@@ -116,7 +116,7 @@ class BinOpNode (Node):
             raise PineError('index must be an interger'.format(b))
 
         if len(a) <= b:
-            r = Series([float('nan')] * len(a))
+            r = Series([NaN] * len(a))
         else:
             r = numpy.roll(a, b)
             for i in range(0, b):
@@ -213,7 +213,7 @@ class IfNode (Node):
                     if not isinstance(s2, Series):
                         s2 = Series([s2] * len(c))
                 else:
-                    s2 = Series([float('nan')] * len(c))
+                    s2 = Series([NaN] * len(c))
 
                 for i in range(0, len(c)):
                     if not bool(c[i]):

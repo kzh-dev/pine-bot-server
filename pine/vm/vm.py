@@ -6,7 +6,7 @@ from . import builtin_function
 from . import builtin_variable
 from ..base import PineError
 
-from .helper import Series, BuiltinSeries
+from .helper import Series, BuiltinSeries, NaN
 
 class VM (object):
 

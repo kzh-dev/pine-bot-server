@@ -12,7 +12,7 @@ STYLE_COLUMNS = 5
 STYLE_CIRCLES = 6
 
 from ..base import PineError
-from .helper import bseries
+from .helper import bseries, NaN
 
 
 def accdist (vm):
@@ -205,7 +205,7 @@ def n (vm):
     raise NotImplementedError
 
 def na (vm):
-    return float("nan")
+    return NaN
 
 def navy (vm):
     return '#000080'

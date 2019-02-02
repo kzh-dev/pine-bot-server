@@ -5,7 +5,7 @@ import numpy as np
 import talib as ta
 
 from ..base import PineError
-from .helper import Series, series_np
+from .helper import Series, series_np, NaN
 
 class PineArgumentError (PineError):
     def __init__ (self, msg):
@@ -300,19 +300,17 @@ def rma (vm, args, kwargs):
     if math.isnan(source[-1]):
         return source.copy()
 
-    nan = float('nan')
-
     slen = len(source)
     if slen <= length:
-        return Series([nan] * slen)
+        return Series([NaN] * slen)
 
-    r = [nan] * (length - 1)
+    r = [NaN] * (length - 1)
     a = float(length - 1)
     for i in range(length - 1, slen):
         v = source[i]
         p = r[i-1]
         if math.isnan(v):
-            r.append(nan)
+            r.append(NaN)
         else:
             if math.isnan(p):
                 p = 0.0
