@@ -46,7 +46,12 @@ class VM (object):
     def assign_variable (self, name, value):
         for t in reversed(self.variable_tables):
             if name in t:
-                if type(t[name]) != type(value):
+                v = t[name]
+                if isinstance(v, Series):
+                    compat = isinstance(value, Series)
+                else:
+                    compat = (type(v) == type(value))
+                if not compat:
                     raise PineError('invalid type to assign: {0}: {1} for {2}'.format(name, value, t[name]))
                 t[name] = value
                 return value
