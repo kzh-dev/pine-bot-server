@@ -281,7 +281,7 @@ def _expand_pivot_args (args, kwargs):
 
 from .builtin_variable import high, low
 
-def _pivot_inner (source, left, right, op):
+def _pivot_inner (source, left, right, ismax):
     slen = len(source)
     if slen < left + right + 1:
         return Series([NaN] * slen)
@@ -290,7 +290,11 @@ def _pivot_inner (source, left, right, op):
     for i in range(left, slen - right):
         v = source[i]
         bars = source[i-left:i+right]
-        if v == op(bars):
+        if ismax:
+            p = bars.max()
+        else:
+            p = bars.min()
+        if v == p:
             r.append(v)
         else:
             r.append(NaN)
@@ -301,13 +305,13 @@ def pivothigh (vm, args, kwargs):
     source, left, right = _expand_pivot_args(args, kwargs)
     if source is None:
         source = high(vm)
-    return _pivot_inner(source, left, right, max)
+    return _pivot_inner(source, left, right, True)
 
 def pivotlow (vm, args, kwargs):
     source, left, right = _expand_pivot_args(args, kwargs)
     if source is None:
         source = low(vm)
-    return _pivot_inner(source, left, right, min)
+    return _pivot_inner(source, left, right, False)
 
 def plot (vm, args, kwargs):
     return None
