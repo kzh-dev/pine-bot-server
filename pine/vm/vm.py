@@ -169,6 +169,7 @@ class RenderVM (VM):
         self.function_table['plot'] = self.plot
         self.function_table['hline'] = self.hline
         self.function_table['fill'] = self.fill
+        self.function_table['plotshape'] = self.plotshape
         self.plots = []
         self.input_idx = 0
 
@@ -300,3 +301,41 @@ class RenderVM (VM):
 
         self.plots.append(plot)
         return plot
+
+    def plotshape (self, vm, args, kwargs):
+        series, title, style, location,\
+         color, transp,\
+         offset, text, textcolor,\
+         editable, show_last, size = builtin_function._expand_args(args, kwargs, (
+            ('series', Series, True),
+            ('title', str, False),
+            ('style', str, False),
+            ('location', str, False),
+            ('color', str, False),
+            ('transp', int, False),
+            ('offset', int, False),
+            ('text', str, False),
+            ('textcolor', str, False),
+            ('join', bool, False),
+            ('editable', bool, False),
+            ('show_last', int, False),
+            ('size', str, False),
+        ))
+
+        plot = {'title': title}
+
+        if location is None:
+            pass
+
+        if color is not None:
+            if isinstance(color, Series):
+                color = color[-1]
+            plot['color'] = color
+        if size:
+            plot['size'] = size
+        if transp:
+            plot['alpha'] = transp * 0.01
+
+        self.plots.append(plot)
+        return plot
+
