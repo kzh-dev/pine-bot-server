@@ -264,11 +264,50 @@ def precentile_nearest_rank (vm, args, kwargs):
 def percentrank (vm, args, kwargs):
     raise NotImplementedError
 
+_pivot_args2 = (
+    ('leftbars', int, True),
+    ('rightbars', int, True),
+)
+_pivot_args3 = (
+    ('source', Series, True),
+) + _pivot_args2
+
+def _expand_pivot_args (args, kwargs):
+    try:
+        return _expand_args(args, kwargs, _pivot_args3)
+    except PineArgumentError:
+        l, r = _expand_args(args, kwargs, _pivot_args2)
+        return (None, l,  r)
+
+from .builtin_variable import high, low
+
+def _pivot_inner (source, left, right, op):
+    slen = len(source)
+    if slen < left + right + 1:
+        return Series([NaN] * slen)
+
+    r = [NaN] * left
+    for i in range(left, slen - right):
+        v = source[i]
+        bars = source[i-left:i+right]
+        if v == op(bars):
+            r.append(v)
+        else:
+            r.append(NaN)
+    r += [NaN] * right
+    return Series(r)
+
 def pivothigh (vm, args, kwargs):
-    raise NotImplementedError
+    source, left, right = _expand_pivot_args(args, kwargs)
+    if source is None:
+        source = high(vm)
+    return _pivot_inner(source, left, right, max)
 
 def pivotlow (vm, args, kwargs):
-    raise NotImplementedError
+    source, left, right = _expand_pivot_args(args, kwargs)
+    if source is None:
+        source = low(vm)
+    return _pivot_inner(source, left, right, min)
 
 def plot (vm, args, kwargs):
     return None
