@@ -11,25 +11,29 @@ INDENT_RE = re.compile(r'[ \t]+')
 def complement_block_tokens (string):
     lines = []
     prev = 0
+    last = 0
     for line in string.splitlines():
         line = line.rstrip()
-        mo = INDENT_RE.match(line)
-        if mo:
-            ws = mo.group().replace("\t", '    ')   # TAB = WS x 4?
-            indent = int((len(ws) + 3 ) / 4)
-        else:
-            indent = 0
 
-        if prev < indent:
-            lines[-1][1] = '|BGN|' * (indent - prev)
-        elif prev > indent:
-            lines[-1][1] += '|END|' * (prev - indent)
+        if line:
+            mo = INDENT_RE.match(line)
+            if mo:
+                ws = mo.group().replace("\t", '    ')   # TAB = WS x 4?
+                indent = int((len(ws) + 3 ) / 4)
+            else:
+                indent = 0
 
-        prev = indent
-        if line.strip():
+            if prev < indent:
+                lines[last][1] = '|BGN|' * (indent - prev)
+            elif prev > indent:
+                lines[last][1] += '|END|' * (prev - indent)
+
+            prev = indent
             delim = '|DLM|'
+            last = len(lines)
         else:
             delim = ''
+
         lines.append([line, delim])
 
     if prev != 0:
