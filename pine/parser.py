@@ -197,33 +197,46 @@ def p_var_ref (p):
     p[0] = vm.VarRefNode(p[1])
 
 def p_fun_call (p):
-    'fun_call : ID LPAR fun_arg_list RPAR'
-    p[0] = vm.FunCallNode(p[1], p[3])
+    '''fun_call : fun_call0
+                | fun_call1
+                | fun_call2
+                | fun_call3
+                | fun_call4
+                | fun_call5'''
+    p[0] = p[1]
 
-def p_fun_arg_list (p):
-    '''fun_arg_list : 
-                    | simple_expr_list
-                    | kw_arg_list
-                    | simple_expr_list COMMA kw_arg_list
-                    | id_list COMMA kw_arg_list'''  # FIXME
-    if len(p) == 1:
-        p[0] = (None, None)
-    elif len(p) == 2:
-        if isinstance(p[1], dict):
-            p[0] = (None, p[1])
-        else:
-            p[0] = (p[1], None)
+def _id2varref (v):
+    if isinstance(v, str):
+        return vm.Node(vm.VarRefNode(v))
     else:
-        # Convert id_list to list of VarRefNode
-        if isinstance(p[1], str):
-            n = vm.Node(vm.VarRefNode(p[1]))
-        elif len(p[1].children) > 0 and isinstance(p[1].children[0], str):
-            n = vm.Node()
-            for s in p[1].children:
-                n.append(vm.VarRefNode(s))
-        else:
-            n = p[1]
-        p[0] = (n, p[3])
+        n = vm.Node()
+        for s in v.children:
+            n.append(vm.VarRefNode(s))
+        return n
+
+def p_fun_call0 (p):
+    'fun_call0 : ID LPAR RPAR'
+    p[0] = vm.FunCallNode(p[1], (None, None))
+
+def p_fun_call1 (p):
+    'fun_call1 : ID LPAR id_list RPAR'
+    p[0] = vm.FunCallNode(p[1], (_id2varref(p[3]), None))
+
+def p_fun_call2 (p):
+    'fun_call2 : ID LPAR simple_expr_list RPAR'
+    p[0] = vm.FunCallNode(p[1], (p[3], None))
+
+def p_fun_call3 (p):
+    'fun_call3 : ID LPAR kw_arg_list RPAR'
+    p[0] = vm.FunCallNode(p[1], (None, p[3]))
+
+def p_fun_call4 (p):
+    'fun_call4 : ID LPAR id_list COMMA kw_arg_list RPAR'
+    p[0] = vm.FunCallNode(p[1], (_id2varref(p[3]), p[5]))
+
+def p_fun_call5 (p):
+    'fun_call5 : ID LPAR simple_expr_list COMMA kw_arg_list RPAR'
+    p[0] = vm.FunCallNode(p[1], (p[3], p[5]))
 
 def p_kw_arg_list (p):
     '''kw_arg_list : kw_arg
