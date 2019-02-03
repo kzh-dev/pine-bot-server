@@ -209,7 +209,7 @@ class RenderVM (VM):
          trackprice, transp, histbase,\
          offset, join, editable, show_last = builtin_function._expand_args(args, kwargs, (
             ('series', Series, True),
-            ('title', str, True),
+            ('title', str, False),
             ('color', None, False),
             ('linewidth', int, False),
             ('style', int, False),
