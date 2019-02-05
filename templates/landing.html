@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <title>Pine REPL</title>
+        <meta charset="UTF-8">
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    </head>
+
+    <body>
+        <h1>Pine REPL</h1>
+        <div id="pine-editor">
+            <form id="pine-input">
+                <textarea id="pine-code" name="pine-code" cols="80" rows="10"
+                          placeholder="Input Pine code"></textarea>
+                <div style="padding-left: 16em">
+                    <button type="button">Load</button>
+                </div>
+            </form>
+        </div>
+        <div id="input-controller">
+        </div>
+        <div id="result-viewer">
+        </div>
+
+        <script type="text/javascript">
+$(function() {
+    $('#pine-input button').click(function() {
+        var code = $('textarea[name="pine-code"]').val();
+        $.post('/evaluate', {code: code}, function(html) {
+            $('#input-controller').html(html);
+            $('#result-viewer').html('');
+            $('#input-controller button').click(function() {
+                data = $('#input-controller form').serialize()
+                $.post('/run', data, function(html) {
+                    $('#result-viewer').html(html);
+                });
+            });
+        }).fail(function() {
+            $('#input-controller').html('ERROR');
+            $('#result-viewer').html('');
+        });
+    });
+});
+        </script>
+    </body>
+</html>

@@ -1,0 +1,53 @@
+<hr>
+<h2>{{ title }} inputs</h2>
+<form>
+    <textarea name="code" hidden>{{ code|e }}</textarea>
+    <label for="symbol">Symbol: </label>
+    <input name="symbol" value="BITMEX:XBTUSD" disabled></input>
+    <label for="resolution">Tick: </label>
+    <select name="resolution">
+        <option value="5">5min</option>
+<!--
+        <option value="15">15min</option>
+        <option value="30" selected>30min</option>
+-->
+        <option value="60" selected>1hour</option>
+<!--
+        <option value="240">4hour</option>
+-->
+        <option value="1D">1day</option>
+    </select>
+    <input type="checkbox" name="draw-on-same-pane" value="0">
+    <label for="draw-on-same-pane">Draw indicators on OHLCV plot.</label>
+
+    {% for form in forms %}
+        <br>
+        <label for='{{ form.title }}'>{{ form.title }}: </label>
+        {% if form.type == 'integer' or form.type == 'float' %}
+            <input name='{{ form.title }}' value='{{ form.defval }}' type='number'
+            min='{{ form.minval }}' max='{{ form.maxval }}' step='{{ form.step or 0.001 }}' required></input>
+        {% elif form.type == 'source' %}
+            <select name='{{ form.title }}'>
+            {% for source in ('close', 'open', 'high', 'low') %}
+                <option value="{{ source }}" {% if source == form.defval %} selected {% endif %}>{{ source }}</option>
+            {% endfor %}
+            </select>
+        {% elif form.type == 'string' %}
+            {% if form.options %}
+                <select name='{{ form.title }}'>
+                {% for val in form.options %}
+                    <option value="{{ val }}" {% if val == form.defval %} selected {% endif %}>{{ val }}</option>
+                {% endfor %}
+                </select>
+            {% else %}
+                <input name='{{ form.title }}' value='{{ form.defval }}'</input>
+            {% endif %}
+        {% elif form.type == 'bool' %}
+            <input name='{{ form.title }}' value='{{ form.defval }}' type='checkbox'
+             {% if form.defval %} checked {% endif %}></input>
+        {% endif %}
+    {% endfor %}
+    <div style="padding-left: 16em">
+        <button type="button">Run</button>
+    </div>
+</form>
