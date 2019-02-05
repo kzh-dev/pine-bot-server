@@ -56,9 +56,6 @@ def run ():
             symbol = request.form[symbol]
         elif k == 'resolution':
             resolution = request.form.get(k, type=int)
-        elif k == 'draw-on-same-pane':
-            if request.form[k] == '0':
-                indicator_pane = 0
         else:
             inputs[k] = request.form[k]
 
@@ -72,6 +69,9 @@ def run ():
         market = BitMexMarket(symbol_, resolution)
         vm = RenderVM(market, inputs)
         vm.eval_node(node)
+
+        if vm.overlay:
+            indicator_pane = 0
 
         html = _make_chart(market, vm.plots, indicator_pane)
         return html
