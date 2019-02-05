@@ -471,7 +471,23 @@ def strategy__close_all (vm, args, kwargs):
     raise NotImplementedError
 
 def strategy__entry (vm, args, kwargs):
-    raise NotImplementedError
+    oid, long_, qty,\
+    limit, stop,\
+    oca_name, oca_type,\
+    comment, when = _expand_args(args, kwargs,
+        (
+            ('id', str, True),
+            ('long', bool, True),
+            ('qty', float, False),
+            ('limit', float, False),
+            ('stop', float, False),
+            ('oca_name', str, False),
+            ('oca_type', str, False),
+            ('comment', str, False),
+            ('when', None, False),
+        )
+    )
+    return {}
 
 def strategy__exit (vm, args, kwargs):
     raise NotImplementedError
