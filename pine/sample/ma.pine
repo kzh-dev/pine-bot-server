@@ -1,0 +1,36 @@
+//@version=3
+study("MA Type Function(Sample 2)",overlay=true)
+
+//MA　入力
+ma_type_s = input(defval = "ema", options = ["ema","sma","rma","swma","vwma","wma","linreg"], title = "短期MA Type")
+src_s = input(close, "短期MA Source")
+len_s = input(5, "短期MA Length")
+
+ma_type_m = input(defval = "ema", options = ["ema","sma","rma","swma","vwma","wma","linreg"], title = "中期MA Type")
+src_m = input(close, "中期MA Source")
+len_m = input(20, "中期MA Length")
+
+ma_type_l = input(defval = "ema", options = ["ema","sma","rma","swma","vwma","wma","linreg"], title = "長期MA Type")
+src_l = input(close, "長期MA Source")
+len_l = input(40, "長期MA Length")
+
+//MA Type 関数宣言
+ma_tf(ma_type, src, len, offset) =>
+    ma_type_fun = ma_type == "ema" ? ema(src, len) :
+                  ma_type == "rma" ? rma(src, len) :
+                  ma_type == "swma" ? swma(src) :
+                  ma_type == "vwma" ? vwma(src, len) :
+                  ma_type == "wma" ? wma(src, len) :
+                  ma_type == "linreg" ? linreg(src, len, offset) :
+                  sma(src, len)
+    ma_type_fun
+
+//MAの計算(offsetはlinreg用だが入力は必要)
+s_ma = ma_tf(ma_type_s, src_s, len_s, 0)
+m_ma = ma_tf(ma_type_m, src_m, len_m, 0)
+l_ma = ma_tf(ma_type_l, src_l, len_l, 0)
+
+//MAを描画
+plot(s_ma, color=red, title="短期MA")
+plot(m_ma, color=green, title="中期MA")
+plot(l_ma, color=blue, title="長期MA")

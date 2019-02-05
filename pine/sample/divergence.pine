@@ -1,0 +1,57 @@
+//@version=3
+study("ダイバージェンス_v1",overlay=false)
+
+//入力設定
+len_high = input(10,title="Length High")
+len_low = input(10,title="Length low")
+len_rsi = input(20,title="rsi期間")
+
+//rsi計算
+rsi = rsi(close,len_rsi)
+
+//ローカル高値、安値確定タイミング
+phi = pivothigh(high,len_high,len_high)
+plo = pivotlow(low,len_low,len_low)
+
+plot(phi)
+plot(plo)
+
+//高値
+hi = high
+hi := phi ? high[len_high] : hi[1]
+
+//安値
+lo = low
+lo := plo ? low[len_low] : lo[1]
+
+//チャート高値タイミングのrsi
+hi_rsi = rsi
+hi_rsi := phi ? rsi[len_high] : hi_rsi[1]
+
+//チャート安値タイミングのrsi
+lo_rsi = rsi
+lo_rsi := plo ? rsi[len_low] : lo_rsi[1]
+
+//HH:高値切り上げ
+//LH:高値切り下げ
+//HL:安値切り上げ
+//LL:安値切り下げ
+HH = phi ? high[len_high] > hi[1] : false
+LH = phi ? hi[1] > high[len_high] : false
+HL = plo ? low[len_low] > lo[1] : false
+LL = plo ? lo[1] > low[len_low] : false
+
+//ダイバージェンス判定
+div1 = HH ? hi_rsi[1] > rsi[len_high] : false
+div2 = LH ? rsi[len_high] > hi_rsi[1] : false
+div3 = HL ? lo_rsi[1] > rsi[len_low] : false
+div4 = LL ? rsi[len_low] > lo_rsi[1] : false
+
+//チャートに表示
+plot(rsi,color=black,linewidth=2)
+plot(hi_rsi,color=blue,offset=-len_high)
+plot(lo_rsi,color=blue,offset=-len_low)
+plotshape(div1,text="chart HH\nrsi LH",location=location.bottom,offset=-len_high)
+plotshape(div2,text="chart LH\nrsi HH",location=location.bottom,offset=-len_high)
+plotshape(div3,text="chart HL\nrsi LL",location=location.bottom,offset=-len_low)
+plotshape(div4,text="chart LL\nrsi HL",location=location.bottom,offset=-len_low)

@@ -1,0 +1,65 @@
+//@version=3
+//タイトルを「yutas_StochRSI_normal」とし、インジのサブチャートに表示するタイトルは「Y_StochRSI_normal」とする。
+study(title="yutas_StochRSI_normal", shorttitle="Y_StochRSI_normal")
+//sourceを終値とする。
+source = close
+
+//-----------------------------
+// StochRSI用の設定
+//-----------------------------
+
+smoothK = input(3,minval=1, title="%K")
+smoothD = input(3,minval=1, title="日")
+//RSIの期間を14で最低数値は1にする。
+lengthRSI = input(14, minval=1)
+//ストキャスの期間を14で最低数値は1でストキャス期間というタイトルにする。
+lengthStoch = input(14, minval=1, title="ストキャス期間")
+//クロスサインを出すかどうかのスイッチを作る。プロット関数に(strss)がtrueであれば表示、falseは非表示。設定画面ではチェックを入れるか入れないかで変わる。
+strss = input(true, title="・strが交差する時にサインを表示")
+//osの数値を標準設定で25で最低数値は1で上の帯というタイトルにする。
+os = input(25,minval=1, title="上の帯")
+//obの数値を標準設定で75で最低数値は1で下の帯というタイトルにする。
+ob = input(75,minval=1, title="下の帯")
+//rsi を終値(close)で計算する。source = closeは上で指定済。
+rsi1 = rsi(source, lengthRSI)
+
+//-----------------------------
+// StochRSIの処理
+//-----------------------------
+
+//RSI計算式
+//https://www.fxbroadnet.com/tech/technicalchart/tech09.jsp　を参考
+//ストキャスRSI計算式
+//https://www.fxbroadnet.com/tech/technicalchart/tech17.jsp　を参考
+
+k = sma(stoch(rsi1, rsi1, rsi1, lengthStoch), smoothK)
+d = sma(k, smoothD)
+
+//fill関数で塗りつぶしをする為に os の数値を h0 と指定しておく
+h0 = hline(os)
+//fill関数で塗りつぶしをする為に obの数値を h1 と指定しておく
+h1 = hline(ob)
+
+//-----------------------------
+// 指標の表示（Stochastic）
+//-----------------------------
+//一定の固定数値での水平ラインを os の数値で silver 色で 上の帯 というタイトルで表示する
+hline(os,color=silver, title="上の帯")
+//一定の固定数値での水平ラインを ob の数値で silver 色で 下の帯 というタイトルで表示する
+hline(ob,color=silver, title="下の帯")
+
+//k を blue 色でタイトルは k で ラインの太さを 1 で表示
+plot(k, color=blue,title="k")
+//d を red 色でタイトルは 日 で ラインの太さを 1 で表示
+plot(d, color=red,title="日",linewidth=1)
+
+//クロスサインを表示する場所を%Kのライン上にプロットする為
+STRcircleYPosition = k
+
+//strss が true の時　and　K と d のラインがクロスした時 and K が d 以上で STRcircleYPosition にクロスサインを円形でラインを5の太さでblue色でタイトルはSTR GCとして表示する
+plot(strss and cross(k, d) and k >= d and k ? STRcircleYPosition : na, title="STR GC", style=circles, linewidth=5, color=blue)
+//strss が true の時　and　K と d のラインがクロスした時 and K が d 未満で STRcircleYPosition にクロスサインを円形でラインを5の太さでred色でタイトルはSTR DCとして表示する
+plot(strss and cross(k, d) and k < d and k ? STRcircleYPosition : na, title="STR DC", style=circles, linewidth=5, color=red)
+
+//h0とh1の間を#9517F2（カラーコード）で 80の濃度で背景と言うタイトルで範囲塗りつぶし表示する
+fill(h0, h1, color=#9517F2, transp=80, title='背景')
