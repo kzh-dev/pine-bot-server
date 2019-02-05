@@ -340,7 +340,7 @@ def strategy__grossprofit (vm):
 def strategy__initial_capital (vm):
     raise NotImplementedError
 def strategy__long (vm):
-    raise NotImplementedError
+    return True
 def strategy__losstrades (vm):
     raise NotImplementedError
 def strategy__max_contracts_held_all (vm):
@@ -370,7 +370,7 @@ def strategy__position_entry_name (vm):
 def strategy__position_size (vm):
     raise NotImplementedError
 def strategy__short (vm):
-    raise NotImplementedError
+    return False
 def strategy__wintrades (vm):
     raise NotImplementedError
 
