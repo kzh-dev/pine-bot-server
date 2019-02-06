@@ -1,0 +1,24 @@
+//@version=3
+//XBTUSD
+//30m
+//名前、表示場所、手数料を決める
+strategy(title = "elize", shorttitle = "elize", overlay = true, commission_value=0.065)
+
+//入力設定
+len = input(54,title="期間")
+
+//EMA、SMAの計算
+ma1 = ema(close,len)
+ma2 = sma(close,len)
+
+//買い条件、売り条件
+buy = crossover(ma1,ma2)
+sel = crossunder(ma1,ma2)
+
+//買い注文、売り注文
+strategy.entry("BUY",  strategy.long , when=buy)
+strategy.entry("SELL", strategy.short, when=sel)
+
+//インジをチャート上に表示
+plot(ma1,color=blue,linewidth=2)
+plot(ma2,color=red,linewidth=2)
