@@ -170,4 +170,7 @@ def _make_chart (market, plots, indicator_pane):
 
 
 if __name__ == '__main__':
-    app.run(port=4000)
+    import os
+    port = int(os.environ.get('PORT', 5000))
+    print(port)
+    app.run(port=port)
