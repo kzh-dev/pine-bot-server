@@ -8,11 +8,10 @@ from .helper import Series, NaN
 # AST Node
 class Node (object):
 
-    def __init__ (self, child=None):
+    def __init__ (self):
         self.children = []
-        if child:
-            self.append(child)
         self.args = []
+        self.lno = None
 
     def __str__ (self):
         me = "{0}: {1}".format(self.__class__.__name__, ", ".join([str(a) for a in self.args]))
@@ -30,6 +29,10 @@ class Node (object):
 
     def append (self, node):
         self.children.append(node)
+        return self
+
+    def lineno (self, lineno):
+        self.lno = lineno
         return self
 
 

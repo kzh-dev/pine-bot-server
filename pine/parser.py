@@ -8,13 +8,13 @@ from .base import PineError
 from .vm import node as vm
 
 ## helper
-def make_list2 (p, cls):
+def make_list2 (p, cls, lidx):
     if len(p) == 2:
         return p[1]
     else:
         l = p[1]
         if not isinstance(l, cls):
-            l = cls(p[1])
+            l = cls().append(p[1]).lineno(p.lineno(lidx))
         l.append(p[3])
         return l
 
@@ -22,7 +22,7 @@ def make_binop (p):
     if len(p) == 2:
         return p[1]
     else:
-        return vm.BinOpNode(p[2], p[1], p[3])
+        return vm.BinOpNode(p[2], p[1], p[3]).lineno(p.lineno(2))
 
 
 ## grammer definition
@@ -33,7 +33,7 @@ def p_statement_list (p):
     if len(p) == 1:
         p[0] == None
     elif len(p) == 2:
-        p[0] = vm.Node(p[1])
+        p[0] = vm.Node().append(p[1])
     else:
         p[0] = p[1].append(p[2])
 
@@ -64,7 +64,7 @@ def p_expression_stmt (p):
 
 def p_var_assign_stmt (p):
     'var_assign_stmt : ID ASSIGN expression DELIM'
-    p[0] = vm.VarAssignNode(p[1], p[3])
+    p[0] = vm.VarAssignNode(p[1], p[3]).lineno(p.lineno(1))
 
 def p_var_def_stmt (p):
     'var_def_stmt : var_def DELIM'
@@ -72,7 +72,7 @@ def p_var_def_stmt (p):
 
 def p_var_def (p):
     'var_def : ID DEFINE expression'
-    p[0] = vm.VarDefNode(p[1], p[3])
+    p[0] = vm.VarDefNode(p[1], p[3]).lineno(p.lineno(1))
 
 def p_var_defs_stmt (p):
     'var_defs_stmt : LSQBR id_list RSQBR DEFINE LSQBR simple_expr_list RSQBR DELIM'
@@ -81,7 +81,7 @@ def p_var_defs_stmt (p):
 def p_id_list (p):
     '''id_list : ID
                | id_list COMMA ID'''
-    p[0] = make_list2(p, vm.Node)
+    p[0] = make_list2(p, vm.Node, 1)
 
 # expression
 def p_expression (p):
@@ -99,7 +99,7 @@ def p_simple_expr_list (p):
     converted = False
     # Convert id_list to list of VarRefNode
     if isinstance(p[1], str):
-        n = vm.Node(vm.VarRefNode(p[1]))
+        n = vm.Node().append(vm.VarRefNode(p[1]))
         converted = True
     elif len(p[1].children) > 0 and isinstance(p[1].children[0], str):
         n = vm.Node()
@@ -111,7 +111,7 @@ def p_simple_expr_list (p):
 
     if len(p) == 2:
         if not converted:
-            n = vm.Node(n)
+            n = vm.Node().append(n)
     else:
         n.append(p[3])
 
@@ -125,17 +125,17 @@ def p_simple_expression (p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = vm.IfNode(p[1], p[3], p[5])
+        p[0] = vm.IfNode(p[1], p[3], p[5]).lineno(p.lineno(2))
 
 def p_or_expr (p):
     '''or_expr : and_expr
                | or_expr OR and_expr'''
-    p[0] = make_list2(p, vm.OrNode)
+    p[0] = make_list2(p, vm.OrNode, 2)
 
 def p_and_expr (p):
     '''and_expr : eq_expr
                 | and_expr AND eq_expr'''
-    p[0] = make_list2(p, vm.AndNode)
+    p[0] = make_list2(p, vm.AndNode, 2)
 
 def p_eq_expr (p):
     '''eq_expr : cmp_expr
@@ -175,7 +175,7 @@ def p_unary_expr (p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = vm.UniOpNode(p[1], p[2])
+        p[0] = vm.UniOpNode(p[1], p[2]).lineno(p.lineno(1))
 
 def p_sqbr_expr (p):
     '''sqbr_expr : atom
@@ -194,7 +194,7 @@ def p_atom (p):
 
 def p_var_ref (p):
     'var_ref : ID'
-    p[0] = vm.VarRefNode(p[1])
+    p[0] = vm.VarRefNode(p[1]).lineno(p.lineno(1))
 
 def p_fun_call (p):
     '''fun_call : fun_call0
@@ -207,7 +207,7 @@ def p_fun_call (p):
 
 def _id2varref (v):
     if isinstance(v, str):
-        return vm.Node(vm.VarRefNode(v))
+        return vm.Node().append(vm.VarRefNode(v))
     else:
         n = vm.Node()
         for s in v.children:
@@ -216,27 +216,27 @@ def _id2varref (v):
 
 def p_fun_call0 (p):
     'fun_call0 : ID LPAR RPAR'
-    p[0] = vm.FunCallNode(p[1], (None, None))
+    p[0] = vm.FunCallNode(p[1], (None, None)).lineno(p.lineno(1))
 
 def p_fun_call1 (p):
     'fun_call1 : ID LPAR id_list RPAR'
-    p[0] = vm.FunCallNode(p[1], (_id2varref(p[3]), None))
+    p[0] = vm.FunCallNode(p[1], (_id2varref(p[3]), None)).lineno(p.lineno(1))
 
 def p_fun_call2 (p):
     'fun_call2 : ID LPAR simple_expr_list RPAR'
-    p[0] = vm.FunCallNode(p[1], (p[3], None))
+    p[0] = vm.FunCallNode(p[1], (p[3], None)).lineno(p.lineno(1))
 
 def p_fun_call3 (p):
     'fun_call3 : ID LPAR kw_arg_list RPAR'
-    p[0] = vm.FunCallNode(p[1], (None, p[3]))
+    p[0] = vm.FunCallNode(p[1], (None, p[3])).lineno(p.lineno(1))
 
 def p_fun_call4 (p):
     'fun_call4 : ID LPAR id_list COMMA kw_arg_list RPAR'
-    p[0] = vm.FunCallNode(p[1], (_id2varref(p[3]), p[5]))
+    p[0] = vm.FunCallNode(p[1], (_id2varref(p[3]), p[5])).lineno(p.lineno(1))
 
 def p_fun_call5 (p):
     'fun_call5 : ID LPAR simple_expr_list COMMA kw_arg_list RPAR'
-    p[0] = vm.FunCallNode(p[1], (p[3], p[5]))
+    p[0] = vm.FunCallNode(p[1], (p[3], p[5])).lineno(p.lineno(1))
 
 def p_kw_arg_list (p):
     '''kw_arg_list : kw_arg
@@ -259,11 +259,12 @@ def p_literal (p):
                | BOOL_LITERAL
                | COLOR_LITERAL
                | list_literal'''
-    p[0] = vm.LiteralNode(p[1])
+    p[0] = vm.LiteralNode(p[1]).lineno(p.lineno(1))
 
 def p_list_leteral (p):
     'list_literal : LSQBR simple_expr_list RSQBR'
     p[0] = p[2]
+    p.set_lineno(0, p.lineno(1))
 
 # complex expression
 def p_complex_expression (p):
@@ -275,14 +276,14 @@ def p_if_expr (p):
     '''if_expr : IF_COND simple_expression stmts_block
                | IF_COND simple_expression stmts_block IF_COND_ELSE stmts_block'''
     if len(p) == 4:
-        p[0] = vm.IfNode(p[2], p[3])
+        p[0] = vm.IfNode(p[2], p[3]).lineno(p.lineno(1))
     else:
-        p[0] = vm.IfNode(p[2], p[3], p[5])
+        p[0] = vm.IfNode(p[2], p[3], p[5]).lineno(p.lineno(1))
 
 def p_for_expr (p):
     '''for_expr : FOR_STMT var_def FOR_STMT_TO simple_expression stmts_block
                 | FOR_STMT var_def FOR_STMT_TO simple_expression FOR_STMT_BY'''     # FIXME
-    p[0] = vm.ForNode(p[2], p[4], p[5])
+    p[0] = vm.ForNode(p[2], p[4], p[5]).lineno(p.lineno(1))
 
 def p_stmts_block (p):
     'stmts_block : BEGIN statement_list END'
@@ -297,11 +298,11 @@ def p_fun_def_stmt (p):
 
 def p_fun_def_stmt_1 (p):
     'fun_def_stmt_1 : ID LPAR id_list RPAR ARROW simple_expression DELIM'
-    p[0] = vm.FunDefNode(p[1], p[3], p[6])
+    p[0] = vm.FunDefNode(p[1], p[3], p[6]).lineno(p.lineno(1))
 
 def p_fun_def_stmt_m (p):
     'fun_def_stmt_m : ID LPAR id_list RPAR ARROW stmts_block'
-    p[0] = vm.FunDefNode(p[1], p[3], p[6])
+    p[0] = vm.FunDefNode(p[1], p[3], p[6]).lineno(p.lineno(1))
 
 ## Error handling
 class PineSyntaxError (PineError):
@@ -322,7 +323,11 @@ def parse (data):
 
 if __name__ == '__main__':
     import sys
+    import re
     from .preprocess import preprocess
     with open(sys.argv[1]) as f:
         data = preprocess(f.read())
-        print(parse(data))
+        lines = data.splitlines()
+        node = parse(data)
+        for n in node.children:
+            print("{0}: {1}: {2}".format(n.lno, lines[n.lno-1], n))
