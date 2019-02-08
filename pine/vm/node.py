@@ -154,11 +154,12 @@ class FunCallNode (Node):
     def __init__ (self, fname, args):
         super().__init__()
         self.args.append(fname)
-        self.args.append(args[0])
-        self.args.append(args[1])
+        self.append(args[0])
+        self.append(args[1])
 
     def eval (self, vm):
-        fname, args, kwargs = self.args
+        fname = self.args[0]
+        args, kwargs = self.children
         if args:
             _args = [a.eval(vm) for a in args.children]
         else:
@@ -232,15 +233,13 @@ class IfNode (Node):
 class ForNode (Node):
     def __init__ (self, var_def, to_clause, stmts_block):
         super().__init__()
-        self.args.append(var_def)
+        self.append(var_def)
         self.append(to_clause)
         self.append(stmts_block)
 
     def eval (self, vm):
-        var_def = self.args[0]
+        var_def, to_node, body = self.children
         counter_name = var_def.name()
-        to_node = self.children[0]
-        body = self.children[1]
         retval = None
 
         vm.push_scope()
