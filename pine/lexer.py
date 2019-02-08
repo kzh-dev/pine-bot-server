@@ -276,4 +276,4 @@ if __name__ == '__main__':
             tok = lexer.token()
             if not tok: 
                 break      # No more input
-            print(tok)
+            print(tok.type, tok.value, tok.lineno, tok.lexpos)
