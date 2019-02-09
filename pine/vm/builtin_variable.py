@@ -15,202 +15,202 @@ from ..base import PineError
 from .helper import bseries, NaN
 
 
-def accdist (vm):
+def accdist (vm=None):
     raise NotImplementedError
 
-def adjustment__dividends (vm):
+def adjustment__dividends (vm=None):
     raise NotImplementedError
-def adjustment__none (vm):
+def adjustment__none (vm=None):
     raise NotImplementedError
-def adjustment__splits (vm):
+def adjustment__splits (vm=None):
     raise NotImplementedError
 
-def aqua (vm):
+def aqua (vm=None):
     return '#00FFFF'
 
-def area (vm):
+def area (vm=None):
     return STYLE_AREA
-def areabr (vm):
+def areabr (vm=None):
     return 0
 
-def barmerge__gaps_off (vm):
+def barmerge__gaps_off (vm=None):
     return False
-def barmerge__gaps_on (vm):
+def barmerge__gaps_on (vm=None):
     return True
-def barmerge__lookahead_off (vm):
+def barmerge__lookahead_off (vm=None):
     return False
-def barmerge__lookahead_on (vm):
+def barmerge__lookahead_on (vm=None):
     return True
 
-def barstate__isconfirmed (vm):
+def barstate__isconfirmed (vm=None):
     raise NotImplementedError
-def barstate__isfirst (vm):
+def barstate__isfirst (vm=None):
     raise NotImplementedError
-def barstate__ishistory (vm):
+def barstate__ishistory (vm=None):
     raise NotImplementedError
-def barstate__islast (vm):
+def barstate__islast (vm=None):
     raise NotImplementedError
-def barstate__isnew (vm):
+def barstate__isnew (vm=None):
     raise NotImplementedError
-def barstate__isrealtime (vm):
+def barstate__isrealtime (vm=None):
     raise NotImplementedError
 
-def black (vm):
+def black (vm=None):
     return '#000000'
-def blue (vm):
+def blue (vm=None):
     return '#0000FF'
 
-def bool (vm):
+def bool (vm=None):
     return 'bool'
 
-def circles (vm):
+def circles (vm=None):
     return STYLE_CIRCLES
 
-def close (vm):
+def close (vm=None):
     return bseries(vm.market.close(), 'close')
 
-def columns (vm):
+def columns (vm=None):
     return STYLE_COLUMNS
-def cross (vm):
+def cross (vm=None):
     return STYLE_CROSS
 
-def currency__AUD (vm):
+def currency__AUD (vm=None):
     return NotImplementedError
-def currency__CAD (vm):
+def currency__CAD (vm=None):
     return NotImplementedError
-def currency__CHF (vm):
+def currency__CHF (vm=None):
     return NotImplementedError
-def currency__EUR (vm):
+def currency__EUR (vm=None):
     return NotImplementedError
-def currency__GBP (vm):
+def currency__GBP (vm=None):
     return NotImplementedError
-def currency__HKD (vm):
+def currency__HKD (vm=None):
     return NotImplementedError
-def currency__JPY (vm):
+def currency__JPY (vm=None):
     return NotImplementedError
-def currency__NOK (vm):
+def currency__NOK (vm=None):
     return NotImplementedError
-def currency__NONE (vm):
+def currency__NONE (vm=None):
     return NotImplementedError
-def currency__NZD (vm):
+def currency__NZD (vm=None):
     return NotImplementedError
-def currency__RUB (vm):
+def currency__RUB (vm=None):
     return NotImplementedError
-def currency__SKE (vm):
+def currency__SKE (vm=None):
     return NotImplementedError
-def currency__SGD (vm):
+def currency__SGD (vm=None):
     return NotImplementedError
-def currency__TRY (vm):
+def currency__TRY (vm=None):
     return NotImplementedError
-def currency__USD (vm):
+def currency__USD (vm=None):
     return 'USD'
-def currency__ZAR (vm):
+def currency__ZAR (vm=None):
     return NotImplementedError
 
-def dashed (vm):
+def dashed (vm=None):
     return 0
 
-def dayofmonth (vm):
+def dayofmonth (vm=None):
     raise NotImplementedError
-def dayofweek (vm):
+def dayofweek (vm=None):
     raise NotImplementedError
 
-def dotted (vm):
+def dotted (vm=None):
     return 0
 
-def float (vm):
+def float (vm=None):
     return 'float'
 
-def friday (vm):
+def friday (vm=None):
     raise NotImplementedError
 
-def fuchsia (vm):
+def fuchsia (vm=None):
     return '#FF00FF'
 
-def gray (vm):
+def gray (vm=None):
     return '#808080'
 
-def green (vm):
+def green (vm=None):
     return '#008000'
 
-def high (vm):
+def high (vm=None):
     return bseries(vm.market.high(), 'high')
 
-def histogram (vm):
+def histogram (vm=None):
     return STYLE_HISTOGRAM
 
-def hl2 (vm):
+def hl2 (vm=None):
     raise NotImplementedError
 
-def hlc3 (vm):
+def hlc3 (vm=None):
     raise NotImplementedError
 
-def integer (vm):
+def integer (vm=None):
     return 'integer'
 
-def interval (vm):
+def interval (vm=None):
     raise NotImplementedError
 
-def isdaily (vm):
+def isdaily (vm=None):
     raise NotImplementedError
 
-def isdwm (vm):
+def isdwm (vm=None):
     raise NotImplementedError
 
-def isintraday (vm):
+def isintraday (vm=None):
     raise NotImplementedError
 
-def ismonthly (vm):
+def ismonthly (vm=None):
     raise NotImplementedError
 
-def isweekly (vm):
+def isweekly (vm=None):
     raise NotImplementedError
 
-def lime (vm):
+def lime (vm=None):
     return '#00ff00'
 
-def line (vm):
+def line (vm=None):
     return STYLE_LINE
 
-def linebr (vm):
+def linebr (vm=None):
     return 0
 
-def location__abovebar (vm):
+def location__abovebar (vm=None):
     return 'abovebar'
-def location__absolute (vm):
+def location__absolute (vm=None):
     return 'absolute'
-def location__belowbar (vm):
+def location__belowbar (vm=None):
     return 'belowbar'
-def location__bottom (vm):
+def location__bottom (vm=None):
     return 'bottom'
-def location__top (vm):
+def location__top (vm=None):
     return 'top'
 
-def low (vm):
+def low (vm=None):
     return bseries(vm.market.low(), 'low')
 
-def maroon (vm):
+def maroon (vm=None):
     return '#800000'
 
-def minute (vm):
+def minute (vm=None):
     raise NotImplementedError
 
-def monday (vm):
+def monday (vm=None):
     raise NotImplementedError
 
-def month (vm):
+def month (vm=None):
     raise NotImplementedError
 
-def n (vm):
+def n (vm=None):
     raise NotImplementedError
 
-def na (vm):
+def na (vm=None):
     return NaN
 
-def navy (vm):
+def navy (vm=None):
     return '#000080'
 
-def ohlc4 (vm):
+def ohlc4 (vm=None):
     o = vm.market.open()
     h = vm.market.high()
     l = vm.market.low()
@@ -218,226 +218,226 @@ def ohlc4 (vm):
     series = [sum(v4) / 4.0 for v4 in zip(o, h, l, c)]
     return bseries(series, 'ohlc4')
 
-def olive (vm):
+def olive (vm=None):
     return '#808000'
 
     raise NotImplementedError
 
-def open (vm):
+def open (vm=None):
     return bseries(vm.market.open(), 'open')
 
-def orange (vm):
+def orange (vm=None):
     return '#ff7f00'
 
-def period (vm):
+def period (vm=None):
     return vm.market.period()
 
-def purple (vm):
+def purple (vm=None):
     return '#800080'
 
-def red (vm):
+def red (vm=None):
     return '#ff0000'
 
-def resolution (vm):
+def resolution (vm=None):
     return 'resolution'
 
-def saturday (vm):
+def saturday (vm=None):
     raise NotImplementedError
 
-def scale__left (vm):
+def scale__left (vm=None):
     return 0
-def scale__none (vm):
+def scale__none (vm=None):
     return 0
-def scale__right (vm):
+def scale__right (vm=None):
     return 0
 
-def second (vm):
+def second (vm=None):
     raise NotImplementedError
 
-def session (vm):
+def session (vm=None):
     raise NotImplementedError
-def session__extended (vm):
+def session__extended (vm=None):
     raise NotImplementedError
-def session__regular (vm):
+def session__regular (vm=None):
     raise NotImplementedError
 
-def shape__arrowdown (vm):
+def shape__arrowdown (vm=None):
     return 'arrowdown'
-def shape__arrowup (vm):
+def shape__arrowup (vm=None):
     return 'arrowup'
-def shape__circle (vm):
+def shape__circle (vm=None):
     return 'circle'
-def shape__cross (vm):
+def shape__cross (vm=None):
     return 'cross'
-def shape__diamond (vm):
+def shape__diamond (vm=None):
     return 'diamond'
-def shape__flag (vm):
+def shape__flag (vm=None):
     return 'flag'
-def shape__labeldown (vm):
+def shape__labeldown (vm=None):
     return 'labeldown'
-def shape__labelup (vm):
+def shape__labelup (vm=None):
     return 'labelup'
-def shape__square (vm):
+def shape__square (vm=None):
     return 'square'
-def shape__triangledown (vm):
+def shape__triangledown (vm=None):
     return 'triangledown'
-def shape__triangleup (vm):
+def shape__triangleup (vm=None):
     return 'triangleup'
-def shape__xcross (vm):
+def shape__xcross (vm=None):
     return 'xcross'
 
-def silver (vm):
+def silver (vm=None):
     return "#c0c0c0"
 
-def size__auto (vm):
+def size__auto (vm=None):
     return 'auto'
-def size__huge (vm):
+def size__huge (vm=None):
     return 'huge'
-def size__large (vm):
+def size__large (vm=None):
     return 'large'
-def size__normal (vm):
+def size__normal (vm=None):
     return 'normal'
-def size__small (vm):
+def size__small (vm=None):
     return 'small'
-def size__tiny (vm):
+def size__tiny (vm=None):
     return 'tiny'
 
-def solid (vm):
+def solid (vm=None):
     return 0
 
-def source (vm):
+def source (vm=None):
     return 'source'
 
-def stepline (vm):
+def stepline (vm=None):
     return STYLE_STEPLINE
 
-def strategy__cash (vm):
+def strategy__cash (vm=None):
     return 'cash'
-def strategy__closedtrades (vm):
+def strategy__closedtrades (vm=None):
     raise NotImplementedError
-def strategy__commission__cash_per_contract (vm):
+def strategy__commission__cash_per_contract (vm=None):
     return 'cash_per_contract'
-def strategy__commission__cash_per_order (vm):
+def strategy__commission__cash_per_order (vm=None):
     return 'cash_per_order'
-def strategy__commission__percent (vm):
+def strategy__commission__percent (vm=None):
     return 'percent'
-def strategy__direction_all (vm):
+def strategy__direction_all (vm=None):
     raise NotImplementedError
-def strategy__direction_long (vm):
+def strategy__direction_long (vm=None):
     raise NotImplementedError
-def strategy__direction_short (vm):
+def strategy__direction_short (vm=None):
     raise NotImplementedError
-def strategy__equity (vm):
+def strategy__equity (vm=None):
     raise NotImplementedError
-def strategy__eventrades (vm):
+def strategy__eventrades (vm=None):
     raise NotImplementedError
-def strategy__fixed (vm):
+def strategy__fixed (vm=None):
     return 'fixed'
-def strategy__grossloss (vm):
+def strategy__grossloss (vm=None):
     raise NotImplementedError
-def strategy__grossprofit (vm):
+def strategy__grossprofit (vm=None):
     raise NotImplementedError
-def strategy__initial_capital (vm):
+def strategy__initial_capital (vm=None):
     raise NotImplementedError
-def strategy__long (vm):
+def strategy__long (vm=None):
     return True
-def strategy__losstrades (vm):
+def strategy__losstrades (vm=None):
     raise NotImplementedError
-def strategy__max_contracts_held_all (vm):
+def strategy__max_contracts_held_all (vm=None):
     raise NotImplementedError
-def strategy__max_contracts_held_long (vm):
+def strategy__max_contracts_held_long (vm=None):
     raise NotImplementedError
-def strategy__max_drawdown (vm):
+def strategy__max_drawdown (vm=None):
     raise NotImplementedError
-def strategy__netprofit (vm):
+def strategy__netprofit (vm=None):
     raise NotImplementedError
-def strategy__oca__cancel (vm):
+def strategy__oca__cancel (vm=None):
     raise NotImplementedError
-def strategy__oca__none (vm):
+def strategy__oca__none (vm=None):
     raise NotImplementedError
-def strategy__oca__reduce (vm):
+def strategy__oca__reduce (vm=None):
     raise NotImplementedError
-def strategy__openprofit (vm):
+def strategy__openprofit (vm=None):
     raise NotImplementedError
-def strategy__opentrades (vm):
+def strategy__opentrades (vm=None):
     raise NotImplementedError
-def strategy__percent_of_equity (vm):
+def strategy__percent_of_equity (vm=None):
     return 'percent_of_equity'
-def strategy__position_avg_price (vm):
+def strategy__position_avg_price (vm=None):
     raise NotImplementedError
-def strategy__position_entry_name (vm):
+def strategy__position_entry_name (vm=None):
     raise NotImplementedError
-def strategy__position_size (vm):
+def strategy__position_size (vm=None):
     raise NotImplementedError
-def strategy__short (vm):
+def strategy__short (vm=None):
     return False
-def strategy__wintrades (vm):
+def strategy__wintrades (vm=None):
     raise NotImplementedError
 
-def string (vm):
+def string (vm=None):
     return 'string'
 
-def sunday (vm):
+def sunday (vm=None):
     raise NotImplementedError
 
-def symbol (vm):
+def symbol (vm=None):
     return 'symbol'
 
-def syminfo__mintick (vm):
+def syminfo__mintick (vm=None):
     raise NotImplementedError
-def syminfo__pointvalue (vm):
+def syminfo__pointvalue (vm=None):
     raise NotImplementedError
-def syminfo__prefix (vm):
+def syminfo__prefix (vm=None):
     raise NotImplementedError
-def syminfo__root (vm):
+def syminfo__root (vm=None):
     raise NotImplementedError
-def syminfo__session (vm):
+def syminfo__session (vm=None):
     raise NotImplementedError
-def syminfo__timezone (vm):
+def syminfo__timezone (vm=None):
     raise NotImplementedError
 
-def teal (vm):
+def teal (vm=None):
     return '#008080'
 
-def thursday (vm):
+def thursday (vm=None):
     raise NotImplementedError
 
-def ticker (vm):
+def ticker (vm=None):
     raise NotImplementedError
-def tickerid (vm):
+def tickerid (vm=None):
     return vm.market.tickerid()
 
-def time (vm):
+def time (vm=None):
     return vm.market.bartimestamp()
-def timenow (vm):
+def timenow (vm=None):
     raise NotImplementedError
 
-def tr (vm):
+def tr (vm=None):
     high = np.array(vm.market.high(), dtype='f8')
     low  = np.array(vm.market.low(),  dtype='f8')
     close = np.array(vm.market.close(), dtype='f8')
     return ta.TRANGE(high, low, close).tolist()
 
-def tuesday (vm):
+def tuesday (vm=None):
     raise NotImplementedError
 
-def volume (vm):
+def volume (vm=None):
     raise NotImplementedError
 
-def vwap (vm):
+def vwap (vm=None):
     raise NotImplementedError
 
-def wednesday (vm):
+def wednesday (vm=None):
     raise NotImplementedError
 
-def weekofyear (vm):
+def weekofyear (vm=None):
     raise NotImplementedError
 
-def white (vm):
+def white (vm=None):
     return '#000000'
 
-def year (vm):
+def year (vm=None):
     raise NotImplementedError
 
-def yellow (vm):
+def yellow (vm=None):
     return '#ffff00'
