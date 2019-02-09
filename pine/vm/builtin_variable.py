@@ -67,6 +67,8 @@ def circles (vm=None):
     return STYLE_CIRCLES
 
 def close (vm=None):
+    if vm is None:
+        return None
     return bseries(vm.market.close(), 'close')
 
 def columns (vm=None):
@@ -134,6 +136,8 @@ def green (vm=None):
     return '#008000'
 
 def high (vm=None):
+    if vm is None:
+        return None
     return bseries(vm.market.high(), 'high')
 
 def histogram (vm=None):
@@ -187,6 +191,8 @@ def location__top (vm=None):
     return 'top'
 
 def low (vm=None):
+    if vm is None:
+        return None
     return bseries(vm.market.low(), 'low')
 
 def maroon (vm=None):
@@ -211,6 +217,8 @@ def navy (vm=None):
     return '#000080'
 
 def ohlc4 (vm=None):
+    if vm is None:
+        return None
     o = vm.market.open()
     h = vm.market.high()
     l = vm.market.low()
@@ -224,12 +232,16 @@ def olive (vm=None):
     raise NotImplementedError
 
 def open (vm=None):
+    if vm is None:
+        return None
     return bseries(vm.market.open(), 'open')
 
 def orange (vm=None):
     return '#ff7f00'
 
 def period (vm=None):
+    if vm is None:
+        return None
     return vm.market.period()
 
 def purple (vm=None):
@@ -405,14 +417,20 @@ def thursday (vm=None):
 def ticker (vm=None):
     raise NotImplementedError
 def tickerid (vm=None):
+    if vm is None:
+        return None
     return vm.market.tickerid()
 
 def time (vm=None):
+    if vm is None:
+        return None
     return vm.market.bartimestamp()
 def timenow (vm=None):
     raise NotImplementedError
 
 def tr (vm=None):
+    if vm is None:
+        return None
     high = np.array(vm.market.high(), dtype='f8')
     low  = np.array(vm.market.low(),  dtype='f8')
     close = np.array(vm.market.close(), dtype='f8')
