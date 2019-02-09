@@ -1,0 +1,49 @@
+//@version=3
+study(title="yutas_StochRSI", shorttitle="Y_StochRSI")
+source = close
+
+//-----------------------------
+// StochRSI用の設定
+//-----------------------------
+useCurrentRes_str = input(true, title="現在のチャートのタイムフレームを使用(STR)")
+resCustom_str = input(title="異なるタイムフレームを使用。 上のチェックボックスをオフにします", type=resolution, defval="1")
+smoothK = input(3,minval=1, title="%K")
+smoothD = input(3,minval=1, title="日")
+lengthRSI = input(14, minval=1)
+lengthStoch = input(14, minval=1, title="ストキャス期間")
+strss = input(true, title="・strが交差する時にサインを表示")
+os = input(25,minval=1, title="上の帯")
+ob = input(75,minval=1, title="下の帯")
+rsi1 = rsi(source, lengthRSI)
+
+//-------------------------時間足の判別-------------------------//
+res_str = useCurrentRes_str ? period : resCustom_str
+//----------------------------ここまで----------------------------//
+
+//-----------------------------
+// StochRSIの処理
+//-----------------------------
+k = sma(stoch(rsi1, rsi1, rsi1, lengthStoch), smoothK)
+d = sma(k, smoothD)
+
+// 設定した時間足に分解
+outk = security(tickerid, res_str, k)
+outd = security(tickerid, res_str, d)
+
+h0 = hline(os)
+h1 = hline(ob)
+//-----------------------------
+// 指標の表示（Stochastic）
+//-----------------------------
+
+hline(os,color=silver, title="上の帯")
+hline(ob,color=silver, title="下の帯")
+
+plot(outk, color=blue,title="k")
+plot(outd, color=red,title="日",linewidth=1)
+
+STRcircleYPosition = outk
+plot(strss and cross(outk, outd) and outk >= outd and outk ? STRcircleYPosition : na, title="STR GC", style=circles, linewidth=5, color=blue)
+plot(strss and cross(outk, outd) and outk < outd and outk ? STRcircleYPosition : na, title="STR DC", style=circles, linewidth=5, color=red)
+
+fill(h0, h1, color=#9517F2, transp=80, title='背景')
