@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import copy
 import numpy
 
 from ..base import PineError
@@ -12,20 +13,28 @@ class Node (object):
         self.children = []
         self.args = []
         self.lno = None
+        self.to_dump = True
 
     def __str__ (self):
         me = "{0}: {1}".format(self.__class__.__name__, ", ".join([str(a) for a in self.args]))
-        ln = [me]
-        for n in self.children:
-            for l in str(n).splitlines():
-                ln.append('  ' + l)
-        return "\n".join(ln)
+        if self.to_dump:
+            self.to_dump = False
+            ln = [me]
+            for n in self.children:
+                for l in str(n).splitlines():
+                    ln.append('  ' + l)
+            return "\n".join(ln)
+        else:
+            return me + " ..."
 
-    def eval (self, vm):
-        v = None
-        for c in self.children:
-            v = c.eval(vm)
-        return v
+    def _reset_dump (self):
+        self.to_dump = True
+        for n in self.children:
+            n._reset_dump()
+        return self
+
+    def dump (self):
+        print(self._reset_dump())
 
     def append (self, node):
         self.children.append(node)
@@ -35,6 +44,40 @@ class Node (object):
         self.lno = lineno
         return self
 
+    def expand_func (self, ctxt):
+        self.children = [n.expand_func(ctxt) for n in self.children]
+        self.children = [n for n in self.children if n is not None]
+        return self
+
+    def resolve_var (self, ctxt):
+        self.children = [n.resolve_var(ctxt) for n in self.children]
+        return self
+
+    def eval (self, vm):
+        v = None
+        for c in self.children:
+            v = c.eval(vm)
+        return v
+
+class LiteralNode (Node):
+    def __init__ (self, literal):
+        super().__init__()
+        if isinstance(literal, Node):
+            self.children = literal.children.copy()
+        else:
+            self.args.append(literal)
+
+    def eval (self, vm):
+        if self.args:
+            return self.args[0]
+        else:
+            return [e.eval(vm) for e in self.children]
+
+class ExprNode (Node):
+
+    def __init__ (self, node):
+        super().__init__()
+        self.append(node)
 
 class OrNode (Node):
 
@@ -145,22 +188,69 @@ class UniOpNode (Node):
             return -rhv
         raise PineError('invalid unary op: {}'.format(op))
 
+class BuiltinVarRefNode (Node):
+    def __init__ (self, ident, func):
+        super().__init__()
+        self.args.append(ident)
+        self.args.append(func)
+
 class VarRefNode (Node):
     def __init__ (self, ident):
         super().__init__()
         self.args.append(ident)
 
+    def resolve_var (self, ctxt):
+        ident = self.args[0]
+        v = ctxt.lookup_variable(ident)
+        if not isinstance(v, Node): # built-in variable
+            v_ = v()
+            if v_ is None:
+                return BuiltinVarRefNode(ident, v).lineno(self.lno)
+            else:
+                return LiteralNode(v_).lineno(self.lno)
+        # User-defined var
+        self.append(v)
+        return self
+
     def eval (self, vm):
-        return vm.lookup_variable(self.args[0])
+        raise NotImplementedError
+
+class KwArgsNode (Node):
+
+    def __init__ (self, kwargs):
+        super().__init__()
+        if kwargs:
+            for k, n in kwargs.items():
+                self.args.append(k)
+                self.append(n)
+
+    def eval (self, vm):
+        raise NotImplementedError
 
 class FunCallNode (Node):
     def __init__ (self, fname, args):
         super().__init__()
         self.args.append(fname)
-        self.append(args[0])
-        self.append(args[1])
+        aargs = args[0]
+        if not isinstance(aargs, Node):
+            aargs = Node()
+        self.append(aargs)
+        kwargs = args[1]
+        if not isinstance(kwargs, Node):
+            kwargs = KwArgsNode(kwargs)
+        self.append(kwargs)
+
+    def expand_func (self, ctxt):
+        fname = self.args[0]
+        func = ctxt.lookup_function(fname)
+
+        if isinstance(func, Node):  # user-defined
+            return UserFuncCallNode(fname, self.children, copy.deepcopy(func))
+        else:
+            return BuiltinFunCallNode(fname, self.children, func)
 
     def eval (self, vm):
+        raise NotImplementedError
         fname = self.args[0]
         args, kwargs = self.children
         if args:
@@ -175,28 +265,62 @@ class FunCallNode (Node):
             _kwargs = None
         return vm.func_call(fname, _args, _kwargs)
 
-class LiteralNode (Node):
-    def __init__ (self, literal):
+class BuiltinFunCallNode (FunCallNode):
+
+    def __init__ (self, fname, args, func):
+        super().__init__(fname, args)
+        self.func = func
+
+class UserFuncCallNode (Node):
+
+    # args: fname, [arg_id, ...]
+    # children: arg_var_defs, body
+    def __init__ (self, fname, args, node):
         super().__init__()
-        if isinstance(literal, Node):
-            self.children = literal.children.copy()
-        else:
-            self.args.append(literal)
+        self.args.append(fname)
 
-    def eval (self, vm):
-        if self.args:
-            return self.args[0]
-        else:
-            return [e.eval(vm) for e in self.children]
+        arg_ids = node.args[1].children
+        self.args.append(arg_ids)
 
+        argdef = Node()
+        argn = args[0]  # FIXME kwarg should be denied.
+        for v, n in zip(arg_ids, argn.children):
+            argdef.append(VarDefNode(v, n, True).lineno(node.lno))
 
-class IfNode (Node):
+        self.append(argdef)
+        self.append(node.children[0])
+
+    def resolve_var (self, ctxt):
+        try:
+            ctxt.push_scope()
+            return super().resolve_var(ctxt)
+        finally:
+            ctxt.pop_scope()
+
+class IfNode (ExprNode):
     def __init__ (self, condition, ifclause, elseclause=None):
-        super().__init__()
-        self.append(condition)
+        super().__init__(condition)
         self.append(ifclause)
         if elseclause:
             self.append(elseclause)
+
+    def resolve_var (self, ctxt):
+        # condition
+        self.children[0] = self.children[0].resolve_var(ctxt)
+        # true
+        try:
+            ctxt.push_scope()
+            self.children[1] = self.children[1].resolve_var(ctxt)
+        finally:
+            ctxt.pop_scope()
+        # false
+        if len(self.children) > 2:
+            try:
+                ctxt.push_scope()
+                self.children[2] = self.children[2].resolve_var(ctxt)
+            finally:
+                ctxt.pop_scope()
+        return self
 
     def eval (self, vm):
         vm.push_scope()
@@ -233,14 +357,22 @@ class IfNode (Node):
         finally:
             vm.pop_scope()
 
-class ForNode (Node):
+class ForNode (ExprNode):
+
     def __init__ (self, var_def, to_clause, stmts_block):
-        super().__init__()
-        self.append(var_def)
+        super().__init__(var_def)
         self.append(to_clause)
         self.append(stmts_block)
 
+    def resolve_var (self, ctxt):
+        try:
+            ctxt.push_scope()
+            return super().resolve_var(ctxt)
+        finally:
+            ctxt.pop_scope()
+
     def eval (self, vm):
+        raise NotImplementedError
         var_def, to_node, body = self.children
         counter_name = var_def.name()
         retval = None
@@ -271,26 +403,50 @@ class ForNode (Node):
         finally:
             vm.pop_scope()
 
-class FunDefNode (Node):
-    def __init__ (self, fname, args, body):
+class DefNode (Node):
+
+    def __init__ (self, name):
         super().__init__()
-        self.args.append(fname)
+        self.args.append(name)
+
+    @property
+    def name (self):
+        return self.args[0]
+
+class FunDefNode (DefNode):
+    def __init__ (self, fname, args, body):
+        super().__init__(fname)
         self.args.append(args)
         self.append(body)
+
+    def expand_func (self, ctxt):
+        ctxt.register_function(self)
+        return None
+
+    def resolve_var (self, ctxt):
+        raise NotImplementedError
 
     def eval (self, vm):
         vm.register_function(self.args[0], self.args[1].children, self.children[0])
 
-class VarDefNode (Node):
-    def __init__ (self, ident, expr):
-        super().__init__()
-        self.args.append(ident)
+class VarDefNode (DefNode):
+    def __init__ (self, ident, expr, volatile=False):
+        super().__init__(ident)
+        self.args.append(False)     # mutable
+        self.args.append(volatile)  # volatile
+        self.args.append(None)      # type
         self.append(expr)
 
-    def name (self):
-        return self.args[0]
+    def resolve_var (self, ctxt):
+        super().resolve_var(ctxt)
+        ctxt.define_variable(self)
+        return self
+
+    def make_mutable (self):
+        self.args[1] = True
 
     def eval (self, vm):
+        raise NotImplementedError
         rhv = self.children[0].eval(vm)
         vm.define_variable(self.args[0], rhv)
         return rhv
@@ -301,7 +457,17 @@ class VarAssignNode (Node):
         self.args.append(ident)
         self.append(expr)
 
+    def resolve_var (self, ctxt):
+        ident = self.args[0]
+        v = ctxt.lookup_variable(ident)
+        if not isinstance(v, Node):
+            raise PineError('cannot assign to built-in variable: {}'.format(ident))
+        v.make_mutable()
+        self.children.insert(0, v)
+        return self
+
     def eval (self, vm):
+        raise NotImplementedError
         rhv = self.children[0].eval(vm)
         vm.assign_variable(self.args[0], rhv)
         return rhv

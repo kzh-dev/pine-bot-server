@@ -123,7 +123,7 @@ def p_simple_expression (p):
     '''simple_expression : or_expr
                          | or_expr COND simple_expression COND_ELSE simple_expression'''
     if len(p) == 2:
-        p[0] = p[1]
+        p[0] = vm.ExprNode(p[1])
     else:
         p[0] = vm.IfNode(p[1], p[3], p[5]).lineno(p.lineno(2))
 

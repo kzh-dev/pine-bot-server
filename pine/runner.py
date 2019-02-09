@@ -3,6 +3,7 @@
 from .preprocess import preprocess
 from .parser import parse
 from .vm.vm import VM
+from .vm.compile import FuncExpander, VarResolver
 from .market.base import Market
 
 if __name__ == '__main__':
@@ -11,5 +12,8 @@ if __name__ == '__main__':
         data = preprocess(f.read())
         node = parse(data)
         market = Market()
-        vm = VM(market)
-        vm.eval_node(node)
+
+        node = FuncExpander().execute(node)
+        #node.dump()
+        node = VarResolver().execute(node)
+        node.dump()
