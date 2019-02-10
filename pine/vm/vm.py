@@ -4,7 +4,7 @@ from . import builtin_function
 from . import builtin_variable
 from ..base import PineError
 
-from .helper import Series, BuiltinSeries
+from .helper import Series, BuiltinSeries, bseries
 
 
 class AnnotationCollector (object):
@@ -30,7 +30,7 @@ class AnnotationCollector (object):
         return (self.meta, self.inputs, self.securities)
 
 
-class VM (object):
+class BaseVM (object):
 
     def __init__ (self, market=None):
         self.market = market
@@ -55,7 +55,7 @@ class VM (object):
         raise NotImplementedError
 
 
-class InputScanVM (VM):
+class InputScanVM (BaseVM):
 
     def input (self, vm, args, kwargs):
         defval, title, typ,\
@@ -92,7 +92,25 @@ class InputScanVM (VM):
     def run (self):
         return [n.evaluate(self) for n in self.inputs]
 
-class RenderVM (VM):
+
+class VM (BaseVM):
+
+    def load_node (self, node):
+        super().load_node(node)
+
+        # setup registers for series
+        self.registers = {}
+        # timestamps
+        self.size = self.market.size
+        self.timestamps = bseries(self.market.timestamps, 'timestamp')
+        # init current clock
+        self.i = 0
+
+        ## prescan node
+        self.node.prescan(self)
+
+
+class RenderVM (BaseVM):
 
     def __init__ (self, market, inputs):
         super().__init__(market)

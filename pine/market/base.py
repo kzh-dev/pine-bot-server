@@ -7,15 +7,16 @@ class Market (object):
         self.symbol = symbol
         self.resolution = resolution
 
+    def size (self):
+        return 1
+    def timestamp (self):
+        return [0]
     def close (self):
         return [0.0]
-
     def open (self):
         return [0.0]
-
     def high (self):
         return [0.0]
-
     def low (self):
         return [0.0]
 

@@ -10,9 +10,8 @@ from .base import Market
 
 class BitMexMarket (Market):
 
-    def __init__ (self, symbol, resolution):
+    def __init__ (self, symbol='XBTUSD', resolution=60):
         super().__init__('BITMEX', symbol, resolution)
-        count = 500
 
         now = datetime.utcnow()
         unixtime = calendar.timegm(now.utctimetuple())
@@ -27,6 +26,10 @@ class BitMexMarket (Market):
 
         self.data = requests.get(url).json()
 
+    def size (self):
+        return len(self.data['t'])
+    def timestamps (self):
+        return self.data['t']
     def open (self):
         return self.data['o']
     def high (self):

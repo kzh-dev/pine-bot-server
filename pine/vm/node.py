@@ -63,6 +63,12 @@ class Node (object):
             v = c.evaluate(vm)
         return v
 
+    def prescan (self, vm):
+        v = None
+        for c in self.children:
+            v = c.evaluate(vm)
+        return v
+
 class LiteralNode (Node):
     def __init__ (self, literal):
         super().__init__()
