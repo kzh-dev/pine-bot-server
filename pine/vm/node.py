@@ -363,40 +363,35 @@ class IfNode (ExprNode):
         return self
 
     def evaluate (self, vm):
-        raise NotImplementedError
-        vm.push_scope()
-        try:
-            c =  self.children[0].evaluate(vm)
-            s1 = self.children[1].evaluate(vm)
-            if len(self.children) > 2:
-                s2 = self.children[2]
+        c =  self.children[0].evaluate(vm)
+        s1 = self.children[1].evaluate(vm)
+        if len(self.children) > 2:
+            s2 = self.children[2]
+        else:
+            s2 = None
+
+        # FIXME
+        if isinstance(c, Series):
+            if isinstance(s1, Series):
+                s1 = s1.copy()
             else:
-                s2 = None
+                s1 = Series([s1] * len(c))
+            if s2 is not None:
+                s2 = s2.evaluate(vm)
+                if not isinstance(s2, Series):
+                    s2 = Series([s2] * len(c))
+            else:
+                s2 = Series([NaN] * len(c))
 
-            # FIXME
-            if isinstance(c, Series):
-                if isinstance(s1, Series):
-                    s1 = s1.copy()
-                else:
-                    s1 = Series([s1] * len(c))
-                if s2 is not None:
-                    s2 = s2.evaluate(vm)
-                    if not isinstance(s2, Series):
-                        s2 = Series([s2] * len(c))
-                else:
-                    s2 = Series([NaN] * len(c))
-
-                for i in range(0, len(c)):
-                    if not bool(c[i]):
-                        s1[i] = s2[i]
+            for i in range(0, len(c)):
+                if not bool(c[i]):
+                    s1[i] = s2[i]
+            return s1
+        else:
+            if bool(c):
                 return s1
-            else:
-                if bool(c):
-                    return s1
-                elif s2:
-                    return s2.evaluate(vm)
-        finally:
-            vm.pop_scope()
+            elif s2:
+                return s2.evaluate(vm)
 
 class ForNode (ExprNode):
 
@@ -413,36 +408,31 @@ class ForNode (ExprNode):
             ctxt.pop_scope()
 
     def evaluate (self, vm):
-        raise NotImplementedError
         var_def, to_node, body = self.children
         counter_name = var_def.name()
         retval = None
 
-        vm.push_scope()
-        try:
-            counter_init = var_def.evaluate(vm)
-            counter_last = to_node.evaluate(vm)
-            if counter_init <= counter_last:
-                op = '>'
-            else:
-                op = '<'
-                
-            while True:
-                # TODO continue, break
-                retval = body.evaluate(vm)
+        counter_init = var_def.evaluate(vm)
+        counter_last = to_node.evaluate(vm)
+        if counter_init <= counter_last:
+            op = '>'
+        else:
+            op = '<'
+            
+        while True:
+            # TODO continue, break
+            retval = body.evaluate(vm)
 
-                counter = vm.lookup_variable(counter_name)
-                if op == '>':
-                    counter += 1
-                    if counter > counter_last:
-                        break
-                else:
-                    counter -= 1
-                    if counter < counter_last:
-                        break
-                vm.assign_variable(counter_name, counter)
-        finally:
-            vm.pop_scope()
+            counter = vm.lookup_variable(counter_name)
+            if op == '>':
+                counter += 1
+                if counter > counter_last:
+                    break
+            else:
+                counter -= 1
+                if counter < counter_last:
+                    break
+            vm.assign_variable(counter_name, counter)
 
 class DefNode (Node):
 

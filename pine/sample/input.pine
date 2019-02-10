@@ -9,3 +9,9 @@ k2 = 10
 for i = 0 to 10
     a := a[1] + i
 input(title="mutable", defval=a)
+
+x = if a > 0.0
+    1
+else
+    0
+input(title="ifval", defval=x)
