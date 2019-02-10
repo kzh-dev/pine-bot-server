@@ -53,10 +53,14 @@ class Node (object):
         self.children = [n.resolve_var(ctxt) for n in self.children]
         return self
 
-    def eval (self, vm):
+    def collect_anotation (self, ctxt):
+        for n in self.children:
+            n.collect_anotation(ctxt)
+
+    def evaluate (self, vm):
         v = None
         for c in self.children:
-            v = c.eval(vm)
+            v = c.evaluate(vm)
         return v
 
 class LiteralNode (Node):
@@ -67,11 +71,11 @@ class LiteralNode (Node):
         else:
             self.args.append(literal)
 
-    def eval (self, vm):
+    def evaluate (self, vm):
         if self.args:
             return self.args[0]
         else:
-            return [e.eval(vm) for e in self.children]
+            return [e.evaluate(vm) for e in self.children]
 
 class ExprNode (Node):
 
@@ -81,10 +85,10 @@ class ExprNode (Node):
 
 class OrNode (Node):
 
-    def eval (self, vm):
+    def evaluate (self, vm):
         r = False
         for n in self.children:
-            v = n.eval(vm)
+            v = n.evaluate(vm)
             if not isinstance(v, Series):
                 if bool(v):
                     return v
@@ -96,10 +100,10 @@ class OrNode (Node):
 
 class AndNode (Node):
 
-    def eval (self, vm):
+    def evaluate (self, vm):
         r = True
         for n in self.children:
-            v = n.eval(vm)
+            v = n.evaluate(vm)
             if not isinstance(v, Series):
                 if not bool(v):
                     return v
@@ -119,13 +123,13 @@ class BinOpNode (Node):
         self.append(a)
         self.append(b)
 
-    def eval (self, vm):
+    def evaluate (self, vm):
         operator = self.args[0]
-        a = self.children[0].eval(vm)
-        b = self.children[1].eval(vm)
+        a = self.children[0].evaluate(vm)
+        b = self.children[1].evaluate(vm)
 
         if operator == r'[':
-            return self.eval_index_access(a, b)
+            return self.index_access(a, b)
         
         if operator == r'==':
             op = lambda a,b: a == b
@@ -155,7 +159,7 @@ class BinOpNode (Node):
         # FIXME need type check
         return op(a, b)
         
-    def eval_index_access (self, a, b):
+    def index_access (self, a, b):
         if not isinstance(a, Series):
             raise PineError('cannot access by index for: {}'.format(a))
         if not isinstance(b, int):
@@ -177,9 +181,9 @@ class UniOpNode (Node):
         self.args.append(op)
         self.append(a)
 
-    def eval (self, vm):
+    def evaluate (self, vm):
         op = self.args[0]
-        rhv = self.children[0].eval(vm)
+        rhv = self.children[0].evaluate(vm)
         if op == 'not':
             return not bool(rhv)
         if op == '+':
@@ -194,6 +198,10 @@ class BuiltinVarRefNode (Node):
         self.args.append(ident)
         self.args.append(func)
 
+    def evaluate (self, vm):
+        func = self.args[1]
+        return func(vm)
+
 class VarRefNode (Node):
     def __init__ (self, ident):
         super().__init__()
@@ -203,7 +211,10 @@ class VarRefNode (Node):
         ident = self.args[0]
         v = ctxt.lookup_variable(ident)
         if not isinstance(v, Node): # built-in variable
-            v_ = v()
+            try:
+                v_ = v()
+            except NotImplementedError:
+                v_ = None
             if v_ is None:
                 return BuiltinVarRefNode(ident, v).lineno(self.lno)
             else:
@@ -211,9 +222,6 @@ class VarRefNode (Node):
         # User-defined var
         self.append(v)
         return self
-
-    def eval (self, vm):
-        raise NotImplementedError
 
 class KwArgsNode (Node):
 
@@ -224,8 +232,11 @@ class KwArgsNode (Node):
                 self.args.append(k)
                 self.append(n)
 
-    def eval (self, vm):
-        raise NotImplementedError
+    def evaluate (self, vm):
+        kws = {}
+        for k, n in zip(self.args, self.children):
+            kws[k] = n.evaluate(vm)
+        return kws
 
 class FunCallNode (Node):
     def __init__ (self, fname, args):
@@ -240,6 +251,10 @@ class FunCallNode (Node):
             kwargs = KwArgsNode(kwargs)
         self.append(kwargs)
 
+    @property
+    def fname (self):
+        return self.args[0]
+
     def expand_func (self, ctxt):
         fname = self.args[0]
         func = ctxt.lookup_function(fname)
@@ -247,29 +262,48 @@ class FunCallNode (Node):
         if isinstance(func, Node):  # user-defined
             return UserFuncCallNode(fname, self.children, copy.deepcopy(func))
         else:
-            return BuiltinFunCallNode(fname, self.children, func)
+            if fname == 'study' or fname == 'strategy':
+                cls = MetaInfoFuncNode
+            elif fname == 'input':
+                cls = InputFuncNode
+            elif fname == 'security':
+                cls = SecurityFuncNode
+            else:
+                cls = BuiltinFunCallNode
+            return cls(fname, self.children, func)
 
-    def eval (self, vm):
+    def evaluate (self, vm):
         raise NotImplementedError
-        fname = self.args[0]
-        args, kwargs = self.children
-        if args:
-            _args = [a.eval(vm) for a in args.children]
-        else:
-            _args = None
-        if kwargs:
-            _kwargs = {}
-            for k, n in kwargs.items():
-                _kwargs[k] = n.eval(vm)
-        else:
-            _kwargs = None
-        return vm.func_call(fname, _args, _kwargs)
 
 class BuiltinFunCallNode (FunCallNode):
 
     def __init__ (self, fname, args, func):
         super().__init__(fname, args)
         self.func = func
+
+    def evaluate (self, vm):
+        fn = self.fname
+        cb = self.func
+        if hasattr(vm, fn):
+            cb = getattr(vm, fn)
+            
+        args, kwargs = self.children
+        _args = [a.evaluate(vm) for a in args.children]
+        _kwargs = kwargs.evaluate(vm)
+        return cb(vm, _args, _kwargs)
+
+class MetaInfoFuncNode (BuiltinFunCallNode):
+    def collect_anotation (self, ctxt):
+        ctxt.register_meta(self)
+
+class InputFuncNode (BuiltinFunCallNode):
+    def collect_anotation (self, ctxt):
+        ctxt.register_input(self)
+
+class SecurityFuncNode (BuiltinFunCallNode):
+    def collect_anotation (self, ctxt):
+        ctxt.register_security(self)
+
 
 class UserFuncCallNode (Node):
 
@@ -322,11 +356,12 @@ class IfNode (ExprNode):
                 ctxt.pop_scope()
         return self
 
-    def eval (self, vm):
+    def evaluate (self, vm):
+        raise NotImplementedError
         vm.push_scope()
         try:
-            c =  self.children[0].eval(vm)
-            s1 = self.children[1].eval(vm)
+            c =  self.children[0].evaluate(vm)
+            s1 = self.children[1].evaluate(vm)
             if len(self.children) > 2:
                 s2 = self.children[2]
             else:
@@ -339,7 +374,7 @@ class IfNode (ExprNode):
                 else:
                     s1 = Series([s1] * len(c))
                 if s2 is not None:
-                    s2 = s2.eval(vm)
+                    s2 = s2.evaluate(vm)
                     if not isinstance(s2, Series):
                         s2 = Series([s2] * len(c))
                 else:
@@ -353,7 +388,7 @@ class IfNode (ExprNode):
                 if bool(c):
                     return s1
                 elif s2:
-                    return s2.eval(vm)
+                    return s2.evaluate(vm)
         finally:
             vm.pop_scope()
 
@@ -371,7 +406,7 @@ class ForNode (ExprNode):
         finally:
             ctxt.pop_scope()
 
-    def eval (self, vm):
+    def evaluate (self, vm):
         raise NotImplementedError
         var_def, to_node, body = self.children
         counter_name = var_def.name()
@@ -379,8 +414,8 @@ class ForNode (ExprNode):
 
         vm.push_scope()
         try:
-            counter_init = var_def.eval(vm)
-            counter_last = to_node.eval(vm)
+            counter_init = var_def.evaluate(vm)
+            counter_last = to_node.evaluate(vm)
             if counter_init <= counter_last:
                 op = '>'
             else:
@@ -388,7 +423,7 @@ class ForNode (ExprNode):
                 
             while True:
                 # TODO continue, break
-                retval = body.eval(vm)
+                retval = body.evaluate(vm)
 
                 counter = vm.lookup_variable(counter_name)
                 if op == '>':
@@ -426,8 +461,8 @@ class FunDefNode (DefNode):
     def resolve_var (self, ctxt):
         raise NotImplementedError
 
-    def eval (self, vm):
-        vm.register_function(self.args[0], self.args[1].children, self.children[0])
+    def evaluate (self, vm):
+        raise NotImplementedError
 
 class VarDefNode (DefNode):
     def __init__ (self, ident, expr, volatile=False):
@@ -445,12 +480,6 @@ class VarDefNode (DefNode):
     def make_mutable (self):
         self.args[1] = True
 
-    def eval (self, vm):
-        raise NotImplementedError
-        rhv = self.children[0].eval(vm)
-        vm.define_variable(self.args[0], rhv)
-        return rhv
-
 class VarAssignNode (Node):
     def __init__ (self, ident, expr):
         super().__init__()
@@ -466,7 +495,7 @@ class VarAssignNode (Node):
         self.children.insert(0, v)
         return self
 
-    def eval (self, vm):
+    def evaluate (self, vm):
         raise NotImplementedError
         rhv = self.children[0].eval(vm)
         vm.assign_variable(self.args[0], rhv)

@@ -12,7 +12,8 @@ def landing ():
 from pine.preprocess import preprocess
 from pine.parser import parse
 from pine.base import PineError
-from pine.vm.vm import VM, InputScanner, RenderVM
+from pine.vm.vm import InputScanVM, RenderVM
+from pine.vm.compile import compile_pine
 from pine.market.base import Market
 from pine.market.bitmex import BitMexMarket
 
@@ -25,15 +26,13 @@ import sys, traceback
 def evaluate ():
     code = request.form['code']
     try:
-        data = preprocess(code)
-        node = parse(data)
-
+        node = compile_pine(code)
         # Exract input
-        market = Market()
-        vm = InputScanner(market)
-        vm.eval_node(node)
+        vm = InputScanVM(Market())
+        vm.load_node(node)
+        inputs = vm.run()
         pine_title = vm.title
-        forms = [convert_to_form(i) for i in vm.inputs]
+        forms = [convert_to_form(i) for i in inputs]
         return render_template('input_forms.html', title=pine_title, forms=forms, code=code)
 
     except PineError as e:

@@ -41,6 +41,7 @@ class FuncExpander (object):
     def execute (self, node):
         return node.expand_func(self)
 
+
 class VarResolver (object):
 
     def __init__ (self):
@@ -67,3 +68,16 @@ class VarResolver (object):
     def execute (self, node):
         return node.resolve_var(self)
 
+
+def compile_node (node):
+    node = FuncExpander().execute(node)
+    node = VarResolver().execute(node)
+    return node
+
+from ..preprocess import preprocess
+from ..parser import parse
+def compile_pine (data):
+    prepped = preprocess(data)
+    node = parse(prepped)
+    compiled = compile_node(node)
+    return compiled

@@ -42,7 +42,16 @@ def _expand_args (args, kwargs, specs):
         args_expanded.append(a)
 
     return args_expanded
+
+def _expand_args_as_dict (args, kwargs, specs):
+    expanded = _expand_args(args, kwargs, specs)
+
+    args_ = {}
+    for v, spec in zip(expanded, specs):
+        args_[spec[0]] = v
+    return args_
     
+
 def _ta_ma (args, kwargs, func):
     source, length = _expand_args(args, kwargs,
         (('source', Series, True), ('length', int, True)))
@@ -424,15 +433,7 @@ def stoch (vm, args, kwargs):
     return series_np(fk)
 
 def strategy (vm, args, kwargs):
-    title, stitle, overlay,\
-    precision, scale,\
-    pyramiding,\
-    calc_on_order_fills, calc_on_every_click,\
-    max_bars_back,\
-    backtest_fill_limits_assumption,\
-    default_qty_type, default_qty_value,\
-    currency, linktoseries, slippage,\
-    commision_type, commision_value = _expand_args(args, kwargs,
+    vm.meta = _expand_args_as_dict(args, kwargs,
         (
             ('title', str, True),
             ('shorttitle', str, False),
@@ -453,9 +454,6 @@ def strategy (vm, args, kwargs):
             ('commision_value', float, False),
         )
     )
-    vm.title = title
-    vm.short_title = stitle
-    vm.overlay = overlay
     return None
 
 def strategy__cancel (vm, args, kwargs):
@@ -514,8 +512,7 @@ def strategy__risk__max_position_size (vm, args, kwargs):
     raise NotImplementedError
 
 def study (vm, args, kwargs):
-    title, stitle, overlay,\
-    precision, scale, max_bars_back, linktoseries = _expand_args(args, kwargs,
+    vm.meta = _expand_args_as_dict(args, kwargs,
         (
             ('title', str, True),
             ('shorttitle', str, False),
@@ -526,9 +523,6 @@ def study (vm, args, kwargs):
             ('linktoseries', bool, False),
         )
     )
-    vm.title = title
-    vm.short_title = stitle
-    vm.overlay = overlay
     return None
 
 def sum (vm, args, kwargs):
