@@ -1,0 +1,11 @@
+study("input test")
+
+k1 = 1000
+input(title="Length", type=integer, minval=1, maxval=k1, defval=5)
+input(title="K", type=float, minval=1, maxval=1000, defval=1.6, step=0.1)
+
+a = 0.0
+k2 = 10
+for i = 0 to 10
+    a := a[1] + i
+input(title="mutable", defval=a)
