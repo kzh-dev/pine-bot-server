@@ -66,12 +66,17 @@ def p_var_assign_stmt (p):
     'var_assign_stmt : ID ASSIGN expression DELIM'
     p[0] = vm.VarAssignNode(p[1], p[3]).lineno(p.lineno(1))
 
-def p_var_def_stmt (p):
-    'var_def_stmt : var_def DELIM'
+def p_var_def_stmt1 (p):
+    '''var_def_stmt : var_def DELIM
+                    | var_def2'''
     p[0] = p[1]
 
 def p_var_def (p):
-    'var_def : ID DEFINE expression'
+    'var_def : ID DEFINE simple_expression'
+    p[0] = vm.VarDefNode(p[1], p[3]).lineno(p.lineno(1))
+
+def p_var_def2 (p):
+    'var_def2 : ID DEFINE complex_expression'
     p[0] = vm.VarDefNode(p[1], p[3]).lineno(p.lineno(1))
 
 def p_var_defs_stmt (p):
