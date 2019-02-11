@@ -23,4 +23,5 @@ if __name__ == '__main__':
             vm.load_node(node)
             #vm.node.dump()
             vm.run()
+            #vm.step()
             vm.dump_registers()
