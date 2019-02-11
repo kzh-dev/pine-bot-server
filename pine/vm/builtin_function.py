@@ -296,24 +296,44 @@ def _expand_pivot_args (args, kwargs):
 
 from .builtin_variable import high, low
 
+# FIXME: follow TV's implementation
+#def _pivot_inner (source, left, right, ismax):
+#    slen = len(source)
+#    if slen < left + right + 1:
+#        return Series([NaN] * slen)
+#
+#    r = [NaN] * left
+#    for i in range(left, slen - right):
+#        v = source[i]
+#        bars = source[i-left:i+right]
+#        if ismax:
+#            p = bars.max()
+#        else:
+#            p = bars.min()
+#        if v == p:
+#            r.append(v)
+#        else:
+#            r.append(NaN)
+#    r += [NaN] * right
+#    return Series(r)
 def _pivot_inner (source, left, right, ismax):
     slen = len(source)
     if slen < left + right + 1:
         return Series([NaN] * slen)
 
-    r = [NaN] * left
+    r = [NaN] * (left + right)
     for i in range(left, slen - right):
         v = source[i]
         bars = source[i-left:i+right]
         if ismax:
-            p = bars.max()
+           p = bars.max()
         else:
             p = bars.min()
         if v == p:
             r.append(v)
         else:
             r.append(NaN)
-    r += [NaN] * right
+    #r += [NaN] * right
     return Series(r)
 
 def pivothigh (vm, args, kwargs):
