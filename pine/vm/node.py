@@ -63,11 +63,6 @@ class Node (object):
             v = c.evaluate(vm)
         return v
 
-    def prescan (self, vm):
-        v = None
-        for c in self.children:
-            v = c.evaluate(vm)
-        return v
 
 class LiteralNode (Node):
     def __init__ (self, literal):
@@ -101,7 +96,7 @@ class OrNode (Node):
             elif r is False:
                 r = v
             else:
-                r = numpy.logical_or(r, v)
+                r = v.logical_or(r)
         return r
 
 class AndNode (Node):
@@ -116,12 +111,10 @@ class AndNode (Node):
             elif r is True:
                 r = v
             else:
-                r = numpy.logical_and(r, v)
+                r = v.logical_and(r)
         return r
 
 
-def _eq (a, b):
-    return a + b
 class BinOpNode (Node):
     def __init__ (self, op, a, b):
         super().__init__()
@@ -135,7 +128,7 @@ class BinOpNode (Node):
         b = self.children[1].evaluate(vm)
 
         if operator == r'[':
-            return self.index_access(a, b)
+            return self.index_access(vm, a, b)
         
         if operator == r'==':
             op = lambda a,b: a == b
@@ -160,14 +153,14 @@ class BinOpNode (Node):
         elif operator == r'%':
             op = lambda a,b: a % b
         else:
-            raise PineError('invalid opertor: {}'.format(opertor))
+            raise PineError('invalid operator: {}'.format(operator))
 
         # FIXME need type check
         return op(a, b)
         
-    def index_access (self, a, b):
-        if not isinstance(a, Series):
-            raise PineError('cannot access by index for: {}'.format(a))
+    def index_access (self, vm, a, b):
+        if not isinstance(a, Series): # and not isinstance(a, list):
+            raise PineError('cannot access by index for: {0}'.format(type(a)))
         if not isinstance(b, int):
             raise PineError('index must be an interger'.format(b))
 
@@ -409,30 +402,35 @@ class ForNode (ExprNode):
 
     def evaluate (self, vm):
         var_def, to_node, body = self.children
-        counter_name = var_def.name()
         retval = None
 
         counter_init = var_def.evaluate(vm)
         counter_last = to_node.evaluate(vm)
         if counter_init <= counter_last:
-            op = '>'
+            op = '+'
         else:
-            op = '<'
+            op = '-'
             
+        counter = counter_init
         while True:
             # TODO continue, break
-            retval = body.evaluate(vm)
+            try:
+                # TODO this is doable in resolve_var...
+                vm.push_register_scope()
+                retval = body.evaluate(vm)
+            finally:
+                vm.pop_register_scope()
 
-            counter = vm.lookup_variable(counter_name)
-            if op == '>':
+            if counter == counter_last:
+                break
+
+            if op == '+':
                 counter += 1
-                if counter > counter_last:
-                    break
             else:
                 counter -= 1
-                if counter < counter_last:
-                    break
-            vm.assign_variable(counter_name, counter)
+            vm.set_register(var_def, counter)
+
+        return retval
 
 class DefNode (Node):
 
@@ -451,6 +449,7 @@ class FunDefNode (DefNode):
         self.append(body)
 
     def expand_func (self, ctxt):
+        super().expand_func(ctxt)
         ctxt.register_function(self)
         return None
 
@@ -461,10 +460,9 @@ class FunDefNode (DefNode):
         raise NotImplementedError
 
 class VarDefNode (DefNode):
-    def __init__ (self, ident, expr, volatile=False):
-        super().__init__(ident)
+    def __init__ (self, ident, expr):
+        super().__init__(ident)     # ident
         self.args.append(False)     # mutable
-        self.args.append(volatile)  # volatile
         self.args.append(None)      # type
         self.append(expr)
 
@@ -476,6 +474,21 @@ class VarDefNode (DefNode):
     def make_mutable (self):
         self.args[1] = True
 
+    def evaluate (self, vm):
+        if vm.ip != 0:
+            raise NotImplementedError
+
+        # vm.ip == 0
+        val = vm.get_register(self)
+        if val is None:
+            rhv = self.children[0].evaluate(vm)
+            mutable = self.args[1]
+            if mutable:
+                val = vm.alloc_register(self, rhv)
+            else:
+                val = vm.set_register(self, rhv)
+        return val
+
 class VarAssignNode (Node):
     def __init__ (self, ident, expr):
         super().__init__()
@@ -483,17 +496,23 @@ class VarAssignNode (Node):
         self.append(expr)
 
     def resolve_var (self, ctxt):
+        # rhv
+        super().resolve_var(ctxt)
+        # make lookup node
         ident = self.args[0]
         v = ctxt.lookup_variable(ident)
         if not isinstance(v, Node):
             raise PineError('cannot assign to built-in variable: {}'.format(ident))
         v.make_mutable()
         self.children.insert(0, v)
+        # rhv
         return self
 
     def evaluate (self, vm):
-        raise NotImplementedError
-        rhv = self.children[0].eval(vm)
-        vm.assign_variable(self.args[0], rhv)
-        return rhv
+        if vm.ip != 0:
+            raise NotImplementedError
+        dest = self.children[0]
+        rhv = self.children[1].evaluate(vm)
+        vm.set_register_value(dest, rhv[vm.ip])
+        return dest
 

@@ -4,7 +4,7 @@ from . import builtin_function
 from . import builtin_variable
 from ..base import PineError
 
-from .helper import Series, BuiltinSeries, bseries
+from .helper import Series, BuiltinSeries, bseries, NaN
 
 
 class AnnotationCollector (object):
@@ -51,6 +51,61 @@ class BaseVM (object):
         if meta:
             meta.evaluate(self)
 
+        # setup registers
+        self.registers = {}
+        self.scoped_registers = []
+        # timestamps
+        self.size = self.market.size()
+        self.timestamps = bseries(self.market.timestamp(), 'timestamp')
+        # reset VM's ip
+        self.ip = 0
+
+    def push_register_scope (self):
+        self.scoped_registers.append({})
+    def pop_register_scope (self):
+        registers = self.scoped_registers.pop(-1)
+        for n in registers.keys():
+            self.registers.pop(n)
+
+    def get_register (self, node):
+        return self.registers.get(node, None)
+
+    def set_register (self, node, val):
+        self.registers[node] = val
+        if self.scoped_registers:
+            self.scoped_registers[node] = val
+        return val
+
+    def alloc_register (self, node, v):
+        typ = type(v)
+        if typ == float:
+            v = [NaN]
+        elif typ == int:
+            v = [0]
+        elif typ == bool:
+            v = [False]
+        elif typ == Series:
+            v = [v[0]]
+        else:
+            raise PineError("invalid type for mutable variable: {0}: {1}".format(typ, v))
+        val = Series(v * self.size)
+        val.valid_index = -1
+        return self.set_register(node, val)
+
+    def set_register_value (self, node, val):
+        dest = self.registers[node]
+        dest[self.ip] = val
+        dest.valid_index = self.ip
+        return dest
+
+    def dump_registers (self):
+        for n, v in self.registers.items():
+            n.dump()
+            if isinstance(v, Series):
+                print("=====> {0}: {1}".format(v.valid_index, v))
+            else:
+                print("=====> {}".format(v))
+
     def run (self):
         raise NotImplementedError
 
@@ -95,19 +150,8 @@ class InputScanVM (BaseVM):
 
 class VM (BaseVM):
 
-    def load_node (self, node):
-        super().load_node(node)
-
-        # setup registers for series
-        self.registers = {}
-        # timestamps
-        self.size = self.market.size
-        self.timestamps = bseries(self.market.timestamps, 'timestamp')
-        # init current clock
-        self.i = 0
-
-        ## prescan node
-        self.node.prescan(self)
+    def run (self):
+        return self.node.evaluate(self)
 
 
 class RenderVM (BaseVM):

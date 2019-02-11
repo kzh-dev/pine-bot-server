@@ -17,7 +17,10 @@ if __name__ == '__main__':
             vm.node.dump()
             print(vm.meta)
             print(vm.run())
+            vm.dump_registers()
         else:
             vm = VM(BitMexMarket())
             vm.load_node(node)
-            print(vm.registers)
+            #vm.node.dump()
+            vm.run()
+            vm.dump_registers()
