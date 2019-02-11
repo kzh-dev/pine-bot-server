@@ -12,7 +12,7 @@ STYLE_COLUMNS = 5
 STYLE_CIRCLES = 6
 
 from ..base import PineError
-from .helper import bseries, NaN
+from .helper import bseries, NaN, series_np
 
 
 def accdist (vm=None):
@@ -434,7 +434,7 @@ def tr (vm=None):
     high = np.array(vm.market.high(), dtype='f8')
     low  = np.array(vm.market.low(),  dtype='f8')
     close = np.array(vm.market.close(), dtype='f8')
-    return ta.TRANGE(high, low, close).tolist()
+    return series_np(ta.TRANGE(high, low, close))
 
 def tuesday (vm=None):
     raise NotImplementedError
