@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import copy
+import math
 import numpy
 
 from ..base import PineError
@@ -166,9 +167,11 @@ class BinOpNode (Node):
         if len(a) <= b:
             r = Series([NaN] * len(a))
         else:
+            import numbers
             r = numpy.roll(a, b)
+            d = r.default_elem()
             for i in range(0, b):
-                r[i] = r[b]
+                r[i] = d
 
         r.set_valid_index(a)
         return r
@@ -368,8 +371,7 @@ class IfNode (Node):
         else:
             s2 = None
 
-        # FIXME
-        if isinstance(c, Series):
+        if vm.ip == 0 and isinstance(c, Series) and c.filled():
             s1 = s1.evaluate(vm)
             if isinstance(s1, Series):
                 r = s1.copy()
@@ -380,18 +382,25 @@ class IfNode (Node):
                 if not isinstance(s2, Series):
                     s2 = Series([s2] * len(c))
             else:
-                s2 = Series([NaN] * len(c))     # FIXME
+                s2 = Series([s1.default_elem()] * len(c))
 
+            c_ = c.to_bool_safe()
             for i in range(0, len(c)):
-                if not bool(c[i]):
+                if not bool(c_[i]):
                     r[i] = s2[i]
+
             r.set_valid_index(c)
             return r
-        else:
-            if bool(c):
-                return s1.evaluate(vm)
-            elif s2:
-                return s2.evaluate(vm)
+
+        if isinstance(c, Series):
+            c = c[vm.ip]
+            if isinstance(c, float) and math.isnan(c):
+                c = 0.0
+
+        if bool(c):
+            return s1.evaluate(vm)
+        elif s2:
+            return s2.evaluate(vm)
 
 class ForNode (Node):
 
@@ -483,18 +492,21 @@ class VarDefNode (DefNode):
         self.args[1] = True
 
     def evaluate (self, vm):
-        if vm.ip != 0:
-            raise NotImplementedError
-
-        # vm.ip == 0
         val = vm.get_register(self)
+        rhv = self.children[0]
         if val is None:
-            rhv = self.children[0].evaluate(vm)
+            rhv = rhv.evaluate(vm)
             mutable = self.args[1]
             if mutable:
                 val = vm.alloc_register(self, rhv)
             else:
                 val = vm.set_register(self, rhv)
+        elif isinstance(val, Series):
+            if val.out_of_date(vm):
+                rhv = rhv.evaluate(vm)
+                if isinstance(rhv, Series):
+                    rhv = rhv[vm.ip]
+                vm.set_register_value(self, rhv)
         return val
 
 class VarAssignNode (Node):
@@ -517,8 +529,6 @@ class VarAssignNode (Node):
         return self
 
     def evaluate (self, vm):
-        if vm.ip != 0:
-            raise NotImplementedError
         dest = self.children[0]
         rhv = self.children[1].evaluate(vm)
         if isinstance(rhv, Series):

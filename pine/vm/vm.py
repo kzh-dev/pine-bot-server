@@ -79,7 +79,7 @@ class BaseVM (object):
 
     def alloc_register (self, node, v):
         if isinstance(v, Series):
-            v = v[0]
+            v = v.default_elem()
         if isinstance(v, float):
             v = [NaN]
         elif isinstance(v, int):
@@ -105,6 +105,10 @@ class BaseVM (object):
                 print("=====> {0}: {1}".format(v.valid_index, v))
             else:
                 print("=====> {}".format(v))
+
+    def step (self):
+        self.node.evaluate(self)
+        self.ip += 1
 
     def run (self):
         raise NotImplementedError
@@ -151,7 +155,9 @@ class InputScanVM (BaseVM):
 class VM (BaseVM):
 
     def run (self):
-        return self.node.evaluate(self)
+        print(self.size)
+        while self.ip < self.size:
+            self.step()
 
 
 class RenderVM (BaseVM):
