@@ -78,17 +78,16 @@ class BaseVM (object):
         return val
 
     def alloc_register (self, node, v):
-        typ = type(v)
-        if typ == float:
+        if isinstance(v, Series):
+            v = v[0]
+        if isinstance(v, float):
             v = [NaN]
-        elif typ == int:
+        elif isinstance(v, int):
             v = [0]
-        elif typ == bool:
+        elif isinstance(v, bool):
             v = [False]
-        elif isinstance(v, Series):
-            v = [v[0]]
         else:
-            raise PineError("invalid type for mutable variable: {0}: {1}".format(typ, v))
+            raise PineError("invalid type for mutable variable: {0}: {1}".format(type(v), v))
         val = Series(v * self.size)
         val.valid_index = -1
         return self.set_register(node, val)
