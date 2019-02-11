@@ -156,7 +156,11 @@ class BinOpNode (Node):
             raise PineError('invalid operator: {}'.format(operator))
 
         # FIXME need type check
-        return op(a, b)
+        s = op(a, b)
+        if not isinstance(s, Series):
+            return s
+        else:
+            return s.set_valid_index(a, b)
         
     def index_access (self, vm, a, b):
         if not isinstance(a, Series): # and not isinstance(a, list):
@@ -171,6 +175,7 @@ class BinOpNode (Node):
             for i in range(0, b):
                 r[i] = r[b]
 
+        r.set_valid_index(a)
         return r
 
 
@@ -183,6 +188,8 @@ class UniOpNode (Node):
     def evaluate (self, vm):
         op = self.args[0]
         rhv = self.children[0].evaluate(vm)
+        if isinstance(rhv, Series):
+            raise NotImplementedError
         if op == 'not':
             return not bool(rhv)
         if op == '+':
@@ -357,7 +364,7 @@ class IfNode (ExprNode):
 
     def evaluate (self, vm):
         c =  self.children[0].evaluate(vm)
-        s1 = self.children[1].evaluate(vm)
+        s1 = self.children[1]
         if len(self.children) > 2:
             s2 = self.children[2]
         else:
@@ -365,24 +372,26 @@ class IfNode (ExprNode):
 
         # FIXME
         if isinstance(c, Series):
+            s1 = s1.evaluate(vm)
             if isinstance(s1, Series):
-                s1 = s1.copy()
+                r = s1.copy()
             else:
-                s1 = Series([s1] * len(c))
-            if s2 is not None:
+                r = Series([s1] * len(c))
+            if s2:
                 s2 = s2.evaluate(vm)
                 if not isinstance(s2, Series):
                     s2 = Series([s2] * len(c))
             else:
-                s2 = Series([NaN] * len(c))
+                s2 = Series([NaN] * len(c))     # FIXME
 
             for i in range(0, len(c)):
                 if not bool(c[i]):
-                    s1[i] = s2[i]
-            return s1
+                    r[i] = s2[i]
+            r.set_valid_index(c)
+            return r
         else:
             if bool(c):
-                return s1
+                return s1.evaluate(vm)
             elif s2:
                 return s2.evaluate(vm)
 
@@ -515,4 +524,3 @@ class VarAssignNode (Node):
         rhv = self.children[1].evaluate(vm)
         vm.set_register_value(dest, rhv[vm.ip])
         return dest
-
