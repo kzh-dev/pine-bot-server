@@ -325,7 +325,7 @@ class UserFuncCallNode (Node):
         argdef = Node()
         argn = args[0]  # FIXME kwarg should be denied.
         for v, n in zip(arg_ids, argn.children):
-            argdef.append(VarDefNode(v, n, True).lineno(node.lno))
+            argdef.append(VarDefNode(v, n).lineno(node.lno))
 
         self.append(argdef)
         self.append(node.children[0])
