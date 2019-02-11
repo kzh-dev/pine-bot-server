@@ -522,5 +522,7 @@ class VarAssignNode (Node):
             raise NotImplementedError
         dest = self.children[0]
         rhv = self.children[1].evaluate(vm)
-        vm.set_register_value(dest, rhv[vm.ip])
+        if isinstance(rhv, Series):
+            rhv = rhv[vm.ip]
+        vm.set_register_value(dest, rhv)
         return dest
