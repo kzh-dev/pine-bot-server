@@ -78,11 +78,6 @@ class LiteralNode (Node):
         else:
             return [e.evaluate(vm) for e in self.children]
 
-class ExprNode (Node):
-
-    def __init__ (self, node):
-        super().__init__()
-        self.append(node)
 
 class OrNode (Node):
 
@@ -265,6 +260,8 @@ class FunCallNode (Node):
         fname = self.args[0]
         func = ctxt.lookup_function(fname)
 
+        self.children = [n.expand_func(ctxt) for n in self.children]
+
         if isinstance(func, Node):  # user-defined
             return UserFuncCallNode(fname, self.children, copy.deepcopy(func))
         else:
@@ -337,9 +334,10 @@ class UserFuncCallNode (Node):
         finally:
             ctxt.pop_scope()
 
-class IfNode (ExprNode):
+class IfNode (Node):
     def __init__ (self, condition, ifclause, elseclause=None):
-        super().__init__(condition)
+        super().__init__()
+        self.append(condition)
         self.append(ifclause)
         if elseclause:
             self.append(elseclause)
@@ -395,10 +393,11 @@ class IfNode (ExprNode):
             elif s2:
                 return s2.evaluate(vm)
 
-class ForNode (ExprNode):
+class ForNode (Node):
 
     def __init__ (self, var_def, to_clause, stmts_block):
-        super().__init__(var_def)
+        super().__init__()
+        self.append(var_def)
         self.append(to_clause)
         self.append(stmts_block)
 
