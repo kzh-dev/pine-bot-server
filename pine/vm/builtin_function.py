@@ -7,6 +7,12 @@ import talib as ta
 from ..base import PineError
 from .helper import Series, series_np, NaN
 
+strategy_functions = {}
+strategy_risk_functions = {}
+plot_functions = {}
+fill_functions = {}
+
+
 class PineArgumentError (PineError):
     def __init__ (self, msg):
         super().__init__(msg)
@@ -336,6 +342,13 @@ def plotshape (vm, args, kwargs):
     return None
 def plotfigure (vm, args, kwargs):
     return None
+plot_functions['plot'] = plot
+plot_functions['plotarrow'] = plotarrow
+plot_functions['plotbar'] = plotbar
+plot_functions['plotcandle'] = plotcandle
+plot_functions['plotchar'] = plotchar
+plot_functions['plotshape'] = plotshape
+plot_functions['plotfigure'] = plotfigure
 
 def pow (vm, args, kwargs):
     raise NotImplementedError
@@ -493,6 +506,15 @@ def strategy__exit (vm, args, kwargs):
 def strategy__order (vm, args, kwargs):
     raise NotImplementedError
 
+strategy_functions['strategy.cancel'] = strategy__cancel
+strategy_functions['strategy.cancel_all'] = strategy__cancel_all
+strategy_functions['strategy.close'] = strategy__close
+strategy_functions['strategy.close_all'] = strategy__close_all
+strategy_functions['strategy.entry'] = strategy__entry
+strategy_functions['strategy.exit'] = strategy__exit
+strategy_functions['strategy.order'] = strategy__order
+
+
 def strategy__risk__allow_entry_in (vm, args, kwargs):
     raise NotImplementedError
 
@@ -510,6 +532,14 @@ def strategy__risk__max_intraday_loss (vm, args, kwargs):
 
 def strategy__risk__max_position_size (vm, args, kwargs):
     raise NotImplementedError
+
+strategy_risk_functions['strategy.risk.allow_entry_in'] = strategy__risk__allow_entry_in
+strategy_risk_functions['strategy.risk.max_cons_loss_days'] = strategy__risk__max_cons_loss_days
+strategy_risk_functions['strategy.risk.max_drawdown'] = strategy__risk__max_drawdown
+strategy_risk_functions['strategy.risk.max_intraday_filled_orders'] = strategy__risk__max_intraday_filled_orders
+strategy_risk_functions['strategy.risk.max_intraday_loss'] = strategy__risk__max_intraday_loss
+strategy_risk_functions['strategy.risk.max_position_size'] = strategy__risk__max_position_size
+
 
 def study (vm, args, kwargs):
     vm.meta = _expand_args_as_dict(args, kwargs,
