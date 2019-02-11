@@ -38,6 +38,7 @@ class BaseVM (object):
         self.meta = {}
         self.inputs = {}
         self.securities = []
+        self.builtin_variable_cache = {}
 
     @property
     def title (self):
@@ -84,7 +85,7 @@ class BaseVM (object):
             v = [0]
         elif typ == bool:
             v = [False]
-        elif typ == Series:
+        elif isinstance(v, Series):
             v = [v[0]]
         else:
             raise PineError("invalid type for mutable variable: {0}: {1}".format(typ, v))
