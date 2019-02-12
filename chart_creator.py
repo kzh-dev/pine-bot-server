@@ -1169,8 +1169,9 @@ class ChartCreator(object):
             # LINE
             if indi["type"] == "line":
                 if len(indi["plot"]) > 0:
-                    y_min = indi["plot"].min()
-                    y_max = indi["plot"].max()
+                    import math
+                    y_min = min([v for v in indi["plot"] if not math.isnan(v)])
+                    y_max = max([v for v in indi["plot"] if not math.isnan(v)])
                 data_x = []
                 data_y = []
                 if len(indi["unixtime"]) == 0:
@@ -1195,8 +1196,13 @@ class ChartCreator(object):
 
             # BAND
             elif indi["type"] == "band":
-                y_min = min([indi["plot1"].min(), indi["plot2"].min()])
-                y_max = max([indi["plot1"].max(), indi["plot2"].max()])
+                import math
+                plot1 = [v for v in indi["plot1"] if not math.isnan(v)]
+                plot2 = [v for v in indi["plot2"] if not math.isnan(v)]
+                #y_min = min([indi["plot1"].min(), indi["plot2"].min()])
+                #y_max = max([indi["plot1"].max(), indi["plot2"].max()])
+                y_min = min(min(plot1), min(plot2))
+                y_max = max(max(plot1), max(plot2))
                 fig.append_trace(
                     go.Scatter(
                         x         = np_x,
@@ -1221,8 +1227,12 @@ class ChartCreator(object):
 
             # BAR
             elif indi["type"] == "bar":
-                y_min = indi["plot"].min()
-                y_max = indi["plot"].max()
+                #y_min = indi["plot"].min()
+                #y_max = indi["plot"].max()
+                import math
+                plot = [v for v in indi["plot"] if not math.isnan(v)]
+                y_min = min(plot)
+                y_max = max(plot)
                 fig.append_trace(
                     go.Bar(
                         x         = np_x,
@@ -1235,8 +1245,12 @@ class ChartCreator(object):
 
             # MARK
             elif indi["type"] == "mark":
-                y_min = indi["plot"].min()
-                y_max = indi["plot"].max()
+                #y_min = indi["plot"].min()
+                #y_max = indi["plot"].max()
+                import math
+                plot = [v for v in indi["plot"] if not math.isnan(v)]
+                y_min = min(plot)
+                y_max = max(plot)
                 if indi["mark"] in cls.__markers.keys():
                     mark = cls.__markers[indi["mark"]]
                 else:
