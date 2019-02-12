@@ -155,7 +155,6 @@ class InputScanVM (BaseVM):
 class VM (BaseVM):
 
     def run (self):
-        print(self.size)
         while self.ip < self.size:
             self.step()
 
