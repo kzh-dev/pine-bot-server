@@ -196,7 +196,7 @@ class VM (BaseVM):
 
         if not title:
             title = vm.get_default_input_title(node)
-        val = self.user_inputs[title]
+        val = self.user_inputs.get(title, None)
 
         # bool, integer, float, string, symbol, resolution, session, source
         if not typ:
