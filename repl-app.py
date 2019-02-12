@@ -85,6 +85,18 @@ import time, requests
 from collections import OrderedDict
 import pandas as pd
 from chart_creator import ChartCreator as cc
+
+import math
+def _make_non_na (timestamps, series):
+    ts = []
+    srs = []
+    for t, v in zip(timestamps, series):
+        if math.isnan(v):
+            continue
+        ts.append(t)
+        srs.append(v)
+    return (ts, srs)
+
 def _make_chart (market, plots, indicator_pane):
     file_path = "chart.html" 
 
@@ -114,23 +126,31 @@ def _make_chart (market, plots, indicator_pane):
         width = plot.get('width', 1)
 
         if typ == 'line':
-            cc.set_line(ts, series,
-                        ax=indicator_pane, color=color, width=width, name=title)
+            t, s = _make_non_na(ts, series)
+            if t:
+                cc.set_line(t, s,
+                            ax=indicator_pane, color=color, width=width, name=title)
         elif typ == 'band':
+            t, s = _make_non_na(ts, series)
             alpha = plot.get('alpha', 0.5)
-            ymin = min(series)
-            ymax = max(series)
+            ymin = min(s)
+            ymax = max(s)
             ymin = ymin - (ymax - ymin) * 0.5
-            cc.set_band(ts, series, [ymin] * len(series),
-                        ax=indicator_pane, up_color=color, edge_width=width, alpha=alpha, name=title)
+            if t:
+                cc.set_band(t, s, [ymin] * len(series),
+                            ax=indicator_pane, up_color=color, edge_width=width, alpha=alpha, name=title)
         elif typ == 'bar':
-            cc.set_bar(ts, series, ax=indicator_pane, color=color, name=title)
+            t, s = _make_non_na(ts, series)
+            if t:
+                cc.set_bar(t, s, ax=indicator_pane, color=color, name=title)
         elif typ == 'hline':
             cc.set_line([ts[0], ts[-1]], [series, series],
                         ax=indicator_pane, color=color, width=width, name=title)
         elif typ == 'marker':
-            cc.set_marker(ts, series,
-                        ax=indicator_pane, color=color, size=width*10, mark=plot['mark'], name=title)
+            t, s = _make_non_na(ts, series)
+            if t:
+                cc.set_marker(t, s,
+                            ax=indicator_pane, color=color, size=width*10, mark=plot['mark'], name=title)
         elif typ == 'fill':
             series2 = plot['series2']
             alpha = plot.get('alpha', 0.5)
