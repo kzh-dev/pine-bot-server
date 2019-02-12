@@ -187,6 +187,7 @@ def highestbars (vm, args, kwargs):
 
 def hline (vm, args, kwargs):
     return None
+plot_functions['hline'] = hline
 
 def hour (vm, args, kwargs):
     raise NotImplementedError

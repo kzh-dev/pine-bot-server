@@ -37,7 +37,7 @@ class AnnotationCollector (object):
 
     def execute (self, node):
         node.collect_anotation(self)
-        return (self.meta, self.inputs, self.securities)
+        return (self.meta, self.inputs, self.securities, self.strategies, self.plots)
 
 
 class BaseVM (object):
@@ -48,16 +48,22 @@ class BaseVM (object):
         self.meta = {}
         self.inputs = {}
         self.securities = []
+        self.strategies = []
+        self.plots = []
         self.builtin_variable_cache = {}
 
     @property
     def title (self):
         return self.meta.get('title', 'No title')
+    @property
+    def overlay (self):
+        return self.meta.get('overlay', False)
 
     def load_node (self, node):
         self.node = node
 
-        meta, self.inputs, self.securties = AnnotationCollector().execute(node)
+        meta, self.inputs, self.securties,\
+        self.strategies, self.plots = AnnotationCollector().execute(node)
 
         if meta:
             meta.evaluate(self)
@@ -120,6 +126,9 @@ class BaseVM (object):
         self.node.evaluate(self)
         self.ip += 1
 
+    def is_last_step (self):
+        return self.ip + 1 == self.size
+
     def run (self):
         while self.ip < self.size:
             self.step()
@@ -155,9 +164,6 @@ class InputScanVM (BaseVM):
             else:
                 typ = 'string'
                 # symbol, resolution, session
-
-        if not title:
-            title = "input{}".format(len(self.inputs) + 1)
 
         return {
             'defval': defval_,
@@ -211,10 +217,8 @@ class VM (BaseVM):
         elif typ == 'float':
             val = float(val)
         elif typ == 'source':
-            func = builtin_variable.source[val]
+            func = builtin_variable.sources[val]
             val = func(self)
-        else:
-            raise PineError("Unknown input type: {}".format(typ))
 
         return val
 

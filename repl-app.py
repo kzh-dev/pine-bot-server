@@ -9,10 +9,9 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 def landing ():
     return render_template('landing.html')
 
-from pine.preprocess import preprocess
-from pine.parser import parse
 from pine.base import PineError
-from pine.vm.vm import InputScanVM, RenderVM
+from pine.vm.vm import InputScanVM
+from pine.vm.plot import PlotVM
 from pine.vm.compile import compile_pine
 from pine.market.base import Market
 from pine.market.bitmex import BitMexMarket
@@ -60,19 +59,20 @@ def run ():
 
     try:
         # FIXME parse again
-        data = preprocess(code)
-        node = parse(data)
+        node = compile_pine(code)
 
         # Run
         market, symbol_ = symbol.split(':')
         market = BitMexMarket(symbol_, resolution)
-        vm = RenderVM(market, inputs)
-        vm.eval_node(node)
+        vm = PlotVM(market)
+        vm.load_node(node)
+        vm.set_user_inputs(inputs)
+        vm.run()
 
         if vm.overlay:
             indicator_pane = 0
 
-        html = _make_chart(market, vm.plots, indicator_pane)
+        html = _make_chart(market, vm.outputs, indicator_pane)
         return html
     except PineError as e:
         return render_template('evaluate_error.html', error=str(e))
@@ -95,7 +95,7 @@ def _make_chart (market, plots, indicator_pane):
     cc.initialize()
 
     # メインチャート(ax:0)設定
-    cc.add_subchart(ax=0, label="USD", grid=True)
+    cc.add_subchart(ax=0, label="Price", grid=True)
 
     # ローソクバー設定(OHLCV)
     cc.set_ohlcv_df(df)
