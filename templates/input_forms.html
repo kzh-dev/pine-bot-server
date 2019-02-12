@@ -26,7 +26,7 @@
             min='{{ form.minval }}' max='{{ form.maxval }}' step='{{ form.step or 0.001 }}' required></input>
         {% elif form.type == 'source' %}
             <select name='{{ form.title }}'>
-            {% for source in ('close', 'open', 'high', 'low') %}
+            {% for source in form.options %}
                 <option value="{{ source }}" {% if source == form.defval %} selected {% endif %}>{{ source }}</option>
             {% endfor %}
             </select>

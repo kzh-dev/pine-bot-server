@@ -128,6 +128,7 @@ class BaseVM (object):
         idx = self.inputs.index(node)
         return 'input{}'.format(idx + 1)
 
+
 class InputScanVM (BaseVM):
 
     def input (self, vm, args, kwargs, node):
@@ -149,6 +150,8 @@ class InputScanVM (BaseVM):
             elif isinstance(defval, BuiltinSeries):
                 typ = 'source'
                 defval_ = defval.varname
+                if not options:
+                    options = tuple(builtin_variable.sources.keys())
             else:
                 typ = 'string'
                 # symbol, resolution, session
@@ -170,7 +173,50 @@ class InputScanVM (BaseVM):
 
 
 class VM (BaseVM):
-    pass
+
+    def __init__ (self, market=None):
+        super().__init__(market)
+        self.user_inputs = None
+
+    def set_user_inputs (self, user_inputs):
+        self.user_inputs = user_inputs
+
+    def input (self, vm, args, kwargs, node):
+        defval, title, typ,\
+        minval, maxval, _, step, options = builtin_function._parse_input_args(args, kwargs)
+
+        if not self.user_inputs:
+            return defval
+
+        if not title:
+            title = vm.get_default_input_title(node)
+        val = self.user_inputs[title]
+
+        # bool, integer, float, string, symbol, resolution, session, source
+        if not typ:
+            t = type(defval)
+            if t == bool:
+                typ = 'bool'
+            elif t == int:
+                typ = 'integer'
+            elif t == float:
+                typ = 'float'
+            elif isinstance(defval, BuiltinSeries):
+                typ = 'source'
+
+        if typ == 'bool':
+            val = bool(val)
+        elif typ == 'integer':
+            val = int(val)
+        elif typ == 'float':
+            val = float(val)
+        elif typ == 'source':
+            func = builtin_variable.source[val]
+            val = func(self)
+        else:
+            raise PineError("Unknown input type: {}".format(typ))
+
+        return val
 
 
 class RenderVM (BaseVM):

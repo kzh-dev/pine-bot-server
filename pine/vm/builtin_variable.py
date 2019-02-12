@@ -14,6 +14,7 @@ STYLE_CIRCLES = 6
 from ..base import PineError
 from .helper import bseries, NaN, series_np
 
+sources = {}
 
 def accdist (vm=None):
     raise NotImplementedError
@@ -70,6 +71,7 @@ def close (vm=None):
     if vm is None:
         return None
     return bseries(vm.market.close(), 'close')
+sources['close'] = close
 
 def columns (vm=None):
     return STYLE_COLUMNS
@@ -139,15 +141,18 @@ def high (vm=None):
     if vm is None:
         return None
     return bseries(vm.market.high(), 'high')
+sources['high'] = high
 
 def histogram (vm=None):
     return STYLE_HISTOGRAM
 
 def hl2 (vm=None):
     raise NotImplementedError
+sources['hl2'] = hl2
 
 def hlc3 (vm=None):
     raise NotImplementedError
+sources['hlc3'] = hlc3
 
 def integer (vm=None):
     return 'integer'
@@ -194,6 +199,7 @@ def low (vm=None):
     if vm is None:
         return None
     return bseries(vm.market.low(), 'low')
+sources['low'] = low
 
 def maroon (vm=None):
     return '#800000'
@@ -225,6 +231,7 @@ def ohlc4 (vm=None):
     c = vm.market.close()
     series = [sum(v4) / 4.0 for v4 in zip(o, h, l, c)]
     return bseries(series, 'ohlc4')
+sources['ohlc4'] = ohlc4
 
 def olive (vm=None):
     return '#808000'
@@ -235,6 +242,7 @@ def open (vm=None):
     if vm is None:
         return None
     return bseries(vm.market.open(), 'open')
+sources['open'] = open
 
 def orange (vm=None):
     return '#ff7f00'
