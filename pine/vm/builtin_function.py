@@ -208,7 +208,7 @@ def _parse_input_args (args, kwargs):
         )
     )
 
-def input (vm, args, kwargs):
+def input (vm, args, kwargs, node=None):
     _args = _parse_input_args(args, kwargs)
     # TODO make dynamic, type check
     # return defval

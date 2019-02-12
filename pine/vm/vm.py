@@ -121,14 +121,21 @@ class BaseVM (object):
         self.ip += 1
 
     def run (self):
-        raise NotImplementedError
+        while self.ip < self.size:
+            self.step()
 
+    def get_default_input_title (self, node):
+        idx = self.inputs.index(node)
+        return 'input{}'.format(idx + 1)
 
 class InputScanVM (BaseVM):
 
-    def input (self, vm, args, kwargs):
+    def input (self, vm, args, kwargs, node):
         defval, title, typ,\
         minval, maxval, confirm, step, options = builtin_function._parse_input_args(args, kwargs)
+
+        if not title and node:
+            title = vm.get_default_input_title(node)
     
         defval_ = defval
         if typ is None:
@@ -163,10 +170,7 @@ class InputScanVM (BaseVM):
 
 
 class VM (BaseVM):
-
-    def run (self):
-        while self.ip < self.size:
-            self.step()
+    pass
 
 
 class RenderVM (BaseVM):

@@ -291,7 +291,7 @@ class BuiltinFunCallNode (FunCallNode):
         super().__init__(fname, args)
         self.func = func
 
-    def evaluate (self, vm):
+    def _pre_evaluate (self, vm):
         fn = self.fname
         cb = self.func
         if hasattr(vm, fn):
@@ -300,7 +300,11 @@ class BuiltinFunCallNode (FunCallNode):
         args, kwargs = self.children
         _args = [a.evaluate(vm) for a in args.children]
         _kwargs = kwargs.evaluate(vm)
-        return cb(vm, _args, _kwargs)
+        return (cb, _args, _kwargs)
+
+    def evaluate (self, vm):
+        cb, args, kwargs = self._pre_evaluate(vm)
+        return cb(vm, args, kwargs)
 
 class MetaInfoFuncNode (BuiltinFunCallNode):
     def collect_anotation (self, ctxt):
@@ -309,6 +313,11 @@ class MetaInfoFuncNode (BuiltinFunCallNode):
 class InputFuncNode (BuiltinFunCallNode):
     def collect_anotation (self, ctxt):
         ctxt.register_input(self)
+
+    def evaluate (self, vm):
+        cb, args, kwargs = self._pre_evaluate(vm)
+        return cb(vm, args, kwargs, self)
+        
 
 class SecurityFuncNode (BuiltinFunCallNode):
     def collect_anotation (self, ctxt):
