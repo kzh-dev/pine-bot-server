@@ -468,6 +468,7 @@ class ForNode (Node):
                 counter -= 1
             vm.set_register(var_def, counter)
 
+        vm.set_register(var_def, counter_init)
         return retval
 
 class DefNode (Node):
