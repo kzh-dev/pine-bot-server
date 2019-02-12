@@ -274,6 +274,10 @@ class FunCallNode (Node):
                 cls = InputFuncNode
             elif fname == 'security':
                 cls = SecurityFuncNode
+            elif ctxt.is_strategy_func(fname):
+                cls = StrategyFuncNode
+            elif ctxt.is_plot_func(fname):
+                cls = PlotFuncNode
             else:
                 cls = BuiltinFunCallNode
             return cls(fname, self.children, func)
@@ -309,6 +313,14 @@ class InputFuncNode (BuiltinFunCallNode):
 class SecurityFuncNode (BuiltinFunCallNode):
     def collect_anotation (self, ctxt):
         ctxt.register_security(self)
+
+class StrategyFuncNode (BuiltinFunCallNode):
+    def collect_anotation (self, ctxt):
+        ctxt.register_strategy(self)
+
+class PlotFuncNode (BuiltinFunCallNode):
+    def collect_anotation (self, ctxt):
+        ctxt.register_plot(self)
 
 
 class UserFuncCallNode (Node):

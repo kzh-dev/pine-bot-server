@@ -13,6 +13,8 @@ class AnnotationCollector (object):
         self.meta = None
         self.inputs = []
         self.securities = []
+        self.strategies = []
+        self.plots = []
 
     def register_meta (self, node):
         self.meta = node
@@ -24,6 +26,14 @@ class AnnotationCollector (object):
     def register_security (self, node):
         if node not in self.securities:
             self.securities.append(node)
+
+    def register_strategy (self, node):
+        if node not in self.strategies:
+            self.strategies.append(node)
+
+    def register_plot (self, node):
+        if node not in self.plots:
+            self.plots.append(node)
 
     def execute (self, node):
         node.collect_anotation(self)

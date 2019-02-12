@@ -10,7 +10,6 @@ from .helper import Series, series_np, NaN
 strategy_functions = {}
 strategy_risk_functions = {}
 plot_functions = {}
-fill_functions = {}
 
 
 class PineArgumentError (PineError):
@@ -169,6 +168,7 @@ def falling (vm, args, kwargs):
 
 def fill (vm, args, kwargs):
     return None
+plot_functions['fill'] = fill
 
 def fixnan (vm, args, kwargs):
     raise NotImplementedError

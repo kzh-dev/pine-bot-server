@@ -41,6 +41,11 @@ class FuncExpander (object):
     def execute (self, node):
         return node.expand_func(self)
 
+    def is_strategy_func (self, fname):
+        return fname in builtin_function.strategy_functions
+
+    def is_plot_func (self, fname):
+        return fname in builtin_function.plot_functions
 
 class VarResolver (object):
 
