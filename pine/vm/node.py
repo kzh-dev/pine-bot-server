@@ -163,18 +163,7 @@ class BinOpNode (Node):
             raise PineError('cannot access by index for: {0}'.format(type(a)))
         if not isinstance(b, int):
             raise PineError('index must be an interger'.format(b))
-
-        if len(a) <= b:
-            r = Series([NaN] * len(a))
-        else:
-            import numbers
-            r = numpy.roll(a, b)
-            d = r.default_elem()
-            for i in range(0, b):
-                r[i] = d
-
-        r.set_valid_index(a)
-        return r
+        return a.shift(b)
 
 
 class UniOpNode (Node):

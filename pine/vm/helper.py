@@ -68,7 +68,25 @@ class Series (np.ndarray):
             return self
         else:
             return np.nan_to_num(self)
+
+    def shift (self, offset):
+        if offset == 0:
+            return self
+
+        d = self.default_elem()
+        if abs(offset) >= self.size:
+            r = Series([d] * self.size)
+        else:
+            r = np.roll(self, offset)
+            if offset > 0:
+                rng = range(0, offset)
+            else:
+                rng = range(self.size+offset, self.size)
+            for i in rng:
+                r[i] = d
+        return r.set_valid_index(self)
     
+
 class BuiltinSeries (Series):
     pass
 
