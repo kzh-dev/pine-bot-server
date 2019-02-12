@@ -5,7 +5,7 @@ import math
 import numpy
 
 from ..base import PineError
-from .helper import Series, NaN
+from .helper import Series, NaN, series_mutable
 
 # AST Node
 class Node (object):
@@ -348,12 +348,13 @@ class UserFuncCallNode (Node):
             ctxt.pop_scope()
 
 class IfNode (Node):
-    def __init__ (self, condition, ifclause, elseclause=None):
+    def __init__ (self, condition, ifclause, elseclause, is_expr=True):
         super().__init__()
         self.append(condition)
         self.append(ifclause)
         if elseclause:
             self.append(elseclause)
+        self.is_expr = is_expr
 
     def resolve_var (self, ctxt):
         # condition
@@ -373,15 +374,8 @@ class IfNode (Node):
                 ctxt.pop_scope()
         return self
 
-    def evaluate (self, vm):
-        c =  self.children[0].evaluate(vm)
-        s1 = self.children[1]
-        if len(self.children) > 2:
-            s2 = self.children[2]
-        else:
-            s2 = None
-
-        if vm.ip == 0 and isinstance(c, Series) and c.filled():
+    def _first_eval_as_series (self, vm, c, s1, s2):
+        if self.is_expr and c.filled():
             s1 = s1.evaluate(vm)
             if isinstance(s1, Series):
                 r = s1.copy()
@@ -401,16 +395,38 @@ class IfNode (Node):
 
             r.set_valid_index(c)
             return r
+        else:
+            # return mutable Series
+            if c.to_bool_safe(vm.ip):
+                r = s1.evaluate(vm)
+            elif s2:
+                r = s2.evaluate(vm)
+            else:
+                r = None
+            if isinstance(r, Series):
+                return r.to_mutable_series()
+            else:
+                return series_mutable(r, c.size)
+
+    def evaluate (self, vm):
+        c =  self.children[0].evaluate(vm)
+        s1 = self.children[1]
+        if len(self.children) > 2:
+            s2 = self.children[2]
+        else:
+            s2 = None
 
         if isinstance(c, Series):
-            c = c[vm.ip]
-            if isinstance(c, float) and math.isnan(c):
-                c = 0.0
-
-        if bool(c):
+            if vm.ip == 0:
+                return self._first_eval_as_series(vm, c, s1, s2)
+            else:
+                c = c.to_bool_safe(vm.ip)
+        if c:
             return s1.evaluate(vm)
         elif s2:
             return s2.evaluate(vm)
+        else:
+            return None
 
 class ForNode (Node):
 

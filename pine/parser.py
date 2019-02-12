@@ -281,9 +281,9 @@ def p_if_expr (p):
     '''if_expr : IF_COND simple_expression stmts_block
                | IF_COND simple_expression stmts_block IF_COND_ELSE stmts_block'''
     if len(p) == 4:
-        p[0] = vm.IfNode(p[2], p[3]).lineno(p.lineno(1))
+        p[0] = vm.IfNode(p[2], p[3], None, False).lineno(p.lineno(1))
     else:
-        p[0] = vm.IfNode(p[2], p[3], p[5]).lineno(p.lineno(1))
+        p[0] = vm.IfNode(p[2], p[3], p[5], False).lineno(p.lineno(1))
 
 def p_for_expr (p):
     '''for_expr : FOR_STMT var_def FOR_STMT_TO simple_expression stmts_block

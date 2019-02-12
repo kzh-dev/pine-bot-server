@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import numpy as np
+from ..base import PineError
 
 NaN = float('nan')
 
@@ -60,14 +61,20 @@ class Series (np.ndarray):
             return 0
         elif self.dtype == 'bool':
             return False
+        elif self.dtype == 'object':
+            return False
         else:
             raise PineError("No default value for series: {}".format(self.dtype))
 
-    def to_bool_safe (self):
-        if self.dtype != 'float64':
-            return self
+    def to_bool_safe (self, idx=None):
+        if idx is None:
+            r = self
         else:
-            return np.nan_to_num(self)
+            r = self[idx]
+        if self.dtype != 'float64':
+            return r
+        else:
+            return np.nan_to_num(r)
 
     def shift (self, offset):
         if offset == 0:
@@ -85,6 +92,12 @@ class Series (np.ndarray):
             for i in rng:
                 r[i] = d
         return r.set_valid_index(self)
+
+    def to_mutable_series (self):
+        r = Series([self.default_elem()] * self.size)
+        r[0] = self[0]
+        r.valid_index = 0
+        return r
     
 
 class BuiltinSeries (Series):
@@ -97,3 +110,17 @@ def bseries (vals, name):
 
 def series_np (np_array):
     return Series(np_array)
+
+def series_mutable (v, size):
+    if isinstance(v, float):
+        d = NaN
+    elif isinstance(v, int):
+        d = 0
+    elif isinstance(v, bool):
+        d = False
+    else:
+        d = None
+    s = Series([d] * size)
+    s[0] = v
+    s.valid_index = 0
+    return s
