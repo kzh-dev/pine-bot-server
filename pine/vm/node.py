@@ -299,6 +299,10 @@ class MetaInfoFuncNode (BuiltinFunCallNode):
     def collect_anotation (self, ctxt):
         ctxt.register_meta(self)
 
+    def evaluate (self, vm):
+        if not vm.meta:
+            return super().evaluate(vm)
+
 class InputFuncNode (BuiltinFunCallNode):
     def collect_anotation (self, ctxt):
         ctxt.register_input(self)

@@ -497,16 +497,26 @@ def strategy__cancel_all (vm, args, kwargs):
     raise NotImplementedError
 
 def strategy__close (vm, args, kwargs):
-    raise NotImplementedError
+    kws = _expand_args_as_dict(args, kwargs,
+        (
+            ('id', str, True),
+            ('when', None, False),
+        )
+    )
+    return vm.broker.close(kws)
 
 def strategy__close_all (vm, args, kwargs):
-    raise NotImplementedError
+    kws = _expand_args_as_dict(args, kwargs,
+        (
+            ('when', None, False),
+        )
+    )
+    return vm.broker.close_all(kws)
 
 def strategy__entry (vm, args, kwargs):
-    oid, long_, qty,\
-    limit, stop,\
-    oca_name, oca_type,\
-    comment, when = _expand_args(args, kwargs,
+    if not vm.broker:
+        return
+    kws = _expand_args_as_dict(args, kwargs,
         (
             ('id', str, True),
             ('long', bool, True),
@@ -519,10 +529,26 @@ def strategy__entry (vm, args, kwargs):
             ('when', None, False),
         )
     )
-    return {}
+    return vm.broker.entry(kws)
 
 def strategy__exit (vm, args, kwargs):
     raise NotImplementedError
+    if not vm.broker:
+        return None
+    kws = _expand_args_as_dict(args, kwargs,
+        (
+            ('id', str, True),
+            ('from_entry', str, False),
+            ('qty', float, False),
+            ('qty_percent', float, False),
+            ('profit', float, False),
+            ('oca_name', str, False),
+            ('oca_type', str, False),
+            ('comment', str, False),
+            ('when', None, False),
+        )
+    )
+    return vm.broker.exit(kws)
 
 def strategy__order (vm, args, kwargs):
     raise NotImplementedError

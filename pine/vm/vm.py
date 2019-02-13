@@ -51,6 +51,7 @@ class BaseVM (object):
         self.strategies = []
         self.plots = []
         self.builtin_variable_cache = {}
+        self.broker = None
 
     @property
     def title (self):
@@ -67,6 +68,8 @@ class BaseVM (object):
 
         if meta:
             meta.evaluate(self)
+            if self.broker:
+                self.broker.setup(meta)
 
         # setup registers
         self.registers = {}
