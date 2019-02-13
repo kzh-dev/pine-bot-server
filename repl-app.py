@@ -15,6 +15,7 @@ from pine.vm.plot import PlotVM
 from pine.vm.compile import compile_pine
 from pine.market.base import Market
 from pine.market.bitmex import BitMexMarket
+from pine.broker.base import Broker
 
 def convert_to_form (spec):
     return spec
@@ -67,6 +68,7 @@ def run ():
         vm = PlotVM(market)
         vm.load_node(node)
         vm.set_user_inputs(inputs)
+        vm.set_broker(Broker())
         vm.run()
 
         if vm.overlay:

@@ -201,7 +201,21 @@ class BuiltinVarRefNode (Node):
 
     def evaluate (self, vm):
         func = self.args[1]
-        return func(vm)
+
+        if vm.ip == 0:
+            v = func(vm)
+            if isinstance(v, Series) and v.valid_index == 0:
+                vm.set_register(self, v)
+            return v
+
+        val = vm.get_register(self)
+        if val is not None:
+            if val.out_of_date(vm):
+                v = func(vm)
+                vm.set_register_value(self, v)
+            return val
+        else:
+            return func(vm)
 
 class VarRefNode (Node):
     def __init__ (self, ident):

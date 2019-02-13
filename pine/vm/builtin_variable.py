@@ -12,7 +12,7 @@ STYLE_COLUMNS = 5
 STYLE_CIRCLES = 6
 
 from ..base import PineError
-from .helper import bseries, NaN, series_np
+from .helper import bseries, NaN, series_np, series_mutable
 
 sources = {}
 
@@ -388,7 +388,15 @@ def strategy__position_avg_price (vm=None):
 def strategy__position_entry_name (vm=None):
     raise NotImplementedError
 def strategy__position_size (vm=None):
-    raise NotImplementedError
+    if vm is None:
+        return None
+    if vm.broker is None:
+        return 0.0
+    sz = vm.broker.position_size()
+    if vm.ip == 0:
+        return series_mutable(sz, vm.size)
+    return sz
+
 def strategy__short (vm=None):
     return False
 def strategy__wintrades (vm=None):
