@@ -175,8 +175,16 @@ class UniOpNode (Node):
     def evaluate (self, vm):
         op = self.args[0]
         rhv = self.children[0].evaluate(vm)
+
         if isinstance(rhv, Series):
-            raise NotImplementedError
+            if op == 'not':
+                return rhv.logical_not()
+            if op == '+':
+                return rhv
+            if op == '-':
+                return rhv.sign()
+            raise PineError('invalid unary op: {}'.format(op))
+
         if op == 'not':
             return not bool(rhv)
         if op == '+':

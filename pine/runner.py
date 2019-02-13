@@ -5,6 +5,7 @@ from .vm.compile import compile_pine
 from .market.base import Market
 from .market.bitmex import BitMexMarket
 from .vm.plot import PlotVM
+from .broker.base import Broker
 
 if __name__ == '__main__':
     import sys
@@ -23,6 +24,7 @@ if __name__ == '__main__':
             vm = VM(BitMexMarket())
             vm.load_node(node)
             vm.node.dump()
+            vm.set_broker(Broker())
             vm.run()
             #vm.step()
             vm.dump_registers()

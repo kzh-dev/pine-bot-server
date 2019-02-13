@@ -60,6 +60,10 @@ class BaseVM (object):
     def overlay (self):
         return self.meta.get('overlay', False)
 
+    def set_broker (self, broker):
+        self.broker = broker
+        return broker
+
     def load_node (self, node):
         self.node = node
 
@@ -127,6 +131,8 @@ class BaseVM (object):
 
     def step (self):
         self.node.evaluate(self)
+        if self.broker:
+            self.broker.step()
         self.ip += 1
 
     def is_last_step (self):

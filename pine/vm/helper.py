@@ -36,6 +36,12 @@ class Series (np.ndarray):
             o = np.nan_to_num(o)
         return np.logical_and(s, o).set_valid_index(self, other)
 
+    def logical_not (self):
+        return np.logical_not(self).set_valid_index(self)
+
+    def sign (self):
+        return np.sign(self).set_valid_index(self)
+
     def set_valid_index (self, a, b=None):
         if isinstance(b, Series):
             if isinstance(a, Series):

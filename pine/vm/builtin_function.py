@@ -264,7 +264,7 @@ def month (vm, args, kwargs):
 def na (vm, args, kwargs):
     x, = _expand_args(args, kwargs, (('x', None, True),))
     if isinstance(x, Series):
-        return [math.isnan(v) for v in x]
+        return Series([math.isnan(v) for v in x])
     else:
         return math.isnan(x)
 
@@ -493,6 +493,11 @@ def strategy (vm, args, kwargs):
     )
     return None
 
+def _evaluate_when (vm, val):
+    if not isinstance(val, Series):
+        return bool(val)
+    return val[vm.ip]
+
 def strategy__cancel (vm, args, kwargs):
     raise NotImplementedError
 
@@ -506,6 +511,9 @@ def strategy__close (vm, args, kwargs):
             ('when', None, False),
         )
     )
+    when = kws.get('when', None)
+    if when is not None and not _evaluate_when(vm, when):
+        return
     return vm.broker.close(kws)
 
 def strategy__close_all (vm, args, kwargs):
@@ -514,6 +522,9 @@ def strategy__close_all (vm, args, kwargs):
             ('when', None, False),
         )
     )
+    when = kws.get('when', None)
+    if when is not None and not _evaluate_when(vm, when):
+        return
     return vm.broker.close_all(kws)
 
 def strategy__entry (vm, args, kwargs):
@@ -532,6 +543,9 @@ def strategy__entry (vm, args, kwargs):
             ('when', None, False),
         )
     )
+    when = kws.get('when', None)
+    if when is not None and not _evaluate_when(vm, when):
+        return
     return vm.broker.entry(kws)
 
 def strategy__exit (vm, args, kwargs):
@@ -551,6 +565,9 @@ def strategy__exit (vm, args, kwargs):
             ('when', None, False),
         )
     )
+    when = kws.get('when', None)
+    if when is not None and not _evaluate_when(vm, when):
+        return
     return vm.broker.exit(kws)
 
 def strategy__order (vm, args, kwargs):
