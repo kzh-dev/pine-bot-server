@@ -41,6 +41,9 @@ def _expand_args (args, kwargs, specs):
                 a = float(a)
             elif typ == int and type(a) == float and int(a) == a:
                 a = int(a)
+            elif typ == bool and type(a) == str:
+                if a == 'false':
+                    a = False
             elif typ is not None and not isinstance(a, typ):
                 raise PineArgumentError("Invalid argument type: {0}: {1} for {2}".format(
                     name, type(a).__name__, typ.__name__))
