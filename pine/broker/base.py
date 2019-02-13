@@ -96,6 +96,13 @@ class Broker (object):
         # Apply orders
         self.apply_orders(orders)
         return orders
+
+    def close_position (self, oid):
+        p = self.positions.get(oid, None)
+        if p is None:
+            return []
+        else:
+            return [{'id': oid, 'qty': -p['qty']}]
                 
     def close_positions (self, d=None):
         if d is None:
@@ -107,7 +114,7 @@ class Broker (object):
 
         orders = []
         for i in ids:
-            orders.append({'id': i, 'qty': -self.positions[i]['qty']})
+            orders += self.close_position(i)
         return orders
 
     def open_position (self, a):
