@@ -63,9 +63,13 @@ def _expand_args_as_dict (args, kwargs, specs):
 def _ta_ma (args, kwargs, func):
     source, length = _expand_args(args, kwargs,
         (('source', Series, True), ('length', int, True)))
-    if math.isnan(source[-1]):
-        return source.dup()
-    return series_np(func(source, length), source)
+    try:
+        return series_np(func(source, length), source)
+    except Exception as e:
+        if str(e) == 'inputs are all NaN':
+            return source.dup()
+        raise
+            
 
 pyabs = abs
 def abs (vm, args, kwargs):
@@ -257,9 +261,12 @@ def linebreak (vm, args, kwargs):
 def linreg (vm, args, kwargs):
     source, length, _offset = _expand_args(args, kwargs,
         (('source', Series, True), ('length', int, True), ('offset', int, True)))
-    if math.isnan(source[-1]):
-        return source.dup()
-    return series_np(ta.LINEARREG(source, length) + _offset, source)
+    try:
+        return series_np(ta.LINEARREG(source, length) + _offset, source)
+    except Exception as e:
+        if str(e) == 'inputs are all NaN':
+            return source.dup()
+        raise
 
 def log (vm, args, kwargs):
     raise NotImplementedError
@@ -462,12 +469,10 @@ def rising (vm, args, kwargs):
 def rma (vm, args, kwargs):
     source, length = _expand_args(args, kwargs,
         (('source', Series, True), ('length', int, True)))
-    if math.isnan(source[-1]):
-        return source.dup()
 
     slen = len(source)
     if slen <= length:
-        return Series([NaN] * slen)
+        return source.dup()
 
     r = [NaN] * (length - 1)
     a = float(length - 1)
@@ -480,7 +485,7 @@ def rma (vm, args, kwargs):
             if math.isnan(p):
                 p = 0.0
             r.append((p * a + v) / length)
-    return Series(r)
+    return series_np(r, source)
 
 def roc (vm, args, kwargs):
     raise NotImplementedError
@@ -540,10 +545,13 @@ def stoch (vm, args, kwargs):
             ('length', int, True),
         )
     )
-    if math.isnan(source[-1]):
-        return source.dup()
-    fk, _ = ta.STOCHF(high, low, source, length)
-    return series_np(fk, source)
+    try:
+        fk, _ = ta.STOCHF(high, low, source, length)
+        return series_np(fk, source)
+    except Exception as e:
+        if str(e) == 'inputs are all NaN':
+            return source.dup()
+        raise
 
 def strategy (vm, args, kwargs):
     vm.meta = _expand_args_as_dict(args, kwargs,
