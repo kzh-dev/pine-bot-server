@@ -105,6 +105,10 @@ class Series (np.ndarray):
         r.valid_index = 0
         return r
     
+    def append (self, v):
+        self.valid_index += 1
+        self[self.valid_index] = v 
+        return v
 
 class BuiltinSeries (Series):
     pass
@@ -130,3 +134,6 @@ def series_mutable (v, size):
     s[0] = v
     s.valid_index = 0
     return s
+
+def series_immutable (v, size):
+    return Series([v] * size)

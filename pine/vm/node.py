@@ -314,8 +314,11 @@ class BuiltinFunCallNode (FunCallNode):
         return (cb, _args, _kwargs)
 
     def evaluate (self, vm):
-        cb, args, kwargs = self._pre_evaluate(vm)
-        return cb(vm, args, kwargs)
+        try:
+            cb, args, kwargs = self._pre_evaluate(vm)
+            return cb(vm, args, kwargs)
+        except Exception as e:
+            raise PineError("{0}: {1}".format(e, self.fname))
 
 class MetaInfoFuncNode (BuiltinFunCallNode):
     def collect_anotation (self, ctxt):

@@ -5,7 +5,7 @@ import numpy as np
 import talib as ta
 
 from ..base import PineError
-from .helper import Series, series_np, NaN
+from .helper import Series, series_np, NaN, series_immutable, series_mutable
 
 strategy_functions = {}
 strategy_risk_functions = {}
@@ -122,31 +122,40 @@ def cos (vm, args, kwargs):
     raise NotImplementedError
 
 def cross (vm, args, kwargs):
-    x, y = _expand_args(args, kwargs, (('x', Series, True), ('y', Series, True)))
-    s = [False]
-    for i in range(1, len(x)):
+    x, y = _expand_args(args, kwargs, (('x', Series, True), ('y', None, True)))
+    if not isinstance(y, Series):
+        y = series_immutable(y, vm.size)
+    s = series_mutable(False, vm.size)
+    imax = pymin([x.valid_index, y.valid_index])
+    for i in range(1, imax+1):
         x1, y1 = x[i], y[i]
         x2, y2 = x[i-1], y[i-1]
         s.append((x1 - y1) * (x2 - y2) < 0)
-    return Series(s)
+    return s
 
 def crossover (vm, args, kwargs):
-    x, y = _expand_args(args, kwargs, (('x', Series, True), ('y', Series, True)))
-    s = [False]
-    for i in range(1, len(x)):
+    x, y = _expand_args(args, kwargs, (('x', Series, True), ('y', None, True)))
+    if not isinstance(y, Series):
+        y = series_immutable(y, vm.size)
+    s = series_mutable(False, vm.size)
+    imax = pymin([x.valid_index, y.valid_index])
+    for i in range(1, imax+1):
         x1, y1 = x[i], y[i]
         x2, y2 = x[i-1], y[i-1]
         s.append(x1 > y1 and x2 < y2)
-    return Series(s)
+    return s
 
 def crossunder (vm, args, kwargs):
-    x, y = _expand_args(args, kwargs, (('x', Series, True), ('y', Series, True)))
-    s = [False]
-    for i in range(1, len(x)):
+    x, y = _expand_args(args, kwargs, (('x', Series, True), ('y', None, True)))
+    if not isinstance(y, Series):
+        y = series_immutable(y, vm.size)
+    s = series_mutable(False, vm.size)
+    imax = pymin([x.valid_index, y.valid_index])
+    for i in range(1, imax+1):
         x1, y1 = x[i], y[i]
         x2, y2 = x[i-1], y[i-1]
         s.append(x1 < y1 and x2 > y2)
-    return Series(s)
+    return s
 
 def cum (vm, args, kwargs):
     raise NotImplementedError
@@ -246,9 +255,11 @@ def lowestbars (vm, args, kwargs):
 def macd (vm, args, kwargs):
     raise NotImplementedError
 
+pymax = max
 def max (vm, args, kwargs):
     raise NotImplementedError
 
+pymin = min
 def min (vm, args, kwargs):
     raise NotImplementedError
 
