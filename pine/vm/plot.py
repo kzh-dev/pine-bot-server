@@ -72,6 +72,9 @@ class PlotVM (VM):
         if color is not None:
             if isinstance(color, Series):   # FIXME
                 color = color[-1]
+            color, *_transp = color.split(':')
+            if _transp:
+                transp = _transp[0]
             plot['color'] = color
         if linewidth:
             plot['width'] = linewidth
@@ -118,6 +121,9 @@ class PlotVM (VM):
         if color is not None:
             if isinstance(color, Series):
                 color = color[-1]
+            color, *_transp = color.split(':')
+            if _transp:
+                transp = _transp[0]
             plot['color'] = color
         if size:
             plot['size'] = size
@@ -173,6 +179,9 @@ class PlotVM (VM):
         if color is not None:
             if isinstance(color, Series):
                 color = color[-1]
+            color, *_transp = color.split(':')
+            if _transp:
+                transp = _transp[0]
             plot['color'] = color
         if transp:
             plot['alpha'] = transp * 0.01

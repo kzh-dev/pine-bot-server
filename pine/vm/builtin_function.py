@@ -118,7 +118,8 @@ def cog (vm, args, kwargs):
     raise NotImplementedError
 
 def color (vm, args, kwargs):
-    raise NotImplementedError
+    col, transp = _expand_args(args, kwargs, (('color', str, True), ('transp', int, True)))
+    return "{0}:{1}".format(col, transp)
 
 def correlation (vm, args, kwargs):
     raise NotImplementedError
