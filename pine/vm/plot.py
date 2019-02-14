@@ -28,7 +28,7 @@ class PlotVM (VM):
 
         series, title, color, linewidth, style,\
          trackprice, transp, histbase,\
-         offset, join, editable, show_last = builtin_function._expand_args(args, kwargs, (
+         offset, editable, show_last = builtin_function._expand_args(args, kwargs, (
             ('series', None, True),
             ('title', str, False),
             ('color', None, False),
@@ -38,7 +38,6 @@ class PlotVM (VM):
             ('transp', int, False),
             ('histbase', float, False),
             ('offset', int, False),
-            ('join', bool, False),
             ('editable', bool, False),
             ('show_last', int, False),
         ))
@@ -94,7 +93,7 @@ class PlotVM (VM):
         series, title, style, location,\
          color, transp,\
          offset, text, textcolor,\
-         editable, show_last, size = builtin_function._expand_args(args, kwargs, (
+         join, editable, show_last, size = builtin_function._expand_args(args, kwargs, (
             ('series', None, True),
             ('title', str, False),
             ('style', str, False),
@@ -133,7 +132,7 @@ class PlotVM (VM):
             series = series.shift(offset)
 
         plot['series'] = series
-        self.outputs.append(plot)
+        #self.outputs.append(plot)
         return None
 
     def hline (self, vm, args, kwargs):
