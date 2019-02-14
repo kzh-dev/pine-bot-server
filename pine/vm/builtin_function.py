@@ -320,12 +320,30 @@ def month (vm, args, kwargs):
 def na (vm, args, kwargs):
     x, = _expand_args(args, kwargs, (('x', None, True),))
     if isinstance(x, Series):
-        return Series([math.isnan(v) for v in x])
+        a = x[:x.valid_index+1]
+        b = x[x.valid_index:]
+        return Series([math.isnan(v) for v in a] + b).set_valid_index(x)
     else:
         return math.isnan(x)
 
 def nz (vm, args, kwargs):
-    raise NotImplementedError
+    x, y = _expand_args(args, kwargs, (('x', None, True),('y', None, False)))
+    if y is None:
+        y = 0.0
+    if not isinstance(x, Series):
+        if math.isnan(x):
+            return y
+        else:
+            return x
+    else:
+        a = list(x)[:x.valid_index+1]
+        b = list(x)[x.valid_index+1:]
+        a_ = []
+        for v in a:
+            if math.isnan(v):
+                v = y
+            a_.append(v)
+        return Series(a_ + b).set_valid_index(x)
 
 def offset (vm, args, kwargs):
     source, _offset = _expand_args(args, kwargs,
