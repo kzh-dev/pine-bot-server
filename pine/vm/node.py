@@ -466,6 +466,8 @@ class IfNode (Node):
 
         if val is not None:
             if not val.filled():
+                if isinstance(r, Series):
+                    r = r[vm.ip]
                 vm.set_register_value(self, r)
             return val
         else:
