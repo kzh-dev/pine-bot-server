@@ -86,7 +86,7 @@ class Broker (object):
                     orders += self.close_positions(True)
                     orders += self.open_position(a)
             elif a['action'] == 'close':
-                orders += self.close_position(a)
+                orders += self.close_position(a['id'])
             elif a['action'] == 'close_all':
                 orders += self.close_positions()
             else:
