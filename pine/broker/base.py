@@ -10,6 +10,7 @@ class Broker (object):
         self.clear_positions()
         self.actions = []
         # TODO self.active_entry_orders[id], self.active_exit_orders[id]
+        self.order_history = []
 
     def clear_positions (self):
         self.positions = {}
@@ -95,6 +96,8 @@ class Broker (object):
 
         # Apply orders
         self.apply_orders(orders)
+
+        self.order_history.append(orders)
         return orders
 
     def close_position (self, oid):

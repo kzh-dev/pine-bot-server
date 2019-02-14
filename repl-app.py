@@ -89,14 +89,22 @@ import pandas as pd
 from chart_creator import ChartCreator as cc
 
 import math
-def _make_non_na (timestamps, series):
+def _make_non_na (timestamps, series, labels=None):
     ts = []
     srs = []
-    for t, v in zip(timestamps, series):
+    lbls = []
+    if labels is None:
+        labels_ = [None] * len(timestamps)
+    else:
+        labels_ = labels
+    for t, v, l in zip(timestamps, series, labels_):
         if math.isnan(v):
             continue
         ts.append(t)
         srs.append(v)
+        lbls.append(l)
+    if labels:
+        return (ts, srs, lbls)
     return (ts, srs)
 
 def _make_chart (market, plots, indicator_pane):
@@ -163,6 +171,12 @@ def _make_chart (market, plots, indicator_pane):
                 series2 = [series2, series2]
             cc.set_band(ts_, series2, series,
                         ax=indicator_pane, up_color=color, alpha=alpha, name=title)
+        elif typ == 'order':
+            labels = plot['labels']
+            t, s, l = _make_non_na(ts, series, labels)
+            if t:
+                cc.set_marker(t, s,
+                            ax=0, color=color, size=width*10, mark=plot['mark'], name=title, text=l)
                         
 
     # SMA計算

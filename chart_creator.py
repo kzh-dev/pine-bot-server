@@ -353,7 +353,7 @@ class ChartCreator(object):
     # [return]
     #---------------------------------------------------------------------
     @classmethod
-    def set_marker(cls, lst_utime, lst_plot, ax=0, color="black", size=20.0, mark="*", name=""):
+    def set_marker(cls, lst_utime, lst_plot, ax=0, color="black", size=20.0, mark="*", name="", text=""):
         if ax not in cls.__subcharts.keys():
             return
         if len(lst_utime) < 2 or len(lst_plot) < 2:
@@ -374,6 +374,7 @@ class ChartCreator(object):
             "size"     : size,
             "mark"     : mark,
             "name"     : name,
+            "text"     : text,
         }]
 
     #---------------------------------------------------------------------
@@ -1260,9 +1261,11 @@ class ChartCreator(object):
                         x         = np_x,
                         y         = indi["plot"],
                         mode      = "markers",
-                        marker    = dict(color=indi["color"], size=indi["size"] / 3.0, symbol=mark),
+                        marker    = dict(color=indi["color"], size=indi["size"] / 3.0, symbol=mark,
+                                         line=dict(color="white", width=1)),
                         opacity   = 1.0,
                         name      = indi["name"],
+                        text      = indi["text"],
                     ),
                     ax[0], 1)
 

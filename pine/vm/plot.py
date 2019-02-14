@@ -2,9 +2,9 @@
 
 import numpy
 
-from . import builtin_function
+from . import builtin_function, builtin_variable
 from .vm import VM
-from .helper import Series
+from .helper import Series, NaN
 
 class PlotVM (VM):
 
@@ -14,9 +14,13 @@ class PlotVM (VM):
 
     def load_node (self, node):
         super().load_node(node)
-
         # TODO good to save plot and strategy inputs if volatile
-        # insert proxy node
+        # by inserting proxy node
+
+    def run (self):
+        super().run()
+        if self.broker:
+            self.plot_orders(self.broker.order_history)
 
     def plot (self, vm, args, kwargs):
         if not vm.is_last_step():
@@ -175,3 +179,45 @@ class PlotVM (VM):
 
         self.plots.append(plot)
         return plot
+
+
+    def plot_orders (self, order_history):
+        # FIXME
+        close = builtin_variable.close(self)
+        longs, shorts = [(NaN,0)], [(NaN, 0)]
+        has_long = has_short = False
+        for price, orders in zip(close, order_history):
+            l = s = (NaN, 0)
+            if orders:
+                qty = sum([o['qty'] for o in orders])
+                if qty > 0:
+                    l = (price, qty)
+                    has_long = True
+                elif qty < 0:
+                    s = (price, -qty)
+                    has_short = True
+            longs.append(l)
+            shorts.append(s)
+        
+        longs.pop(-1)
+        shorts.pop(-1)
+        if has_long:
+            self.outputs.append({
+                'title': 'Buy',
+                'series': [p for p,q in longs],
+                'type': 'order',
+                'mark': '^',
+                'width': 4,
+                'color': 'green',
+                'labels': [q for p,q in longs],
+            })
+        if has_short:
+            self.outputs.append({
+                'title': 'Sell',
+                'series': [p for p,q in shorts],
+                'type': 'order',
+                'mark': 'v',
+                'width': 4,
+                'color': 'red',
+                'labels': [q for p,q in shorts],
+            })
