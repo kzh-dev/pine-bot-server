@@ -1,0 +1,35 @@
+//@version=3
+//XBBTUSD
+//4H
+strategy("オフセット戦略_改",overlay=true,commission_value=0.075)
+//strategy("オフセット戦略_改(成績)",overlay=false,commission_value=0.075)
+
+//入力設定
+len = input(38)
+ss = input(ohlc4)
+delay = input(21)
+signal_length = input(28)
+hist_vol = input(45)
+
+//emaを計算
+ema = ema(ss,len)
+
+//過去のema
+ema_delay = ema[delay]
+
+//emaと過去のemaのmacd
+macd = ema - ema_delay
+signal = sma(macd, signal_length)
+hist = macd - signal
+
+//売買条件
+buy = crossover(ema,ema_delay) and abs(hist) > abs(hist_vol) or macd > 0 and close > open and abs(hist) > abs(hist_vol)
+sell = crossunder(ema,ema_delay) and abs(hist) > abs(hist_vol) or macd < 0 and close < open and abs(hist) > abs(hist_vol)
+ex_b = macd < 0 and close < open and abs(hist) > abs(hist_vol)
+ex_s = macd > 0 and close > open and abs(hist) > abs(hist_vol)
+
+//買い注文、売り注文
+strategy.entry("buy",true,when=buy)
+strategy.entry("sell",false,when=sell)
+strategy.close("buy",when=ex_b or crossunder(ema,ema_delay))
+strategy.close("sell",when=ex_s or crossover(ema,ema_delay))
