@@ -314,8 +314,8 @@ class BuiltinFunCallNode (FunCallNode):
         return (cb, _args, _kwargs)
 
     def evaluate (self, vm):
+        cb, args, kwargs = self._pre_evaluate(vm)
         try:
-            cb, args, kwargs = self._pre_evaluate(vm)
             return cb(vm, args, kwargs)
         except NotImplementedError as e:
             raise PineError("not implemented: {}".format(self.fname)) from e
@@ -447,17 +447,29 @@ class IfNode (Node):
         else:
             s2 = None
 
+        val = None
         if isinstance(c, Series):
-            if vm.ip == 0:
-                return self._first_eval_as_series(vm, c, s1, s2)
+            val = vm.get_register(self)
+            if val is None:
+                val = self._first_eval_as_series(vm, c, s1, s2)
+                vm.set_register(self, val)
+                return val
             else:
-                c = c.to_bool_safe(vm.ip)
-        if c:
-            return s1.evaluate(vm)
+                c = bool(c.to_bool_safe(vm.ip))
+        r = None
+        if bool(c) and not math.isnan(c):
+            r = s1.evaluate(vm)
         elif s2:
-            return s2.evaluate(vm)
+            r = s2.evaluate(vm)
         else:
-            return None
+            r = None
+
+        if val is not None:
+            if not val.filled():
+                vm.set_register(val, r)
+            return val
+        else:
+            return r
 
 class ForNode (Node):
 
