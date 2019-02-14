@@ -18,7 +18,7 @@ class Series (np.ndarray):
         self.valid_index = getattr(obj, 'valid_index', None)
         #self.valid_index = len(self)
 
-    def logical_or (self, ohther):
+    def logical_or (self, other):
         s = self
         if isinstance(s[0], float):
             s = np.nan_to_num(s)
