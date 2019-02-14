@@ -328,7 +328,9 @@ def nz (vm, args, kwargs):
     raise NotImplementedError
 
 def offset (vm, args, kwargs):
-    raise NotImplementedError
+    source, _offset = _expand_args(args, kwargs,
+        (('source', Series, True), ('offset', int, True)))
+    return source.shift(_offset)
 
 def precentile_linear_interpolation (vm, args, kwargs):
     raise NotImplementedError
