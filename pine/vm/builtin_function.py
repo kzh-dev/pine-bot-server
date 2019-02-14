@@ -64,7 +64,7 @@ def _ta_ma (args, kwargs, func):
     source, length = _expand_args(args, kwargs,
         (('source', Series, True), ('length', int, True)))
     if math.isnan(source[-1]):
-        return source.copy()
+        return source.dup()
     return series_np(func(source, length), source)
 
 pyabs = abs
@@ -197,8 +197,23 @@ def floor (vm, args, kwargs):
 def heikinashi (vm, args, kwargs):
     raise NotImplementedError
 
+_xest_args1 = (
+    ('length', int, True),
+)
+_xest_args2 = (
+    ('source', Series, True),
+) + _xest_args1
+
+def _xest (vm, args, kwargs, sop, xop):
+    try:
+        source, length = _expand_args(args, kwargs, _xest_args2)
+    except PineArgumentError:
+        length = _expand_args(args, kwargs, _xest_args1)
+        source = sop(vm)
+    return series_np(xop(source, length), source)
+
 def highest (vm, args, kwargs):
-    raise NotImplementedError
+    return _xest(vm, args, kwargs, high, ta.MAX)
 
 def highestbars (vm, args, kwargs):
     raise NotImplementedError
@@ -243,7 +258,7 @@ def linreg (vm, args, kwargs):
     source, length, _offset = _expand_args(args, kwargs,
         (('source', Series, True), ('length', int, True), ('offset', int, True)))
     if math.isnan(source[-1]):
-        return source.copy()
+        return source.dup()
     return series_np(ta.LINEARREG(source, length) + _offset, source)
 
 def log (vm, args, kwargs):
@@ -253,7 +268,7 @@ def log10 (vm, args, kwargs):
     raise NotImplementedError
 
 def lowest (vm, args, kwargs):
-    raise NotImplementedError
+    return _xest(vm, args, kwargs, low, ta.MIN)
 
 def lowestbars (vm, args, kwargs):
     raise NotImplementedError
@@ -261,13 +276,37 @@ def lowestbars (vm, args, kwargs):
 def macd (vm, args, kwargs):
     raise NotImplementedError
 
+def _mxx (args, kwargs, op, sop):
+    x, y = _expand_args(args, kwargs, (('x', None, True), ('y', None, True)))
+    if not isinstance(x, Series):
+        if not isinstance(y, Series):
+            # !x, !y
+            if math.isna(x):
+                return y
+            elif math.isna(y):
+                return x
+            return op((x,y))
+        else:
+            # !x, y
+            if math.isna(x):
+                return y.dup()
+            x = series_np([x] * y.size, y)
+    elif not isinstance(y, Series):
+        # x, !y
+        if math.isna(y):
+            return x.dup()
+        y = series_np([y] * x.size, x)
+
+    r = sop([x,y], axis=0)
+    return Series(r).set_valid_index(x, y)
+
 pymax = max
 def max (vm, args, kwargs):
-    raise NotImplementedError
+    return _mxx(args, kwargs, pymax, np.nanmax)
 
 pymin = min
 def min (vm, args, kwargs):
-    raise NotImplementedError
+    return _mxx(args, kwargs, pymin, np.nanmin)
 
 def minute (vm, args, kwargs):
     raise NotImplementedError
@@ -404,7 +443,7 @@ def rma (vm, args, kwargs):
     source, length = _expand_args(args, kwargs,
         (('source', Series, True), ('length', int, True)))
     if math.isnan(source[-1]):
-        return source.copy()
+        return source.dup()
 
     slen = len(source)
     if slen <= length:
@@ -433,7 +472,7 @@ def rsi (vm, args, kwargs):
     x, y = _expand_args(args, kwargs,
         (('x', Series, True), ('y', int, True)))
     if math.isnan(x[-1]):
-        return x.copy()
+        return x.dup()
     return series_np(ta.RSI(x, y), x)
 
 def sar (vm, args, kwargs):
@@ -482,7 +521,7 @@ def stoch (vm, args, kwargs):
         )
     )
     if math.isnan(source[-1]):
-        return source.copy()
+        return source.dup()
     fk, _ = ta.STOCHF(high, low, source, length)
     return series_np(fk, source)
 

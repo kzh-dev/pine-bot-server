@@ -110,6 +110,9 @@ class Series (np.ndarray):
         self[self.valid_index] = v 
         return v
 
+    def dup (self):
+        return self.copy().set_valid_index(self)
+
 class BuiltinSeries (Series):
     pass
 
