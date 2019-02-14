@@ -466,7 +466,7 @@ class IfNode (Node):
 
         if val is not None:
             if not val.filled():
-                vm.set_register(val, r)
+                vm.set_register_value(self, r)
             return val
         else:
             return r

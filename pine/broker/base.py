@@ -8,11 +8,21 @@ from ..base import PineError
 class Broker (object):
 
     def __init__ (self):
-        self.setup({})
         self.clear_positions()
         self.actions = []
         # TODO self.active_entry_orders[id], self.active_exit_orders[id]
         self.order_history = []
+
+        self.pyramiding = 0
+        self.calc_on_order_fills = False
+        self.calc_on_every_tick = True
+        self.backtest_fill_limits_assumption = 0.0
+        self.default_qty_type = 'fixed'
+        self.default_qty_value = 1.0
+        self.currency = 'NONE'
+        self.slippage = 0
+        self.commission_type = 'percent'
+        self.commission_value = 'commission_value'
 
     def clear_positions (self):
         self.positions = {}
@@ -24,16 +34,30 @@ class Broker (object):
         return s
 
     def setup (self, kws):
-        self.pyramiding = kws.get('pyramiding', 0)
-        self.calc_on_order_fills = kws.get('calc_on_order_fills', False)
-        self.calc_on_every_tick = kws.get('calc_on_every_tick', False)
-        self.backtest_fill_limits_assumption = kws.get('backtest_fill_limits_assumption', 0)
-        self.default_qty_type = kws.get('default_qty_type', 'fixed')
-        self.default_qty_value = kws.get('default_qty_value', 1.0)
-        self.currency = kws.get('currency', 'NONE')
-        self.slippage = kws.get('slippage', 0)
-        self.commission_type = kws.get('commission_type', 'percent')
-        self.commission_value = kws.get('commission_value', 0.0)
+        v = kws.get('pyramiding', None)
+        if v is not None:
+            self.pyramiding = v
+        v = kws.get('calc_on_order_fills', None)
+        if v is not None:
+            self.calc_on_order_fills = v
+        v = kws.get('calc_on_every_tick', None)
+        if v is not None:
+                self.calc_on_every_tick = v
+        v = kws.get('backtest_fill_limits_assumption', None)
+        if v is not None:
+            self.backtest_fill_limits_assumption = v
+        v = kws.get('default_qty_type', None)
+        if v is not None:
+            self.default_qty_type = v
+        v = kws.get('default_qty_value', None)
+        if v is not None:
+            self.default_qty_value = v
+        v = kws.get('currency', None)
+        if v is not None:
+            self.currency = v
+        v = kws.get('slippage', None)
+        if v is not None:
+            self.commission_type = 0.0
         
         if self.calc_on_order_fills:
             raise PineError('calc_on_order_fills is not supported')
