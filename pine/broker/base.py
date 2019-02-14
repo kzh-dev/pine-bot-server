@@ -1,5 +1,7 @@
 # coding=utf-8
 
+import math
+
 from ..vm.helper import NaN
 from ..base import PineError
 
@@ -76,9 +78,9 @@ class Broker (object):
         orders = []
         for a in self.actions:
             if a['action'] == 'entry':
-                if a['qty'] is None:
-                    a['qty'] = self.default_qty_value
                 qty = a['qty']
+                if qty is None or math.isnan(qty):
+                    a['qty'] = self.default_qty_value
                 if a['long']:
                     orders += self.close_positions(False)
                     orders += self.open_position(a)
