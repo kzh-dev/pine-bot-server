@@ -670,7 +670,7 @@ def timestamp (vm, args, kwargs):
         tzinfo = None
 
     dt = datetime.datetime(year, month, day, hour, minute, tzinfo=tzinfo)
-    return dt.timestamp() * 1000.0
+    return int(dt.timestamp())
 
 def tostring (vm, args, kwargs):
     raise NotImplementedError

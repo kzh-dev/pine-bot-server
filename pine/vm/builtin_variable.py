@@ -440,7 +440,7 @@ def tickerid (vm=None):
 def time (vm=None):
     if vm is None:
         return None
-    return vm.market.bartimestamp()
+    return bseries(vm.market.timestamps(), 'time')
 def timenow (vm=None):
     raise NotImplementedError
 
