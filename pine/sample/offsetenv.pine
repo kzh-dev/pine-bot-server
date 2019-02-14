@@ -1,0 +1,80 @@
+//@version=3
+strategy("Offset MA & Envelope",overlay=true, default_qty_type = strategy.fixed, initial_capital=10000, currency="USD", default_qty_value = 1,slippage=1,commission_type=strategy.commission.percent,commission_value=0.065)
+
+//テスト期間
+syear=input(1900,title="開始（年）")
+smonth=input(01,title="開始（月）")
+sday=input(01,title="開始（日）")
+shour=input(00,title="開始（時）")
+sminute=input(00,title="開始（分）")
+eyear=input(2100,title="終了（年）")
+emonth=input(12,title="終了（月）")
+eday=input(31,title="終了（日）")
+ehour=input(00,title="終了（時）")
+eminute=input(00,title="終了（分）")
+timescale = timestamp(eyear, emonth, eday, ehour, eminute) > time and time > timestamp(syear, smonth, sday, shour, sminute)
+
+
+//MA　入力
+ma_type1 = input(defval = "linreg", options = ["ema","sma","rma","swma","vwma","wma","linreg"], title = "短期MA Type")
+src1 = input(ohlc4, "MA1 Source")
+len1 = input(48, "MA1 Length")
+
+ma_type2 = input(defval = "linreg", options = ["ema","sma","rma","swma","vwma","wma","linreg"], title = "中期MA Type")
+src2 = input(ohlc4, "MA2 Source")
+len2 = input(50, "MA2 Length")
+offset2 = input(28, "MA2 Offset")
+ep = input(2.0, "Envelope Percent", step=0.1)
+
+//MA Type 関数宣言
+ma_tf(ma_type, src, len, offset) =>
+    ma_type_fun = ma_type == "ema" ? ema(src, len) :
+                  ma_type == "rma" ? rma(src, len) :
+                  ma_type == "swma" ? swma(src) :
+                  ma_type == "vwma" ? vwma(src, len) :
+                  ma_type == "wma" ? wma(src, len) :
+                  ma_type == "linreg" ? linreg(src, len, offset) :
+                  sma(src, len)
+    ma_type_fun
+
+//MAの計算
+ma1 = ma_tf(ma_type1, src1, len1, 0)
+ma2 = offset(ma_tf(ma_type2, src2, len2, 0), offset2)
+
+//Envelopeの計算
+upper = ma2 * (1 + (ep / 100))
+lower = ma2 * (1 - (ep / 100))
+
+
+//売買条件
+buy_on = input(true, "買いエントリー有り")
+buy_exit_on = input(true, "買い決済有り")
+sell_on = input(true, "売りエントリー有り")
+sell_exit_on = input(true, "売り決済有り")
+
+buy1 = crossover(ma1, lower) and buy_on
+buy2 = crossover(ma1, upper) and buy_on
+buy = buy1 or buy2
+
+buy_exit = crossunder(ma1, ma2) and buy_exit_on
+
+sell1 = crossunder(ma1, upper) and sell_on
+sell2 = crossunder(ma1, lower) and sell_on
+sell = sell1 or sell2
+
+sell_exit = crossover(ma1, ma2) and sell_exit_on
+
+if timescale
+	strategy.entry("buy",true,when=buy)
+	strategy.entry("sell",false,when=sell)
+if not sell
+	strategy.close("buy",when=buy_exit)
+if not buy
+	strategy.close("sell",when=sell_exit)
+
+
+//MAを描画
+plot(ma1, color=red, title="MA1")
+plot(ma2, color=aqua, title="MA2")
+plot(upper, color=blue, title="Envelope +%")
+plot(lower, color=blue, title="Envelope -%")

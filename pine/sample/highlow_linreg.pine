@@ -1,0 +1,131 @@
+//@version=3
+//XBTUSD
+//30
+strategy("High_Low Linreg", overlay=true, default_qty_type = strategy.fixed, initial_capital=10000, currency="USD", default_qty_value = 1,slippage=1,commission_type=strategy.commission.percent,commission_value=0.065)
+
+//テスト期間
+syear=input(1900,title="開始（年）")
+smonth=input(01,title="開始（月）")
+sday=input(01,title="開始（日）")
+shour=input(00,title="開始（時）")
+sminute=input(00,title="開始（分）")
+eyear=input(2100,title="終了（年）")
+emonth=input(12,title="終了（月）")
+eday=input(31,title="終了（日）")
+ehour=input(00,title="終了（時）")
+eminute=input(00,title="終了（分）")
+timescale = timestamp(eyear, emonth, eday, ehour, eminute) > time and time > timestamp(syear, smonth, sday, shour, sminute)
+
+//------------------------------------
+
+//MA　入力
+ma_type = input(defval = "linreg", options = ["ema","sma","rma","swma","vwma","wma","linreg"], title = "MA Type")
+ma_src = input(ohlc4, "MA Source")
+ma_len = input(55, "MA Length")
+ma_offset = input(0, "MA Offset")
+
+//MA Type 関数宣言
+ma_tf(ma_type, src, len, offset) =>
+    ma_type_fun = ma_type == "ema" ? ema(src, len) :
+                  ma_type == "rma" ? rma(src, len) :
+                  ma_type == "swma" ? swma(src) :
+                  ma_type == "vwma" ? vwma(src, len) :
+                  ma_type == "wma" ? wma(src, len) :
+                  ma_type == "linreg" ? linreg(src, len, offset) :
+                  sma(src, len)
+    ma_type_fun
+
+//MAの計算
+ma = ma_tf(ma_type, ma_src, ma_len, ma_offset)
+
+//MAを描画
+plot(ma, color=red, title="MA")
+
+//------------------------------------
+
+//High-Low Band　入力
+hl_len = input(15, "High-Low Band Length")
+hl_offset = input(30, "High-Low Band Offset")
+use_oc = input(true, "High-Low Bandに始値・終値を使用")
+
+//High-Low Band　計算
+h_band = use_oc ? highest(max(open, close)[hl_offset], hl_len) : highest(high[hl_offset], hl_len)
+l_band = use_oc ? lowest(min(open, close)[hl_offset], hl_len)  : lowest(low[hl_offset], hl_len)
+m_band = (h_band + l_band) / 2
+
+//High-Low MA　入力
+hl_ma_type = input(defval = "linreg", options = ["ema","sma","rma","swma","vwma","wma","linreg"], title = "High-Low MA Type")
+hl_ma_len = input(33, "High-Low MA Length")
+hl_ma_offset = input(0, "High-Low MA Offset")
+
+//High-Low MA 計算
+h_ma = ma_tf(hl_ma_type, h_band, hl_ma_len, hl_ma_offset)
+m_ma = ma_tf(hl_ma_type, m_band, hl_ma_len, hl_ma_offset)
+l_ma = ma_tf(hl_ma_type, l_band, hl_ma_len, hl_ma_offset)
+
+//High-Low MA　描画
+//plot(h_band, color=blue, title="High Band")
+//plot(m_band, color=aqua, title="Middle Band")
+//plot(l_band, color=yellow, title="Low Band")
+
+plot(h_ma, color=blue, title="High Band MA")
+plot(m_ma, color=aqua, title="Middle Band MA")
+plot(l_ma, color=yellow, title="Low Band MA")
+
+//------------------------------------
+
+//売買条件　入力
+buy_on = input(true, "買いエントリー有り")
+buy_exit_on = input(true, "買い決済有り")
+sell_on = input(true, "売りエントリー有り")
+sell_exit_on = input(true, "売り決済有り")
+
+b_entry1 = input(defval = "High Band MA", options=["High Band MA", "Middle Band MA", "Low Band MA"], title = "Buy Entry Line 1")
+b_entry2 = input(defval = "Low Band MA", options=["High Band MA", "Middle Band MA", "Low Band MA"], title = "Buy Entry Line 2")
+
+b_exit = input(defval = "Middle Band MA", options=["High Band MA", "Middle Band MA", "Low Band MA"], title = "Buy Exit Line")
+
+s_entry1 = input(defval = "Low Band MA", options=["High Band MA", "Middle Band MA", "Low Band MA"], title = "Sell Entry Line 1")
+s_entry2 = input(defval = "High Band MA", options=["High Band MA", "Middle Band MA", "Low Band MA"], title = "Sell Entry Line 2")
+
+s_exit = input(defval = "Middle Band MA", options=["High Band MA", "Middle Band MA", "Low Band MA"], title = "Sell Exit Line")
+
+//売買判定
+src1 = b_entry1 == "High Band MA" ? h_ma :
+       b_entry1 == "Middle Band MA" ? m_ma :
+       l_ma
+src2 = b_entry2 == "High Band MA" ? h_ma :
+       b_entry2 == "Middle Band MA" ? m_ma :
+       l_ma
+src3 = b_exit == "High Band MA" ? h_ma :
+       b_exit == "Middle Band MA" ? m_ma :
+       l_ma
+src4 = s_entry1 == "High Band MA" ? h_ma :
+       s_entry1 == "Middle Band MA" ? m_ma :
+       l_ma
+src5 = s_entry2 == "High Band MA" ? h_ma :
+       s_entry2 == "Middle Band MA" ? m_ma :
+       l_ma
+src6 = s_exit == "High Band MA" ? h_ma :
+       s_exit == "Middle Band MA" ? m_ma :
+       l_ma
+
+buy1 = crossover(ma, src1) and buy_on
+buy2 = crossover(ma, src2) and buy_on
+buy = buy1 or buy2
+
+buy_exit = crossunder(ma, src3) and buy_exit_on
+
+sell1 = crossunder(ma, src4) and sell_on
+sell2 = crossunder(ma, src5) and sell_on
+sell = sell1 or sell2
+
+sell_exit = crossover(ma, src6) and sell_exit_on
+
+if timescale
+	strategy.entry("buy",true,when=buy)
+	strategy.entry("sell",false,when=sell)
+if not sell
+	strategy.close("buy",when=buy_exit)
+if not buy
+	strategy.close("sell",when=sell_exit)

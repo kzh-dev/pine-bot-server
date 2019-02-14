@@ -1,0 +1,23 @@
+//@version=3
+//XBTUSD
+//2H
+strategy("MOEF strategy",overlay=true,commission_value=0.075)
+
+param = input(7)
+
+//MP = (高値 + 安値) ÷ 2
+//MPdiff = 2 × MP - 前日MP
+//MOEF = 0.13785 × MPdiff + 0.0007 × 前日MPdiff + 0.13785 × 2日前MPdiff + 1.2103 × 前日MOEF - 0.4867 × 2日前MOEF
+
+MOEF = close
+MP = hl2
+MPdiff = 2 * MP - MP[1]
+//MOEF := 0.13785 * MPdiff + 0.0007 * MPdiff[1] + 0.13785 * MPdiff[2] + 1.2103 * nz(MOEF[1]) - 0.4867 * nz(MOEF[2])
+MOEF := 0.13785 * MPdiff + 0.0007 * MPdiff[1] + 0.13785 * MPdiff[2] + 1.2103 * nz(MOEF[1]) - 0.4867 * nz(MOEF[2])
+plot(MOEF,color=black,linewidth=2)
+
+buy = crossover(MOEF,MOEF[param])
+sell = crossunder(MOEF,MOEF[param])
+
+strategy.entry("buy",strategy.long,when=buy)
+strategy.entry("sell",strategy.short,when=sell)
