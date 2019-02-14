@@ -147,7 +147,12 @@ def histogram (vm=None):
     return STYLE_HISTOGRAM
 
 def hl2 (vm=None):
-    raise NotImplementedError
+    if vm is None:
+        return None
+    h = vm.market.high()
+    l = vm.market.low()
+    series = [sum(v2) / 2.0 for v2 in zip(h, l)]
+    return bseries(series, 'hl2')
 sources['hl2'] = hl2
 
 def hlc3 (vm=None):
