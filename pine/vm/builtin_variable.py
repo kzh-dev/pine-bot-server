@@ -160,6 +160,11 @@ def hlc3 (vm=None):
     return bseries(series, 'hlc3')
 sources['hlc3'] = hlc3
 
+def hour (vm=None):
+    if vm is None:
+        return 0
+    return vm.timestamps[vm.ip] % (3600 * 24) / 3600
+
 def integer (vm=None):
     return 'integer'
 
@@ -211,7 +216,9 @@ def maroon (vm=None):
     return '#800000'
 
 def minute (vm=None):
-    raise NotImplementedError
+    if vm is None:
+        return 0
+    return vm.timestamps[vm.ip] % 3600 / 60
 
 def monday (vm=None):
     raise NotImplementedError
@@ -278,7 +285,9 @@ def scale__right (vm=None):
     return 0
 
 def second (vm=None):
-    raise NotImplementedError
+    if vm is None:
+        return 0
+    return vm.timestamps[vm.ip] % 60
 
 def session (vm=None):
     raise NotImplementedError
