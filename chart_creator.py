@@ -356,8 +356,8 @@ class ChartCreator(object):
     def set_marker(cls, lst_utime, lst_plot, ax=0, color="black", size=20.0, mark="*", name="", text=""):
         if ax not in cls.__subcharts.keys():
             return
-        if len(lst_utime) < 2 or len(lst_plot) < 2:
-            return
+        #if len(lst_utime) < 2 or len(lst_plot) < 2:
+        #    return
         if lst_utime[0] < lst_utime[-1]:
             np_ut = np.array(lst_utime)
             np_pl = np.array(lst_plot)
