@@ -65,10 +65,15 @@ def _ta_ma (args, kwargs, func):
         (('source', Series, True), ('length', int, True)))
     if math.isnan(source[-1]):
         return source.copy()
-    return series_np(func(source, length))
+    return series_np(func(source, length), source)
 
+pyabs = abs
 def abs (vm, args, kwargs):
-    raise NotImplementedError
+    source = _expand_args(args, kwargs, (('source', None, True),))[0]
+    if isinstance(source, Series):
+        return series_np(np.abs(source), source)
+    else:
+        return pyabs(source)
 
 def acos (vm, args, kwargs):
     raise NotImplementedError
@@ -238,7 +243,7 @@ def linreg (vm, args, kwargs):
         (('source', Series, True), ('length', int, True), ('offset', int, True)))
     if math.isnan(source[-1]):
         return source.copy()
-    return series_np(ta.LINEARREG(source, length) + _offset)
+    return series_np(ta.LINEARREG(source, length) + _offset, source)
 
 def log (vm, args, kwargs):
     raise NotImplementedError
@@ -428,7 +433,7 @@ def rsi (vm, args, kwargs):
         (('x', Series, True), ('y', int, True)))
     if math.isnan(x[-1]):
         return x.copy()
-    return series_np(ta.RSI(x, y))
+    return series_np(ta.RSI(x, y), x)
 
 def sar (vm, args, kwargs):
     raise NotImplementedError
@@ -478,7 +483,7 @@ def stoch (vm, args, kwargs):
     if math.isnan(source[-1]):
         return source.copy()
     fk, _ = ta.STOCHF(high, low, source, length)
-    return series_np(fk)
+    return series_np(fk, source)
 
 def strategy (vm, args, kwargs):
     vm.meta = _expand_args_as_dict(args, kwargs,

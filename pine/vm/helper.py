@@ -118,8 +118,8 @@ def bseries (vals, name):
     s.varname = name
     return s
 
-def series_np (np_array):
-    return Series(np_array)
+def series_np (np_array, source):
+    return Series(np_array).set_valid_index(source)
 
 def series_mutable (v, size):
     if isinstance(v, float):
