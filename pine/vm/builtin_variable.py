@@ -151,7 +151,13 @@ def hl2 (vm=None):
 sources['hl2'] = hl2
 
 def hlc3 (vm=None):
-    raise NotImplementedError
+    if vm is None:
+        return None
+    h = vm.market.high()
+    l = vm.market.low()
+    c = vm.market.close()
+    series = [sum(v3) / 3.0 for v3 in zip(h, l, c)]
+    return bseries(series, 'hlc3')
 sources['hlc3'] = hlc3
 
 def integer (vm=None):
