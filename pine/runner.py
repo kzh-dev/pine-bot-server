@@ -26,7 +26,13 @@ if __name__ == '__main__':
             vm.node.dump()
             vm.set_broker(Broker())
             vm.run()
-            #vm.step()
+            vm.dump_registers()
+        elif op == 'step':
+            vm = VM(BitMexMarket())
+            vm.load_node(node)
+            vm.node.dump()
+            vm.set_broker(Broker())
+            vm.step()
             vm.dump_registers()
         elif op == 'plot':
             vm = PlotVM(BitMexMarket())
