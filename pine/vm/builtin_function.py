@@ -238,7 +238,7 @@ def linreg (vm, args, kwargs):
         (('source', Series, True), ('length', int, True), ('offset', int, True)))
     if math.isnan(source[-1]):
         return source.copy()
-    return series_np(ta.LINEARREG(source, length))
+    return series_np(ta.LINEARREG(source, length) + _offset)
 
 def log (vm, args, kwargs):
     raise NotImplementedError
