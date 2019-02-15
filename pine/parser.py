@@ -68,6 +68,7 @@ def p_var_assign_stmt (p):
 
 def p_var_def_stmt1 (p):
     '''var_def_stmt : var_def DELIM
+                    | var_def COMMA
                     | var_def2'''
     p[0] = p[1]
 
