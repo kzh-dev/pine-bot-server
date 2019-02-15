@@ -320,6 +320,7 @@ class BuiltinFunCallNode (FunCallNode):
         except NotImplementedError as e:
             raise PineError("not implemented: {}".format(self.fname)) from e
         except Exception as e:
+            raise
             raise PineError("{0}: {1}".format(str(e), self.fname)) from e
 
 class MetaInfoFuncNode (BuiltinFunCallNode):

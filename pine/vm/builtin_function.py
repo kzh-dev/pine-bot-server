@@ -104,7 +104,25 @@ def barcolor (vm, args, kwargs):
     raise NotImplementedError
 
 def barssince (vm, args, kwargs):
-    raise NotImplementedError
+    condition = _expand_args(args, kwargs, (
+        ('condition', None, True),
+    ))[0]
+    if not isinstance(condition, Series):
+        if bool(condition):
+            return Series(list(range(1,vm.size+1)))
+        return Series([0]*vm.size)
+
+    # TODO speed!
+    c = 0
+    vidx = condition.valid_index
+    dest = Series([0] * vm.size)
+    for i in range(0, vidx+1):
+        if condition.to_bool_safe(i):
+            c = 0
+        else:
+            c += 1
+        dest[i] = c
+    return dest.set_valid_index(condition)
 
 def bgcolor (vm, args, kwargs):
     return None
@@ -212,7 +230,7 @@ def _xest (vm, args, kwargs, sop, xop):
     try:
         source, length = _expand_args(args, kwargs, _xest_args2)
     except PineArgumentError:
-        length = _expand_args(args, kwargs, _xest_args1)
+        length = _expand_args(args, kwargs, _xest_args1)[0]
         source = sop(vm)
     return series_np(xop(source, length), source)
 
@@ -753,6 +771,34 @@ def tr (vm, args, kwargs):
 
 def tsi (vm, args, kwargs):
     raise NotImplementedError
+
+def valuewhen (vm, args, kwargs):
+    condition, source, occurrence = _expand_args(args, kwargs, (
+        ('condition', None, True),
+        ('source', Series, True),
+        ('occurrence', int, True),
+    ))
+    if not isinstance(condition, Series):
+        if bool(condition):
+            return source.offset(occurrence)
+        return source.dup_none()
+
+    # TODO speed!
+    vidx = pymin([condition.valid_index, source.valid_index])
+    tval = []
+    dest = []
+    dval = source.default_elem()
+    for i in range(0, vidx+1):
+        if condition.to_bool_safe(i):
+            tval.append(source[i])
+        if len(tval) > occurrence:
+            dest.append(tval[-occurrence-1])
+        else:
+            dest.append(dval)
+    for i in range(vidx+1, vm.size):
+        dest.append(dval)
+            
+    return Series(dest).set_valid_index(condition, source)
 
 def variance (vm, args, kwargs):
     raise NotImplementedError

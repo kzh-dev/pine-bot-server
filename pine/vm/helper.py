@@ -51,7 +51,7 @@ class Series (np.ndarray):
         elif isinstance(a, Series):
             self.valid_index = a.valid_index
         else:
-            raise "Trying to set valid index for non-Series values: {0}, {1}".format(a, b)
+            raise PineError("Trying to set valid index for non-Series values: {0}, {1}").format(a, b)
         return self
 
     def out_of_date (self, vm):
@@ -112,6 +112,12 @@ class Series (np.ndarray):
 
     def dup (self):
         return self.copy().set_valid_index(self)
+
+    def dup_none (self):
+        r = Series([self.default_elem()] * self.size)
+        r.valid_index = self.valid_index
+        return r
+        
 
 class BuiltinSeries (Series):
     pass
