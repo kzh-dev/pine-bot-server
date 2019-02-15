@@ -21,14 +21,16 @@ if __name__ == '__main__':
             print(vm.run())
             vm.dump_registers()
         elif op == 'run':
-            vm = VM(BitMexMarket())
+            market = BitMexMarket()
+            vm = VM(market)
             vm.load_node(node)
             vm.node.dump()
             vm.set_broker(Broker())
             vm.run()
             vm.dump_registers()
         elif op == 'step':
-            vm = VM(BitMexMarket())
+            market = BitMexMarket()
+            vm = VM(market)
             vm.load_node(node)
             vm.node.dump()
             vm.set_broker(Broker())

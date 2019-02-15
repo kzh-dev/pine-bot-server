@@ -6,16 +6,17 @@
     <input name="symbol" value="BITMEX:XBTUSD" disabled></input>
     <label for="resolution">Tick: </label>
     <select name="resolution">
+        <option value="1">1min</option>
+        <option value="3">3min</option>
         <option value="5">5min</option>
-<!--
         <option value="15">15min</option>
         <option value="30" selected>30min</option>
--->
-        <option value="60" selected>1hour</option>
-<!--
+        <option value="60">1hour</option>
+        <option value="120">2hour</option>
         <option value="240">4hour</option>
--->
-        <option value="1D">1day</option>
+        <option value="360">6hour</option>
+        <option value="720">12hour</option>
+        <option value="1440">1day</option>
     </select>
 
     {% for form in forms %}
