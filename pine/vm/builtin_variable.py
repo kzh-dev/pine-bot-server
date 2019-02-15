@@ -432,6 +432,9 @@ def symbol (vm=None):
     return 'symbol'
 
 def syminfo__mintick (vm=None):
+    if vm is None:
+        return 0.0
+    return vm.market.mintick()
     raise NotImplementedError
 def syminfo__pointvalue (vm=None):
     raise NotImplementedError

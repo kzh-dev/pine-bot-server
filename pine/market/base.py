@@ -24,6 +24,8 @@ class Market (object):
         return 'DD'
     def tickerid (self):
         return ':'.join((self.market, self.symbol))
+    def mintick (self):
+        return 0.0
 
     # float(ms)
     def bartimestamp (self):

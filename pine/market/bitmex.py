@@ -26,6 +26,9 @@ class BitMexMarket (Market):
 
         self.data = requests.get(url).json()
 
+    def mintick (self):
+        return 0.5
+
     def size (self):
         return len(self.data['t'])
     def timestamps (self):
