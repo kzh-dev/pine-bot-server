@@ -36,7 +36,7 @@ class FuncExpander (object):
         f = builtin_functions.get(name, None)
         if f:
             return f
-        raise PineError('function is not found: {}'.format(fname))
+        raise PineError('function is not found: {}'.format(name))
 
     def execute (self, node):
         return node.expand_func(self)
