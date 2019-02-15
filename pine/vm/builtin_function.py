@@ -552,7 +552,18 @@ def sqrt (vm, args, kwargs):
     raise NotImplementedError
 
 def stdev (vm, args, kwargs):
-    raise NotImplementedError
+    source, length = _expand_args(args, kwargs,
+        (
+            ('source', Series, True),
+            ('length', int, True),
+        )
+    )
+    try:
+        return series_np(ta.STDDEV(source, length), source)
+    except Exception as e:
+        if str(e) == 'inputs are all NaN':
+            return source.dup()
+        raise
 
 def stoch (vm, args, kwargs):
     source, high, low, length = _expand_args(args, kwargs,
