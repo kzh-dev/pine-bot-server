@@ -8,6 +8,11 @@ class BitMexMarketBase (MarketBase):
 
     SYMBOLS = ('XBTUSD',)
 
+    UDF_RESOLUTIONS = ( 1, 5, 60, 60*24 )
+
+    URL_TMPL = "https://www.bitmex.com/api/udf/history?symbol=XBTUSD&" + \
+                "resolution={resolution}&from={f}&to={t}"
+
     def __init__ (self, symbol='XBTUSD', resolution=60):
         super().__init__('BITMEX', symbol, resolution)
 
@@ -25,14 +30,8 @@ class BitMexMarketDirect (BitMexMarketBase):
         if resolution >= 1440:
             resolution = "{}D".format(resolution / 1440)
 
-        param = {"period": resolution, "from": since, "to": unixtime}
-        url   = "https://www.bitmex.com/api/udf/history?symbol=XBTUSD&" + \
-                "resolution={period}&from={from}&to={to}".format(**param)
-
+        url = self.URL_TMPL.format(resolution=resolution, f=since, t=unixtime)
         self.data = requests.get(url).json()
-
-    def resolutions (self):
-        return (1, 5, 60, 60*24)
 
 
 PROXY_PORT = 7000
@@ -45,13 +44,7 @@ class BitMexMarket (BitMexMarketBase):
         super().__init__(symbol, resolution)
 
         self.client = RPCClient('127.0.0.1', PROXY_PORT)
-
-        self._resolutions = tuple(self.client.call('resolutions'))
         self.data = self.client.call('ohlcv', self.resolution, 256)
-
-    def resolutions (self):
-        return self._resolutions
-
 
 
 # CandleProxyServer
@@ -63,13 +56,8 @@ import time
 
 class BitMexMarketProxyServer (RPCServer):
 
-    UDF_RESOLUTIONS = ( 1, 5, 60, 60*24 )
-
     MIN_COUNT = 500
     MAX_COUNT = 10000
-
-    URL_TMPL = "https://www.bitmex.com/api/udf/history?symbol=XBTUSD&" + \
-                "resolution={resolution}&from={f}&to={t}"
 
     def __init__ (self):
         super().__init__()

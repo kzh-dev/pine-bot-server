@@ -60,7 +60,6 @@ def str_to_resolution (string):
         n = 1
     return n * u
 
-
 class MarketBase (object):
 
     RESOLUTIONS = (
@@ -90,6 +89,18 @@ class MarketBase (object):
         return pd.DataFrame(OrderedDict(
                         {"unixtime":data["t"], "open":data["o"], "high":data["h"],
                          "low":data["l"], "close":data["c"], "volume":data["v"]}))
+    def rows_to_udf (self, rows):
+        import numpy
+        cols = numpy.array(rows).T
+        udf = empty_udf()
+        udf['t'] += [int(t) for t in cols[0]]
+        udf['o'] += [t for t in cols[1]]
+        udf['h'] += [t for t in cols[2]]
+        udf['l'] += [t for t in cols[3]]
+        udf['c'] += [t for t in cols[4]]
+        udf['v'] += [t for t in cols[5]]
+        return udf
+
     def size (self):
         return len(self.data['t'])
     def timestamp (self):

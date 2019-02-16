@@ -14,7 +14,8 @@ from pine.vm.vm import InputScanVM
 from pine.vm.plot import PlotVM
 from pine.vm.compile import compile_pine
 from pine.market.base import Market, MARKETS, resolution_to_str
-from pine.market.bitmex import BitMexMarket
+import pine.market.bitmex
+import pine.market.bitflyer
 from pine.broker.base import Broker
 
 def convert_to_form (spec):
