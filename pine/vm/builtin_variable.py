@@ -463,7 +463,7 @@ def tickerid (vm=None):
 def time (vm=None):
     if vm is None:
         return None
-    return self.timestamps
+    return vm.timestamps
 def timenow (vm=None):
     raise NotImplementedError
 
