@@ -36,8 +36,8 @@ class BitMexMarketDirect (BitMexMarketBase):
         self.data = requests.get(url).json()
 
 
-from .base import PROXY_PORT
 # CandleProxyClient
+from .base import PROXY_PORT
 from mprpc import RPCClient
 class BitMexMarket (BitMexMarketBase):
 
