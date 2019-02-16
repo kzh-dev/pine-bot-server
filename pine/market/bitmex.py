@@ -1,52 +1,18 @@
 # coding=utf-8
 
-from datetime import datetime
-import calendar
 import requests
 
-from .base import Market
+from .base import MarketBase, MarketError, empty_udf, utcunixtime, register_market
 
-class MarketError (Exception):
-    pass
+class BitMexMarketBase (MarketBase):
 
-def utcunixtime ():
-    now = datetime.utcnow()
-    return calendar.timegm(now.utctimetuple())
-
-
-class BitMexMarketBase (Market):
+    SYMBOLS = ('XBTUSD',)
 
     def __init__ (self, symbol='XBTUSD', resolution=60):
         super().__init__('BITMEX', symbol, resolution)
 
-    def resolutions (self):
-        raise NotImplementedError
-
     def mintick (self):
         return 0.5
-
-    def size (self):
-        return len(self.data['t'])
-    def timestamps (self):
-        return self.data['t']
-    def open (self):
-        return self.data['o']
-    def high (self):
-        return self.data['h']
-    def low (self):
-        return self.data['l']
-    def close (self):
-        return self.data['c']
-    def volume (self):
-        return self.data['v']
-
-    def ohlcv_df (self):
-        import pandas as pd
-        from collections import OrderedDict
-        data = self.data
-        return pd.DataFrame(OrderedDict(
-                        {"unixtime":data["t"], "open":data["o"], "high":data["h"],
-                         "low":data["l"], "close":data["c"], "volume":data["v"]}))
 
 
 class BitMexMarketDirect (BitMexMarketBase):
@@ -89,24 +55,6 @@ class BitMexMarket (BitMexMarketBase):
 
 
 # CandleProxyServer
-class L(list):
-
-    def __setitem__(self, index, value):
-        if index >= len(self):
-            self.extend([None]*(index + 1 - len(self)))
-        list.__setitem__(self, index, value)
-
-    def rindex (self, v):
-        i = len(self) - 1
-        while i >= 0:
-            if self[i] == v:
-                return i
-            i -= 1
-        return 0
-
-def empty_udf ():
-    return {'t':L(), 'o':L(), 'c':L(), 'h':L(), 'l':L(), 'v':L()}
-
 from mprpc import RPCServer
 import threading
 import fasteners
@@ -114,20 +62,6 @@ import queue
 import time
 
 class BitMexMarketProxyServer (RPCServer):
-
-    RESOLUTIONS = (
-        1,
-        3,
-        5,
-        15,
-        30,
-        60 * 1,
-        60 * 2,
-        60 * 4,
-        60 * 6,
-        60 * 12,
-        60 * 24,
-    )
 
     UDF_RESOLUTIONS = ( 1, 5, 60, 60*24 )
 
@@ -329,10 +263,14 @@ class BitMexMarketProxyServer (RPCServer):
                 for dres in children:
                     self.downsample_candle(myres, dres)
 
+            # debug
+            from datetime import datetime
             now = datetime.now()
             for res in [myres] + children:
                 udf = self.candles[res]
                 print("{}: {}: #={}: t={} c={} v={}".format(now, res, len(udf['t']), int(udf['t'][-1] % 3600 / 60), udf['c'][-1], udf['v'][-1]))
+
+register_market('BITMEX', BitMexMarket)
 
 
 if __name__ == '__main__':

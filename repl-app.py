@@ -13,7 +13,7 @@ from pine.base import PineError
 from pine.vm.vm import InputScanVM
 from pine.vm.plot import PlotVM
 from pine.vm.compile import compile_pine
-from pine.market.base import Market
+from pine.market.base import Market, MARKETS, resolution_to_str
 from pine.market.bitmex import BitMexMarket
 from pine.broker.base import Broker
 
@@ -33,7 +33,14 @@ def evaluate ():
         inputs = vm.run()
         pine_title = vm.title
         forms = [convert_to_form(i) for i in inputs]
-        return render_template('input_forms.html', title=pine_title, forms=forms, code=code)
+        symbols = []
+        for m,cls in MARKETS.items():
+            for t in cls.SYMBOLS:
+                symbols.append(':'.join([m,t]))
+        resolutions = []
+        for r in Market.RESOLUTIONS:
+            resolutions.append((r, resolution_to_str(r)))
+        return render_template('input_forms.html', title=pine_title, forms=forms, code=code, symbols=symbols, resolutions=resolutions)
 
     except PineError as e:
         return render_template('evaluate_error.html', error=str(e))
@@ -49,22 +56,25 @@ def run ():
     inputs = {}
     indicator_pane = 1
     for k in request.form:
-        if k == 'code':
-            code = request.form[k]
-        elif k == 'symbol':
-            symbol = request.form[symbol]
-        elif k == 'resolution':
-            resolution = request.form.get(k, type=int)
-        else:
-            inputs[k] = request.form[k]
-
+        try:
+            if k == 'code':
+                code = request.form[k]
+            elif k == 'symbol':
+                symbol = request.form[k]
+            elif k == 'resolution':
+                resolution = request.form.get(k, type=int)
+            else:
+                inputs[k] = request.form[k]
+        except Exception as e:
+            print(e, k, request.form)
+            raise
     try:
         # FIXME parse again
         node = compile_pine(code)
 
         # Run
         market, symbol_ = symbol.split(':')
-        market = BitMexMarket(symbol_, resolution)
+        market = MARKETS[market](symbol_, resolution)
         vm = PlotVM(market)
         vm.load_node(node)
         vm.set_user_inputs(inputs)
@@ -207,5 +217,4 @@ def _make_chart (market, plots, indicator_pane):
 if __name__ == '__main__':
     import os
     port = int(os.environ.get('PORT', 5000))
-    print(port)
     app.run(port=port)

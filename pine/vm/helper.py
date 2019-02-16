@@ -146,39 +146,3 @@ def series_mutable (v, size):
 
 def series_immutable (v, size):
     return Series([v] * size)
-
-
-def resolution_to_str (resolution):
-    if resolution < 60:
-        return str(60)
-    if resolution < 60*24:
-        n, u = int(resolution / 240), 'H'
-    else:
-        n, u = int(resolution / 60 / 24 / 7), 'D'
-    if n == 1:
-        n = ''
-    return n+u
-    
-def str_to_resolution (string):
-    try:
-        return int(string)
-    except:
-        pass
-    if string[-1] == 'H':
-        n = string[0:-1]
-        u = 60
-    elif string[-1] == 'D':
-        n = string[0:-1]
-        u = 60 * 24
-    else:
-        raise PineError("invalid resolution: {}".format(string))
-
-    if not bool(n):
-        n = 1
-    return n * u
-
-
-
-
-
-

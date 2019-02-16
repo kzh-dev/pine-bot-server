@@ -20,6 +20,7 @@ if __name__ == '__main__':
             print(vm.meta)
             print(vm.run())
             vm.dump_registers()
+            from .market.base import MARKETS
         elif op == 'run':
             market = BitMexMarket()
             vm = VM(market)

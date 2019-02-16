@@ -3,20 +3,16 @@
 <form>
     <textarea name="code" hidden>{{ code|e }}</textarea>
     <label for="symbol">Symbol: </label>
-    <input name="symbol" value="BITMEX:XBTUSD" disabled></input>
+    <select name="symbol">
+        {% for s in symbols %}
+            <option value="{{s}}" {% if s == 'BITMEX:XBTUSD' %} selected {% endif %}>{{s}}</option>
+        {% endfor %}
+    </select>
     <label for="resolution">Tick: </label>
     <select name="resolution">
-        <option value="1">1min</option>
-        <option value="3">3min</option>
-        <option value="5">5min</option>
-        <option value="15">15min</option>
-        <option value="30" selected>30min</option>
-        <option value="60">1hour</option>
-        <option value="120">2hour</option>
-        <option value="240">4hour</option>
-        <option value="360">6hour</option>
-        <option value="720">12hour</option>
-        <option value="1440">1day</option>
+        {% for r,s in resolutions %}
+            <option value="{{r}}" {% if r == 30 %} selected {% endif %}>{{s}}</option>
+        {% endfor %}
     </select>
 
     {% for form in forms %}
