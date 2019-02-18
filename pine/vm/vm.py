@@ -139,8 +139,13 @@ class BaseVM (object):
         return self.ip + 1 == self.size
 
     def run (self):
+        #import time
+        #t = time.time()
         while self.ip < self.size:
             self.step()
+            #t_ = time.time()
+            #print(t_ - t)
+            #t = t_
 
     def get_default_input_title (self, node):
         idx = self.inputs.index(node)
