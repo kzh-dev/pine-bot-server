@@ -80,7 +80,7 @@ class BaseVM (object):
         self.scoped_registers = []
         # timestamps
         self.size = self.market.size()
-        self.timestamps = bseries(self.market.timestamp(), 'timestamp')
+        self.timestamps = bseries(self.market.timestamp(), builtin_variable.time)
         # reset VM's ip
         self.ip = 0
 

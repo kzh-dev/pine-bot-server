@@ -49,6 +49,18 @@ class BitFlyerMarket (BitFlyerMarketBase):
         self.client = RPCClient('127.0.0.1', port)
         self.data = self.client.call('ohlcv', TICKERID, self.resolution, 256)
 
+    def step_ohlcv (self, next_clock):
+        d1, d0 = self.client.call('step_ohlcv', TICKERID, self.resolution, next_clock)
+        if d1 is None:
+            return None
+        if d0['t'] <= self.data['t'][-1]:
+            return None
+        for k,v in d0.items():
+            self.data[k].pop(0)
+            self.data[k][-1] = d1[k]
+            self.data[k].append(v)
+        return d0['t']
+
 register_market(MARKET, BitFlyerMarket)
 #register_market(MARKET, BitFlyerMarketDirect)
 

@@ -67,10 +67,12 @@ def bool (vm=None):
 def circles (vm=None):
     return STYLE_CIRCLES
 
-def close (vm=None):
+def close (vm=None, count=0):
     if vm is None:
         return None
-    return bseries(vm.market.close(), 'close')
+    if count:
+        return vm.market.close(count)
+    return bseries(vm.market.close(), close)
 sources['close'] = close
 
 def columns (vm=None):
@@ -137,32 +139,43 @@ def gray (vm=None):
 def green (vm=None):
     return '#008000'
 
-def high (vm=None):
+def high (vm=None, count=0):
     if vm is None:
         return None
-    return bseries(vm.market.high(), 'high')
+    if count:
+        return vm.market.high(count)
+    return bseries(vm.market.high(), high)
 sources['high'] = high
 
 def histogram (vm=None):
     return STYLE_HISTOGRAM
 
-def hl2 (vm=None):
+def hl2 (vm=None, count=0):
     if vm is None:
         return None
+    if count:
+        h = vm.market.high(count)
+        l = vm.market.low(count)
+        return (h + l) / 2.0
     h = vm.market.high()
     l = vm.market.low()
     series = [sum(v2) / 2.0 for v2 in zip(h, l)]
-    return bseries(series, 'hl2')
+    return bseries(series, hl2)
 sources['hl2'] = hl2
 
-def hlc3 (vm=None):
+def hlc3 (vm=None, count=0):
     if vm is None:
         return None
+    if count:
+        h = vm.market.high()
+        l = vm.market.low()
+        c = vm.market.close()
+        return (h + l + c) / 3.0
     h = vm.market.high()
     l = vm.market.low()
     c = vm.market.close()
     series = [sum(v3) / 3.0 for v3 in zip(h, l, c)]
-    return bseries(series, 'hlc3')
+    return bseries(series, hlc3)
 sources['hlc3'] = hlc3
 
 def hour (vm=None):
@@ -211,10 +224,12 @@ def location__bottom (vm=None):
 def location__top (vm=None):
     return 'top'
 
-def low (vm=None):
+def low (vm=None, count=0):
     if vm is None:
         return None
-    return bseries(vm.market.low(), 'low')
+    if count:
+        return vm.market.low(count)
+    return bseries(vm.market.low(), low)
 sources['low'] = low
 
 def maroon (vm=None):
@@ -240,15 +255,21 @@ def na (vm=None):
 def navy (vm=None):
     return '#000080'
 
-def ohlc4 (vm=None):
+def ohlc4 (vm=None, count=0):
     if vm is None:
         return None
+    if count:
+        o = vm.market.open()
+        h = vm.market.high()
+        l = vm.market.low()
+        c = vm.market.close()
+        return (o + h + l + c) / 4.0
     o = vm.market.open()
     h = vm.market.high()
     l = vm.market.low()
     c = vm.market.close()
     series = [sum(v4) / 4.0 for v4 in zip(o, h, l, c)]
-    return bseries(series, 'ohlc4')
+    return bseries(series, ohlc4)
 sources['ohlc4'] = ohlc4
 
 def olive (vm=None):
@@ -256,10 +277,12 @@ def olive (vm=None):
 
     raise NotImplementedError
 
-def open (vm=None):
+def open (vm=None, count=0):
     if vm is None:
         return None
-    return bseries(vm.market.open(), 'open')
+    if count:
+        return vm.market.open(count)
+    return bseries(vm.market.open(), open)
 sources['open'] = open
 
 def orange (vm=None):
@@ -460,9 +483,11 @@ def tickerid (vm=None):
         return None
     return vm.market.tickerid()
 
-def time (vm=None):
+def time (vm=None, count=0):
     if vm is None:
         return None
+    if count:
+        return vm.market.timestamp(count)
     return vm.timestamps
 def timenow (vm=None):
     raise NotImplementedError

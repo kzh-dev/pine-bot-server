@@ -321,10 +321,10 @@ def p_error (p):
 from .lexer import Lexer
 def parse (data):
     parser = yacc.yacc()
-    import logging
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-    return parser.parse(data, lexer=Lexer(), debug=logger)
+    #import logging
+    #logger = logging.getLogger()
+    #logger.setLevel(logging.DEBUG)
+    return parser.parse(data, lexer=Lexer())#), debug=logger)
 
 
 if __name__ == '__main__':

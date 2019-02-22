@@ -99,6 +99,16 @@ class Series (np.ndarray):
                 r[i] = d
         return r.set_valid_index(self)
 
+    def step (self, v=None):
+        self[:self.size-1] = self[1:]
+        self[-1] = self.default_elem()
+        if v:
+            self[-1] = v
+        else:
+            self[-1] = self.default_elem()
+            self.valid_index -= 1
+        return self
+
     def to_mutable_series (self):
         r = Series([self.default_elem()] * self.size)
         r[0] = self[0]
@@ -120,11 +130,14 @@ class Series (np.ndarray):
         
 
 class BuiltinSeries (Series):
-    pass
 
-def bseries (vals, name):
+    @property
+    def varname (self):
+        return self.varfunc.__name__
+
+def bseries (vals, func):
     s = BuiltinSeries(vals)
-    s.varname = name
+    s.varfunc = func
     return s
 
 def series_np (np_array, source):

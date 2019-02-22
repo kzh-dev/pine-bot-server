@@ -20,7 +20,17 @@ class L(list):
             if self[i] == v:
                 return i
             i -= 1
-        return 0
+        return i
+
+    def rindex_next (self, v):
+        i = imax = len(self) - 1
+        while i >= 0:
+            if self[i] <= v:
+                if i == imax:
+                    return -1
+                return i + 1
+            i -= 1
+        return i
 
 def empty_udf ():
     return {'t':L(), 'o':L(), 'c':L(), 'h':L(), 'l':L(), 'v':L()}
@@ -104,18 +114,30 @@ class MarketBase (object):
 
     def size (self):
         return len(self.data['t'])
-    def timestamp (self):
+    def timestamp (self, count=0):
+        if count:
+            return self.data['t'][-count]
         return self.data['t']
 
-    def open (self):
+    def open (self, count=0):
+        if count:
+            return self.data['o'][-count]
         return self.data['o']
-    def high (self):
+    def high (self, count=0):
+        if count:
+            return self.data['h'][-count]
         return self.data['h']
-    def low (self):
+    def low (self, count=0):
+        if count:
+            return self.data['l'][-count]
         return self.data['l']
-    def close (self):
+    def close (self, count=0):
+        if count:
+            return self.data['c'][-count]
         return self.data['c']
-    def volume (self):
+    def volume (self, count=0):
+        if count:
+            return self.data['v'][-count]
         return self.data['v']
 
     def mintick (self):
@@ -172,14 +194,41 @@ class MarketOhlcvAdapter (object):
 
     def ohlcv (self, resolution, count):
         candles = self.candles[resolution]
-        return dict(
-            t=candles['t'][-count:],
-            o=candles['o'][-count:],
-            h=candles['h'][-count:],
-            l=candles['l'][-count:],
-            c=candles['c'][-count:],
-            v=candles['v'][-count:],
-        )
+        with self.lock.read_lock():
+            return dict(
+                t=candles['t'][-count:],
+                o=candles['o'][-count:],
+                h=candles['h'][-count:],
+                l=candles['l'][-count:],
+                c=candles['c'][-count:],
+                v=candles['v'][-count:],
+            )
+
+    def step_ohlcv (self, resolution, next_clock):
+        candles = self.candles[resolution]
+        with self.lock.read_lock():
+            i = candles['t'].rindex(next_clock)
+            if i <= 0:
+                return (None, None)
+            else:
+                return (
+                    dict(
+                        t=candles['t'][i-1],
+                        o=candles['o'][i-1],
+                        h=candles['h'][i-1],
+                        l=candles['l'][i-1],
+                        c=candles['c'][i-1],
+                        v=candles['v'][i-1],
+                    ),
+                    dict(
+                        t=candles['t'][i],
+                        o=candles['o'][i],
+                        h=candles['h'][i],
+                        l=candles['l'][i],
+                        c=candles['c'][i],
+                        v=candles['v'][i],
+                    ),
+                )
 
     def start_threads (self):
         resolutions = list(MarketBase.RESOLUTIONS)
@@ -312,6 +361,8 @@ class MarketOhlcvAdapter (object):
             self.candles[res] = target
 
         ti = target['t'].rindex(candles['t'][0])
+        if ti < 0:
+            ti = 0
 
         for i in range(0, len(candles['t'])):
             target['t'][ti+i] = candles['t'][i]

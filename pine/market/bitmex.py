@@ -39,13 +39,36 @@ class BitMexMarketDirect (BitMexMarketBase):
 # CandleProxyClient
 from .base import PROXY_PORT
 from mprpc import RPCClient
+import msgpackrpc
+
 class BitMexMarket (BitMexMarketBase):
 
     def __init__ (self, symbol=SYMBOL, resolution=60, port=PROXY_PORT):
         super().__init__(symbol, resolution)
 
-        self.client = RPCClient('127.0.0.1', port)
-        self.data = self.client.call('ohlcv', TICKERID, self.resolution, 256)
+        #self.client = RPCClient('127.0.0.1', port)
+        self.client = msgpackrpc.Client(msgpackrpc.Address('127.0.0.1', port), unpack_encoding='utf-8')
+        data = self.client.call('ohlcv', TICKERID, self.resolution, 256)
+        self.data = dict(
+            t=list(data['t']),
+            o=list(data['o']),
+            h=list(data['h']),
+            l=list(data['l']),
+            c=list(data['c']),
+            v=list(data['v']),
+        )
+
+    def step_ohlcv (self, next_clock):
+        d1, d0 = self.client.call('step_ohlcv', TICKERID, self.resolution, next_clock)
+        if d1 is None:
+            return None
+        if d0['t'] <= self.data['t'][-1]:
+            return None
+        for k,v in d0.items():
+            self.data[k].pop(0)
+            self.data[k][-1] = d1[k]
+            self.data[k].append(v)
+        return d0['t']
 
 register_market(MARKET, BitMexMarket)
 

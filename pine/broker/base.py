@@ -5,14 +5,9 @@ import math
 from ..vm.helper import NaN
 from ..base import PineError
 
-class Broker (object):
+class BaseBroker (object):
 
     def __init__ (self):
-        self.clear_positions()
-        self.actions = []
-        # TODO self.active_entry_orders[id], self.active_exit_orders[id]
-        self.order_history = []
-
         self.pyramiding = 0
         self.calc_on_order_fills = False
         self.calc_on_every_tick = True
@@ -24,14 +19,7 @@ class Broker (object):
         self.commission_type = 'percent'
         self.commission_value = 'commission_value'
 
-    def clear_positions (self):
-        self.positions = {}
-
-    def position_size (self):
-        s = 0.0
-        for p in self.positions.values():
-            s += p['qty']
-        return s
+        self.actions = []
 
     def setup (self, kws):
         v = kws.get('pyramiding', None)
@@ -63,6 +51,7 @@ class Broker (object):
             raise PineError('calc_on_order_fills is not supported')
 
     def entry (self, kws):
+        #print('entry', kws)
         #oid = kws['id']
         #is_long = kws['long']
         #qty = kws.get('qty', self.default_qty_value)
@@ -83,10 +72,12 @@ class Broker (object):
         self.add_action(kws)
 
     def close (self, kws):
+        #print('close', kws)
         kws['action'] = 'close'
         self.add_action(kws)
 
     def close_all (self, kws):
+        #print('close_all', kws)
         kws['action'] = 'close_all'
         self.add_action(kws)
 
@@ -94,6 +85,30 @@ class Broker (object):
         self.actions.append(action)
     def clear_actions (self):
         self.actions = []
+
+    def position_size (self):
+        raise NotImplementedError
+
+    def step (self):
+        raise NotImplementedError
+
+
+class Broker (BaseBroker):
+
+    def __init__ (self):
+        super().__init__()
+        self.clear_positions()
+        # TODO self.active_entry_orders[id], self.active_exit_orders[id]
+        self.order_history = []
+
+    def clear_positions (self):
+        self.positions = {}
+
+    def position_size (self):
+        s = 0.0
+        for p in self.positions.values():
+            s += p['qty']
+        return s
 
     def step (self):
         # TODO need to separate order and execution for limit order.
