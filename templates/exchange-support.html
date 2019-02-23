@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <title>Exchange support list</title>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <h1>Exchange suport list</h1>
+        {% for name, xchg in exchanges.items() %}
+            <h2>{{ name }}</h2>
+            <dl>
+                <dt>name: </dt>
+                <dd>{{ xchg.name }}</dd>
+                <dt>ids: </dt>
+                <dd>{{ xchg.ids }}</dd>
+                <dt>cryptowatch: </dt>
+                <dd>{{ xchg.cryptowatch }}</dd>
+            </dl>
+            <table>
+                <thead>
+                    <tr>
+                        <td>name</td>
+                        <td>ids</td>
+                        <td>cryptowatch?</td>
+                        <td>resolutions</td>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for name, market in xchg.markets.items() %}
+                    <tr>
+                        <td>{{ name }}</td>
+                        <td>{{ market.ids }}</td>
+                        <td>{{ market.cryptowatch }}</td>
+                        <td>{{ market.resolutions }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+    </body>
+</html>
+

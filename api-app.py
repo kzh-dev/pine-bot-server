@@ -31,6 +31,41 @@ from datetime import datetime, timezone
 def utctimestamp ():
     return datetime.now(timezone.utc).timestamp()
 
+# exchange information
+import json
+with open('static/exchange-support.json') as f:
+    exchanges = json.loads(f.read(), object_pairs_hook=OrderedDict)
+
+@app.route('/exchange-support', methods=['POST'])
+def exchange_support ():
+    try:
+        exchange = request.json.get('exchange', None)
+        if not exchange:
+            return jsonify(exchanges=tuple(exchanges.keys()))
+        xchg = exchanges.get(exchange.lower(), None)
+        if xchg is None:
+            return jsonify(markets=[])
+        
+        market = request.json.get('market', None)
+        if market is None:
+            return jsonify(markets=xchg['markets'])
+
+        market = market.lower()
+        print(market)
+        markets = []
+        for name, m in xchg['markets'].items():
+            if market == name:
+                markets.append(m)
+            else:
+                print(m['ids'])
+                for mi in m['ids']:
+                    if mi.lower() == market:
+                        markets.append(m)
+                        break
+        return jsonify(markets=markets)
+
+    except Exception as e:
+        return jsonify(error=traceback.format_exc())
 
 @app.route('/scan-input', methods=['POST'])
 def scan_input ():

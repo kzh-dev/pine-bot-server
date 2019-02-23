@@ -59,8 +59,7 @@ for xchg_name in ccxt.exchanges:
             m_['ids'] = (name, m['id'], m['symbol'])
             cw = False
             for i in m_['ids']:
-                if i in cryptowatch[xchg_id] or i.lower() in cryptowatch[xchg_id] or\
-                   i.upper() in cryptowatch[xchg_id]:
+                if xchg_id in cryptowatch and (i in cryptowatch[xchg_id] or i.lower() in cryptowatch[xchg_id] or i.upper() in cryptowatch[xchg_id]):
                     cw = True
                     break
             m_['cryptowatch'] = cw
@@ -80,7 +79,9 @@ for xchg_name in ccxt.exchanges:
         exchanges[xchg_name] = xchg
         print(xchg_name)
     except Exception as e:
+        import traceback
         print(f'error: {xchg_name}: {e}')
+        traceback.print_exc() 
             
 with open('static/exchange-support.json', 'w') as f:
     f.write(json.dumps(exchanges, indent=2))

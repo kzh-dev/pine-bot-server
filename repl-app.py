@@ -11,6 +11,14 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 def landing ():
     return render_template('landing.html')
 
+import json
+from collections import OrderedDict
+with open('static/exchange-support.json') as f:
+    exchanges = json.loads(f.read(), object_pairs_hook=OrderedDict)
+@app.route('/exchange-support')
+def exchange_support ():
+    return render_template('exchange-support.html', exchanges=exchanges)
+
 from pine.base import PineError
 from pine.vm.vm import InputScanVM
 from pine.vm.plot import PlotVM
@@ -97,7 +105,6 @@ def run ():
 
 
 import time, requests
-from collections import OrderedDict
 import pandas as pd
 from chart_creator import ChartCreator as cc
 
