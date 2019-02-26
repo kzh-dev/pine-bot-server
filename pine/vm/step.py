@@ -14,6 +14,17 @@ class StepVM (VM):
         self.code = pine_code
         self.ident = hashlib.sha1(str(random.random()).encode('utf-8')).hexdigest()
 
+    def scan_market (self):
+        # TODO 
+        for n in self.securties:
+            n.evaluate(self)
+        self.reset_context()
+        return []
+
+    def set_ohlcv (self, ohlcv):
+        self.market.set_ohlcv(ohlcv)
+        self.reset_context()
+
     @property
     def clock (self):
         return int(self.timestamps[-1])
@@ -25,20 +36,6 @@ class StepVM (VM):
     def step_new (self):
         ## TODO SubVM
 
-        # load a new candle
-        max_trial = 15
-        trial = 0
-        next_clock = self.next_clock
-        while trial < max_trial:
-            trial += 1
-            ts = self.market.step_ohlcv(next_clock)
-            if ts:
-                break
-            time.sleep(1)
-        # Fail to load?
-        if next_clock > self.next_clock:
-            return None
-        
         # step registers
         for s in [v for v in self.registers.values() if isinstance(v, Series)]:
             if isinstance(s, BuiltinSeries):

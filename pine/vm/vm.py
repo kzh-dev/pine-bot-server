@@ -53,6 +53,15 @@ class BaseVM (object):
         self.builtin_variable_cache = {}
         self.broker = None
 
+    def reset_context (self):
+        # setup registers
+        self.registers = {}
+        self.scoped_registers = []
+        # timestamps
+        self.timestamps = bseries(self.market.timestamp(), builtin_variable.time)
+        # reset VM's ip
+        self.ip = 0
+
     @property
     def title (self):
         return self.meta.get('title', 'No title')
@@ -63,6 +72,10 @@ class BaseVM (object):
     def set_broker (self, broker):
         self.broker = broker
         return broker
+
+    @property
+    def size (self):
+        return self.market.size()
 
     def load_node (self, node):
         self.node = node
@@ -75,14 +88,7 @@ class BaseVM (object):
             if self.broker:
                 self.broker.setup(meta)
 
-        # setup registers
-        self.registers = {}
-        self.scoped_registers = []
-        # timestamps
-        self.size = self.market.size()
-        self.timestamps = bseries(self.market.timestamp(), builtin_variable.time)
-        # reset VM's ip
-        self.ip = 0
+        self.reset_context()
 
     def push_register_scope (self):
         self.scoped_registers.append({})

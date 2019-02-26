@@ -627,7 +627,9 @@ def strategy__close (vm, args, kwargs):
     when = kws.get('when', None)
     if when is not None and not _evaluate_when(vm, when):
         return
-    return vm.broker.close(kws)
+    if vm.broker:
+        return vm.broker.close(kws)
+    return
 
 def strategy__close_all (vm, args, kwargs):
     kws = _expand_args_as_dict(args, kwargs,
@@ -638,7 +640,9 @@ def strategy__close_all (vm, args, kwargs):
     when = kws.get('when', None)
     if when is not None and not _evaluate_when(vm, when):
         return
-    return vm.broker.close_all(kws)
+    if vm.broker:
+        return vm.broker.close_all(kws)
+    return
 
 def strategy__entry (vm, args, kwargs):
     if not vm.broker:
@@ -659,7 +663,9 @@ def strategy__entry (vm, args, kwargs):
     when = kws.get('when', None)
     if when is not None and not _evaluate_when(vm, when):
         return
-    return vm.broker.entry(kws)
+    if vm.broker:
+        return vm.broker.entry(kws)
+    return
 
 def strategy__exit (vm, args, kwargs):
     raise NotImplementedError
@@ -681,7 +687,9 @@ def strategy__exit (vm, args, kwargs):
     when = kws.get('when', None)
     if when is not None and not _evaluate_when(vm, when):
         return
-    return vm.broker.exit(kws)
+    if vm.broker:
+        return vm.broker.exit(kws)
+    return
 
 def strategy__order (vm, args, kwargs):
     raise NotImplementedError

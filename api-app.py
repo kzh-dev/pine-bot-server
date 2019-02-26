@@ -1,5 +1,8 @@
 # coding=utf-8
 
+from logging import getLogger
+logger = getLogger(__name__)
+
 from datetime import datetime
 
 from flask import Flask
@@ -19,9 +22,8 @@ from pine.base import PineError
 from pine.vm.vm import InputScanVM
 from pine.vm.step import StepVM
 from pine.vm.compile import compile_pine
-from pine.market.base import Market, MARKETS, str_to_resolution
-import pine.market.bitmex
-import pine.market.bitflyer
+from pine.market.base import Market
+from pine.market.mirror import MirrorMarket
 from pine.broker.mirror import MirrorBroker
 
 import traceback
@@ -91,8 +93,9 @@ def scan_input ():
             resolution=30,
             default_qty=default_qty,
         )
+        params['inputs'] = inputs = OrderedDict()
         for i in inputs:
-            params[i['title']] = i['defval']
+            inputs[i['title']] = i['defval']
 
         return jsonify(params=params)
 
@@ -101,84 +104,83 @@ def scan_input ():
 
 
 vm_cache = OrderedDict()
-MAX_VM_CACHE_COUNT = 100
+MAX_VM_CACHE_COUNT = 256
 
-@app.route('/init-vm', methods=['POST'])
-def init_vm ():
+@app.route('/install-vm', methods=['POST'])
+def install_vm ():
     try:
         code = request.json['code']
-        params = request.json['params']
-
-        # resolution
-        resolution = str_to_resolution(params['resolution'])
-        if resolution not in Market.RESOLUTIONS:
-            raise Exception("unusable resolution: {}".format(resolution))
-        # Market
-        exchange = params['exchange']
-        market_cls = MARKETS.get(exchange, None)
-        if market_cls is None:
-            raise Exception('unusable exchange: {}'.fomrat(exchange))
-        market = market_cls(params['symbol'], resolution)
+        inputs = request.json['inputs']
+        market = request.json['market']
 
         # compile PINE
         node = compile_pine(code)
         if node is None:
             raise PineError("pine script is empty")
 
-        # VM & broker
-        vm = StepVM(market, code)
-        vm.set_broker(MirrorBroker())
+        # VM
+        vm = StepVM(MirrorMarket(*market), code)
 
         # Set up and run
         vm.load_node(node)
-        vm.set_user_inputs(params)
-        vm.run()
+        vm.set_user_inputs(inputs)
+        markets = vm.scan_market()
     
         # Register VM to store
         vm_cache[vm.ident] = vm
         while len(vm_cache) > MAX_VM_CACHE_COUNT:
             vm_cache.pop_item()
 
-        return jsonify(vm=vm.ident, clock=vm.clock, next_clock=vm.next_clock,
-                       server_clock=int(utctimestamp()))
+        return jsonify(vm=vm.ident, markets=markets, server_clock=utctimestamp())
 
     except Exception as e:
         # ステータスコードは OK (200)
         return jsonify(error=traceback.format_exc())
 
 
-@app.route('/step-vm', methods=['POST'])
-def step_vm ():
+@app.route('/boot-vm', methods=['POST'])
+def boot_vm ():
     try:
-        vmid = request.json['vm']
-        next_clock = request.json['next_clock']
-        broker = request.json['broker']
+        vmid = request.json['vmid']
+        ohlcv = request.json['ohlcv']
 
         vm = vm_cache.pop(vmid, None)
         if vm is None:
             return jsonify(error='Not found in cache'), 205
         vm_cache[vmid] = vm
 
-        now = utctimestamp()
-        interval = 10
-        if next_clock - now > interval:
-            return jsonify(server_clock=int(now)), 206
+        vm.set_ohlcv(ohlcv)
+        vm.run()
+        vm.set_broker(MirrorBroker())
 
-        if vm.next_clock != next_clock:
-            raise Exception('out-of-sync: vm={0}, client={1}'.fomrat(vm.next_clock, next_clock))
-
-        vm.broker.update(**broker)
-        actions = vm.step_new()
-        if actions is None:
-            now = utctimestamp()
-            return jsonify(server_clock=int(now)), 206
-
-        return jsonify(actions=actions,
-                       next_clock=vm.next_clock,
-                       server_clock=int(utctimestamp()))
+        return jsonify(server_clock=utctimestamp())
 
     except Exception as e:
         vm = vm_cache.pop(vmid, None)
+        # ステータスコードは RESET
+        return jsonify(error=traceback.format_exc()), 205
+
+@app.route('/step-vm', methods=['POST'])
+def step_vm ():
+    try:
+        vmid = request.json['vmid']
+        broker = request.json['broker']
+        ohlcv2 = request.json['ohlcv2']
+
+        vm = vm_cache.pop(vmid, None)
+        if vm is None:
+            return jsonify(error='Not found in cache'), 205
+        vm_cache[vmid] = vm
+
+        vm.broker.update(**broker)
+        vm.market.update_ohlcv2(ohlcv2)
+        
+        actions = vm.step_new()
+        return jsonify(actions=actions,
+                       server_clock=utctimestamp())
+
+    except Exception as e:
+        logger.error(f'fail to step_vm: {vmid}:{e}')
         # ステータスコードは RESET
         return jsonify(error=traceback.format_exc()), 205
 
