@@ -119,7 +119,7 @@ def register_vm_to_cache (vm):
 def get_vm_from_cache (vmid):
     with vm_cache_lock:
         vm = vm_cache[vmid]
-        vm_cache.mote_to_end(vmid)
+        vm_cache.move_to_end(vmid)
         return vm
 
 @app.route('/install-vm', methods=['POST'])
@@ -151,6 +151,17 @@ def install_vm ():
         # ステータスコードは OK (200)
         return jsonify(error=traceback.format_exc())
 
+@app.route('/touch-vm', methods=['POST'])
+def touch_vm ():
+    try:
+        vmid = request.json['vmid']
+        try:
+            get_vm_from_cache(vmid)
+            return jsonify(server_clock=utctimestamp())
+        except KeyError:
+            return jsonify(error='Not found in cache'), 205
+    except Exception as e:
+        return jsonify(error=traceback.format_exc()), 500
 
 @app.route('/boot-vm', methods=['POST'])
 def boot_vm ():
@@ -171,6 +182,8 @@ def boot_vm ():
 
     except Exception as e:
         # ステータスコードは RESET
+        logger.error(f'fail to boot VM: {e}')
+        logger.error(traceback.format_exc())
         return jsonify(error=traceback.format_exc()), 500
 
 @app.route('/step-vm', methods=['POST'])
