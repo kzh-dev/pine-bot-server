@@ -8,11 +8,16 @@ import json
 exchanges = OrderedDict()
 
 # cryptowatch
-def _initialize_bitmex (symbols, pair):
+
+## special handlers
+def __bitmex (symbols, pair):
     if pair.endswith('-perpetual-futures'):
         symbols[pair.split('-')[0]] = pair
     if pair == 'btcusd-perpetual-futures':
         symbols['xbtusd'] = pair
+def __bitflyer (symbols, pair):
+    if pair == 'btcfxjpy':
+        symbols['fxbtcjpy'] = pair
 
 cryptowatch = OrderedDict()
 API_SERVER_URL = 'https://api.cryptowat.ch'
@@ -22,8 +27,9 @@ for m in res.json(object_pairs_hook=OrderedDict)['result']:
     pair = m['pair']
     symbols = cryptowatch.setdefault(exchange, OrderedDict())
     symbols[pair] = pair
-    if exchange == 'bitmex':
-        _initialize_bitmex(symbols, pair)
+    func = globals().get(f'__{exchange}', None)
+    if func:
+        func(symbols, pair)
 
 with open('static/cryptowatch-support.json', 'w') as f:
     f.write(json.dumps(cryptowatch, indent=2))
@@ -40,9 +46,18 @@ def resolution_to_str (*args):
         else:
             r.append('{}m'.format(a % 60))
     return r
+
+def make_ids (*args):
+    ids = []
+    for a in args:
+        if a not in ids:
+            ids.append(a)
+        a_ = ''.join([c for c in a if c.isalnum()])
+        if a_ not in ids:
+            ids.append(a_)
+    return ids
             
 exchanges = OrderedDict(exchanges)
-
 for xchg_name in ccxt.exchanges:
     try:
         xchg_obj = getattr(ccxt, xchg_name)()
@@ -56,7 +71,7 @@ for xchg_name in ccxt.exchanges:
         markets = xchg.setdefault('markets', OrderedDict())
         for name, m in xchg_obj.load_markets().items():
             m_ = markets.setdefault(name, OrderedDict())
-            m_['ids'] = (name, m['id'], m['symbol'])
+            m_['ids'] = make_ids(name, m['id'], m['symbol'])
             cw = False
             for i in m_['ids']:
                 if xchg_id in cryptowatch and (i in cryptowatch[xchg_id] or i.lower() in cryptowatch[xchg_id] or i.upper() in cryptowatch[xchg_id]):

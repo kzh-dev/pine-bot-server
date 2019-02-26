@@ -774,6 +774,7 @@
     "btcjpy-biweekly-futures": "btcjpy-biweekly-futures",
     "bchbtc": "bchbtc",
     "btcfxjpy": "btcfxjpy",
+    "fxbtcjpy": "btcfxjpy",
     "btcusd": "btcusd",
     "btceur": "btceur",
     "btcjpy-quarterly-futures": "btcjpy-quarterly-futures"
@@ -2994,7 +2995,9 @@
     "btteth": "btteth",
     "zenbtc": "zenbtc",
     "zeneth": "zeneth",
-    "zenusdt": "zenusdt"
+    "zenusdt": "zenusdt",
+    "nimbtc": "nimbtc",
+    "nimeth": "nimeth"
   },
   "cryptofacilities": {
     "btcusd-quarterly-futures": "btcusd-quarterly-futures",
