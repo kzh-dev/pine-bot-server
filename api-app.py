@@ -106,8 +106,21 @@ def scan_input ():
         return jsonify(error=traceback.format_exc())
 
 
+import threading
 vm_cache = OrderedDict()
+vm_cache_lock = threading.Lock()
 MAX_VM_CACHE_COUNT = 256
+def register_vm_to_cache (vm):
+    with vm_cache_lock:
+        vm_cache[vm.ident] = vm
+        while len(vm_cache) > MAX_VM_CACHE_COUNT:
+            vm_cache.pop_item(False)    # From most oldest
+        
+def get_vm_from_cache (vmid):
+    with vm_cache_lock:
+        vm = vm_cache[vmid]
+        vm_cache.mote_to_end(vmid)
+        return vm
 
 @app.route('/install-vm', methods=['POST'])
 def install_vm ():
@@ -130,9 +143,7 @@ def install_vm ():
         markets = vm.scan_market()
     
         # Register VM to store
-        vm_cache[vm.ident] = vm
-        while len(vm_cache) > MAX_VM_CACHE_COUNT:
-            vm_cache.pop_item()
+        register_vm_to_cache(vm)
 
         return jsonify(vm=vm.ident, markets=markets, server_clock=utctimestamp())
 
@@ -147,10 +158,10 @@ def boot_vm ():
         vmid = request.json['vmid']
         ohlcv = request.json['ohlcv']
 
-        vm = vm_cache.pop(vmid, None)
-        if vm is None:
+        try:
+            vm = get_vm_from_cache(vmid)
+        except KeyError:
             return jsonify(error='Not found in cache'), 205
-        vm_cache[vmid] = vm
 
         vm.set_ohlcv(ohlcv)
         vm.run()
@@ -159,9 +170,8 @@ def boot_vm ():
         return jsonify(server_clock=utctimestamp())
 
     except Exception as e:
-        vm = vm_cache.pop(vmid, None)
         # ステータスコードは RESET
-        return jsonify(error=traceback.format_exc()), 205
+        return jsonify(error=traceback.format_exc()), 500
 
 @app.route('/step-vm', methods=['POST'])
 def step_vm ():
@@ -170,10 +180,10 @@ def step_vm ():
         broker = request.json['broker']
         ohlcv2 = request.json['ohlcv2']
 
-        vm = vm_cache.pop(vmid, None)
-        if vm is None:
+        try:
+            vm = get_vm_from_cache(vmid)
+        except KeyError:
             return jsonify(error='Not found in cache'), 205
-        vm_cache[vmid] = vm
 
         vm.broker.update(**broker)
         vm.market.update_ohlcv2(ohlcv2)
@@ -185,7 +195,7 @@ def step_vm ():
     except Exception as e:
         logger.error(f'fail to step_vm: {vmid}:{e}')
         # ステータスコードは RESET
-        return jsonify(error=traceback.format_exc()), 205
+        return jsonify(error=traceback.format_exc()), 500
 
 if __name__ == '__main__':
     import os
