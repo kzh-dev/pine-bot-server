@@ -82,16 +82,19 @@ def scan_input ():
         vm.load_node(node)
         inputs = vm.run()
 
-        # FIXME should consider market recommendation
-        default_qty = 1.0
-        if vm.meta:
-            default_qty = vm.meta.get('default_qty', 1.0)
+        default_qty_value = vm.meta.get('default_qty_value', 1.0)
+        pyramiding  = vm.meta.get('pyramiding ', 0)
+        max_bars_back = vm.meta.get('max_bars_back', 0)
 
         params = OrderedDict(
             exchange='BITMEX',
             symbol='XBTUSD',
             resolution=30,
-            default_qty=default_qty,
+            strategy=OrderedDict(
+                default_qty_value=default_qty_value,
+                pyramiding=pyramiding,
+                max_bars_back=max_bars_back,
+            )
         )
         params['inputs'] = inputs = OrderedDict()
         for i in inputs:
