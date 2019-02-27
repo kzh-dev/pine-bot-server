@@ -85,3 +85,19 @@ def notify (logger, msg):
     logger.info(msg)
     if discord_thread:
         discord_queue.put(msg)
+
+## Preserve PINE scripts
+import hashlib
+def record_pine (code, vm=None):
+    if not os.path.exists('pine-codes'):
+        return
+    if vm:
+        basename = vm.title
+    else:
+        basename = 'NoTitle'
+    if vm and vm.ident:
+        basename += '@' + vm.ident
+    else:
+        basename += '@' + hashlib.sha1(code.encode('utf-8')).hexdigest()
+    with open(os.path.join('pine-codes', basename+'.pine'), 'w') as f:
+        f.write(code)

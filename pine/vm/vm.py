@@ -45,6 +45,7 @@ class BaseVM (object):
     def __init__ (self, market=None):
         self.market = market
         self.node = None
+        self.ident = ''
         self.meta = {}
         self.inputs = {}
         self.securities = []

@@ -51,13 +51,11 @@ def exchange_support ():
             return jsonify(markets=xchg['markets'])
 
         market = market.lower()
-        print(market)
         markets = []
         for name, m in xchg['markets'].items():
             if market == name:
                 markets.append(m)
             else:
-                print(m['ids'])
                 for mi in m['ids']:
                     if mi.lower() == market:
                         markets.append(m)
@@ -65,7 +63,10 @@ def exchange_support ():
         return jsonify(markets=markets)
 
     except Exception as e:
+        logger.exception(f'request={request.path}: {request.data}')
         return jsonify(error=traceback.format_exc())
+
+from log import record_pine
 
 @app.route('/scan-input', methods=['POST'])
 def scan_input ():
@@ -79,6 +80,8 @@ def scan_input ():
         vm = InputScanVM(Market())
         vm.load_node(node)
         inputs = vm.run()
+
+        record_pine(code, vm)
 
         default_qty_value = vm.meta.get('default_qty_value', 1.0)
         pyramiding  = vm.meta.get('pyramiding ', 0)
@@ -101,6 +104,7 @@ def scan_input ():
         return jsonify(params=params)
 
     except Exception as e:
+        logger.exception(f'request={request.path}: {request.data}')
         return jsonify(error=traceback.format_exc())
 
 
@@ -143,10 +147,11 @@ def install_vm ():
         # Register VM to store
         register_vm_to_cache(vm)
 
+        record_pine(code, vm)
         return jsonify(vm=vm.ident, markets=markets, server_clock=utctimestamp())
 
     except Exception as e:
-        # ステータスコードは OK (200)
+        logger.exception(f'request={request.path}: {request.data}')
         return jsonify(error=traceback.format_exc())
 
 @app.route('/touch-vm', methods=['POST'])
@@ -159,6 +164,7 @@ def touch_vm ():
         except KeyError:
             return jsonify(error='Not found in cache'), 205
     except Exception as e:
+        logger.exception(f'request={request.path}: {request.data}')
         return jsonify(error=traceback.format_exc()), 500
 
 @app.route('/boot-vm', methods=['POST'])
@@ -179,9 +185,7 @@ def boot_vm ():
         return jsonify(server_clock=utctimestamp())
 
     except Exception as e:
-        # ステータスコードは RESET
-        logger.error(f'fail to boot VM: {e}')
-        logger.error(traceback.format_exc())
+        logger.exception(f'request={request.path}: {request.data}')
         return jsonify(error=traceback.format_exc()), 500
 
 @app.route('/step-vm', methods=['POST'])
@@ -204,8 +208,7 @@ def step_vm ():
                        server_clock=utctimestamp())
 
     except Exception as e:
-        logger.error(f'fail to step_vm: {vmid}:{e}')
-        # ステータスコードは RESET
+        logger.exception(f'request={request.path}: {request.data}')
         return jsonify(error=traceback.format_exc()), 500
 
 if __name__ == '__main__':
