@@ -1,7 +1,9 @@
 # coding=utf-8
 
+import log
+
 from logging import getLogger
-logger = getLogger(__name__)
+logger = getLogger()
 
 from datetime import datetime
 
@@ -13,10 +15,6 @@ from flask import jsonify
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.config['JSON_SORT_KEYS'] = False
-
-#@app.route('/')
-#def landing ():
-#    return render_template('landing.html')
 
 from pine.base import PineError
 from pine.vm.vm import InputScanVM
