@@ -66,7 +66,7 @@ def exchange_support ():
         logger.exception(f'request={request.path}: {request.data}')
         return jsonify(error=traceback.format_exc())
 
-from log import record_pine
+from log import record_pine, current_maxrss
 
 @app.route('/scan-input', methods=['POST'])
 def scan_input ():
@@ -117,12 +117,22 @@ def register_vm_to_cache (vm):
         vm_cache[vm.ident] = vm
         while len(vm_cache) > MAX_VM_CACHE_COUNT:
             vm_cache.pop_item(False)    # From most oldest
+    logger.info("VM cache count=%s, RSS=%s", len(vm_vache), current_maxrss())
         
 def get_vm_from_cache (vmid):
     with vm_cache_lock:
         vm = vm_cache[vmid]
         vm_cache.move_to_end(vmid)
         return vm
+
+import threading
+def vm_cache_reporter ():
+    from log import notify
+    import time
+    while True:
+        time.sleep(3600)
+        notify(logger, "VM #={}, RSS={}".format(len(vm_cache), current_maxrss()))
+threading.Thread(target=vm_cache_reporter, daemon=True).start()
 
 @app.route('/install-vm', methods=['POST'])
 def install_vm ():

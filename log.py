@@ -35,11 +35,6 @@ discord_queue = queue.Queue()
 discord_handler = logging.handlers.QueueHandler(discord_queue)
 discord_handler.setFormatter(shortest_formatter)
 discord_handler.setLevel(logging.CRITICAL)
-discord_conf = dict(
-    url=DISCORD_URL,
-    name=DISCORD_NAME,
-    avatar_url=DISCORD_AVATAR_URL,
-)
 import requests
 def discord_sender ():
     while True:
@@ -50,11 +45,11 @@ def discord_sender ():
             continue
         data = {
             "content": msg,
-            "username": discord_conf['name'] or DEFAULT_DISCORD_NAME,
-            "avatar_url": discord_conf['avatar_url'] or DEFAULT_DISCORD_AVATAR_URL,
+            "username": DISCORD_NAME,
+            "avatar_url": DISCORD_AVATAR_URL,
         }
         try:
-            r = requests.post(discord_conf['url'], data=data)
+            r = requests.post(DISCORD_URL, data=data)
             if r.status_code != 204:
                 logger.error(f'fail to send to Discord: {r.status_code}')
         except Exception as e:
@@ -101,3 +96,8 @@ def record_pine (code, vm=None):
         basename += '@' + hashlib.sha1(code.encode('utf-8')).hexdigest()
     with open(os.path.join('pine-codes', basename+'.pine'), 'w') as f:
         f.write(code)
+
+import resource
+def current_maxrss ():
+    return '{:.1f}'.format(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0)
+
