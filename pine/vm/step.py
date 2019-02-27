@@ -13,7 +13,7 @@ class StepVM (VM):
     def __init__ (self, market, pine_code):
         super().__init__(market)
         self.code = pine_code
-        self.ident = datetime.datetime.now().isoformat() + '@'\
+        self.ident = datetime.datetime.now().isoformat() + '@' +\
                         hashlib.sha1(str(random.random()).encode('utf-8')).hexdigest()
 
     def scan_market (self):
