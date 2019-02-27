@@ -117,7 +117,7 @@ def register_vm_to_cache (vm):
         vm_cache[vm.ident] = vm
         while len(vm_cache) > MAX_VM_CACHE_COUNT:
             vm_cache.pop_item(False)    # From most oldest
-    logger.info("VM cache count=%s, RSS=%s", len(vm_vache), current_maxrss())
+    logger.info("VM cache count=%s, RSS=%s", len(vm_cache), current_maxrss())
         
 def get_vm_from_cache (vmid):
     with vm_cache_lock:
